@@ -1,23 +1,43 @@
 import { Injectable } from '@angular/core';
-import { BaseService } from 'src/app/common/helpers/services/basehttp.service';
-import { NotifyService } from 'src/app/common/helpers/services/notify.service';
 import { Subject, Observable } from 'rxjs';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+<%_ for( let imp of service.imports ){ _%>
+import { <%= imp %> } from '../models';
+<%_}_%>
 
 @Injectable()
-export class ClientAPIService extends BaseService {
+export class <%= name %>APIService {
     public serviceName: string;
-    public uri: string;
     constructor(
-        public http: HttpClient,
-        public _notify: NotifyService) {
-        super(http, _notify);
-        this.serviceName = 'UserAPIService';
-        this.uri = '/api/client/';
+        public http: HttpClient) {
+        this.serviceName = '<%= name %>API';
     }
-    public getById(clientID: number): Observable<IClientDto> {
-        return this.getById_mock();
-    }
+<% for(let method of service.methods){ %>
+    /**
+     * @method
+     * @name  <%=method.name%>
+     <%_ for(let param of method.params.all){_%>
+     * @param {<%=param.type[0]%>} <%=param.name%>
+     <%_}_%>
+     */
+    public <%=method.name%>(
+        <%_ for(let i=0;i<method.params.all.length;i++){_%>
+        <%=method.params.all[i].name%><%=method.params.all[i].required?'':'?'%>: <%=method.params.all[i].type[0]%><%=(i<method.params.all.length-1)?',':''%>
+        <%_}_%>
+    ): Observable<<%=method.resp.type%>> {
+        <%_ if((method.type==='post')||(method.type==='put')){ _%>
+        const payload = [];
+        <%_for(let param of method.params.payload){_%>
+        payload[<%=param.name%>] = <%=param.name%>;
+        <%_}_%>
+        <%_}_%>
 
-    
+        <%_if((method.type==='get')||(method.type==='delete')){_%>
+        return this.http.<%=method.type%><<%=method.resp.type%>>('<%=method.uri%>');
+        <%_}_%>
+        <%_if((method.type==='post')||(method.type==='put')){_%>
+        return this.http.<%=method.type%><<%=method.resp.type%>>('<%=method.uri%>', JSON.stringify(payload));
+        <%_}_%>
+    }<%}%>
+
 }
