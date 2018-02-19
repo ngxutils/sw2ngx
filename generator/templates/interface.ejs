@@ -1,0 +1,6 @@
+import { QualityErrorDto, PermissionDto, RoleDto, VersionDescription, VoiceConfigViewModel, ConfigParameter, ImageConfigViewModel, Client, Error, Lii, ClientExceptionInformation, InputViewModel, OutputViewModel, UserListItemDto, Role, UserDto, UserActivityDto, UserChangeDto } from './models';
+import { Observable } from 'rxjs';
+
+export interface IAPIService {
+	BiometryData_CheckImageBiometryStatus(id: number): Observable<boolean>;
+}

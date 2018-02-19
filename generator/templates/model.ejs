@@ -1,0 +1,14 @@
+<% for(var i=0; i<model.imports.length; i++) {%>
+import { <%= model.imports[i] %> } from './';<% } %>
+/*
+* <%= model.description %>
+*/
+export interface I<%= model.name %> {<% for(var i=0; i<model.props.length; i++) {%>
+		// <%= model.props[i].description===''?'':model.props[i].description %>
+		<%= model.props[i].name %>: <%= model.props[i].type %>;<% } %>
+} 
+
+export class <%= model.name %> implements I<%= model.name %>  { <% for(var i=0; i<model.props.length; i++) {%>
+		// <%= model.props[i].description===''?'':model.props[i].description %>
+		public <%= model.props[i].name %>: <%= model.props[i].type %>; <% } %>
+}

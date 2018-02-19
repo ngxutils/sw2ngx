@@ -1,0 +1,23 @@
+import { Injectable } from '@angular/core';
+import { BaseService } from 'src/app/common/helpers/services/basehttp.service';
+import { NotifyService } from 'src/app/common/helpers/services/notify.service';
+import { Subject, Observable } from 'rxjs';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+
+@Injectable()
+export class ClientAPIService extends BaseService {
+    public serviceName: string;
+    public uri: string;
+    constructor(
+        public http: HttpClient,
+        public _notify: NotifyService) {
+        super(http, _notify);
+        this.serviceName = 'UserAPIService';
+        this.uri = '/api/client/';
+    }
+    public getById(clientID: number): Observable<IClientDto> {
+        return this.getById_mock();
+    }
+
+    
+}
