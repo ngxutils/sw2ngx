@@ -1,0 +1,21 @@
+import { NgModule } from '@angular/core';
+import {
+    <%_ for(let i=0; i<servicesList.length;i++){_%>
+    <%= servicesList[i]+'APIService'+((i<servicesList.length-1)?',':'')%>
+    <%_}_%>
+ } from './services';
+import { HttpClientModule } from '@angular/common/http';
+
+@NgModule({
+  imports: [
+    HttpClientModule
+  ],
+  exports: [],
+  declarations: [],
+  providers: [
+    <%_ for(let i=0; i<servicesList.length;i++){_%>
+    <%= servicesList[i]+'APIService'+((i<servicesList.length-1)?',':'')%>
+    <%_}_%>
+  ],
+})
+export class APIModule { }

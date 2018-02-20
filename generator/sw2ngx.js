@@ -1,76 +1,16 @@
 const ejs = require('ejs');
-const _ = require('lodash');
 const fs = require('fs');
 const path = require('path');
+const logger = require('./logger');
 
 let models = [];
-const enums = [];
+let enums = [];
 let serivces = [];
 
-
-function color(string) {
-    const _self = this;
-    const help_colors = {
-        reset: "\x1b[0m",
-        bright: "\x1b[1m",
-        dim: "\x1b[2m",
-        underscore: "\x1b[4m",
-        blink: "\x1b[5m",
-        reverse: "\x1b[7m",
-        hidden: "\x1b[8m"
-    }
-    const text = {
-        black: "\x1b[30m",
-        red: "\x1b[31m",
-        green: "\x1b[32m",
-        yellow: "\x1b[33m",
-        blue: "\x1b[34m",
-        magenta: "\x1b[35m",
-        cyan: "\x1b[36m",
-        white: "\x1b[37m",
-    };
-    const background = {
-        black: "\x1b[40m",
-        red: "\x1b[41m",
-        green: "\x1b[42m",
-        yellow: "\x1b[43m",
-        blue: "\x1b[44m",
-        magenta: "\x1b[45m",
-        cyan: "\x1b[46m",
-        white: "\x1b[47m"
-    }
-    _self.reset = function () {
-        process.stdout.write(help_colors.reset);
-        return _self;
-    }
-    _self.bg = function (color) {
-        process.stdout.write(background[color]);
-        return _self;
-
-    }
-    _self.fg = function (cl) {
-        process.stdout.write(text[cl]);
-        return _self;
-    }
-    _self.write = function (string) {
-        process.stdout.write(string);
-        return _self;
-    }
-    _self.writeln = function (string) {
-        process.stdout.write(string);
-        process.stdout.write('\r\n');
-        return _self;
-    }
-
-    return _self;
-}
-
-const logger = color();
-
-
-function genServices(paths) {
+function genServices(paths, baseURI) {
     let result = {
         __common: {
+            uri: baseURI,
             imports: [],
             methods: []
         }
@@ -84,6 +24,7 @@ function genServices(paths) {
                         result[parsedMethod.tag].methods.push(parsedMethod);
                     } else {
                         result[parsedMethod.tag] = {
+                            uri: baseURI,
                             imports: [],
                             methods: [parsedMethod]
                         }
@@ -93,7 +34,6 @@ function genServices(paths) {
         }
     }
     result = resolveServiceImports(result);
-    console.log(result);
     return result;
 }
 
@@ -135,7 +75,7 @@ function resolveServiceImports(servicesList) {
 
 function parseMethod(uri, type, method) {
     return {
-        uri: uri,
+        uri: uri.replace(/\{/ig,'${'),
         type: type,
         tag: parseTags(method.tags),
         name: method.operationId,
@@ -157,7 +97,7 @@ function parseTags(tags) {
 function parseResponse(responses) {
     if (responses['200']) {
         if (responses['200']['schema']) {
-            const resolvedType = resolveType(responses['200']['schema']);
+            const resolvedType = resolveType(responses['200']['schema'],'response');
             if (resolvedType[0] === null) {
                 return {
                     type: 'any',
@@ -207,7 +147,8 @@ function parseParams(params) {
                 type = resolveType(params[param],params[param].name);
             }
             let res = {
-                name: params[param].name,
+                name: params[param].name.replace(/\.|\-/ig,''),
+                query_name: params[param].name,
                 description: params[param].description,
                 required: params[param].required,
                 type: type
@@ -243,22 +184,36 @@ function resolveImports(imports) {
     return result;
 }
 
-function extractEnum(str) {
+function extractEnum(str, propEnum) {
     const result = [];
     var indexOf = str.search(/\(\d/ig);
-    let temp = str.substr(indexOf + 1).replace(')', '');
-    temp = temp.split(',');
-    for (let tmp of temp) {;
-        let key = tmp.split('=');
-        result.push({
-            key: key[1],
-            val: key[0]
-        });
+    if(indexOf!==-1){
+        let temp = str.substr(indexOf + 1).replace(')', '');
+        temp = temp.split(',');
+        for (let tmp of temp) {;
+            let key = tmp.split('=');
+            result.push({
+                key: key[1],
+                val: key[0]
+            });
+        }
+    }else{
+        for(var key in propEnum){
+            if(propEnum.hasOwnProperty(key)){
+                result.push(
+                    {
+                        key: 'enum'+key,
+                        val: propEnum[key]
+                    }
+                )
+            }
+        }
     }
     return result;
 }
 
 function resolveType(prop, name) {
+    let curname = name.replace(/\.|\-/ig,'_');
     if (prop === undefined) {
         return ['any', null];
     }
@@ -277,7 +232,7 @@ function resolveType(prop, name) {
             return ['boolean', null];
         }
         if (prop.type === 'array') {
-            temp = resolveType(prop.items);
+            temp = resolveType(prop.items, curname);
             return [temp[0] + "[]", temp[1] ? temp[1] : null];
         }
         if (prop.type ==='object'){
@@ -285,11 +240,42 @@ function resolveType(prop, name) {
         }
     } else {
         if (prop.enum !== undefined) {
+            const temp = extractEnum(prop.description, prop.enum);
+            let dublicate = '';
+            let equals = false;
+            for(let item of enums){
+                if(item.name.toLowerCase() === curname.toLowerCase()){
+                    dublicate = item;
+
+                    if(item.props.length===temp.length){
+
+                        equals = true;
+                        for(var i=0;i<item.props.length;i++){
+                            
+                            if((item.props[i].key!==temp[i].key)||(item.props[i].val!==temp[i].val)){
+                                equals = false;
+                                break;
+                            }
+                        }
+                    }
+                    break;
+                }
+            }
+            if((dublicate!=='')&&equals){
+                return [dublicate.name, dublicate.name];
+            }
+            if((dublicate!=='')&&(!equals)){
+                enums.push({
+                    name: curname+'_other',
+                    props: temp
+                });    
+                return [curname+'_other', curname+'_other'];
+            }
             enums.push({
-                name: name,
-                props: extractEnum(prop.description)
-            })
-            return [name, name];
+                name: curname,
+                props: temp
+            });
+            return [curname, curname];
         }
         if (prop.format) {
             switch (prop.format) {
@@ -329,7 +315,6 @@ function resolveType(prop, name) {
 
 function genModelProp(name, prop) {
     const resolvedType = resolveType(prop, name);
-    //console.log(resolvedType);
     return {
         name: name,
         type: resolvedType[0],
@@ -339,8 +324,6 @@ function genModelProp(name, prop) {
 }
 
 function genModels(models) {
-    const log = color()
-        .reset();
     const result = [];
     for (const key in models) {
         const model = {
@@ -420,7 +403,6 @@ function saveEnum(basePath, elem) {
 
         logger.fg('green').write("---").fg('yellow').write('enums/' + elem.name + '.ts').writeln(" [ + ]").reset();
     });
-
 }
 
 function saveEnumIndex(basePath, enumsList) {
@@ -438,8 +420,29 @@ function saveEnumIndex(basePath, enumsList) {
     });
 }
 
-function saveInterface() {
+function saveInterface(basePath,srvName,srv) {
+    if (!fs.existsSync(basePath)) {
+        fs.mkdirSync(basePath);   
+    }
+    if (!fs.existsSync(basePath + '/services')) {
+        fs.mkdirSync(basePath + '/services');
+    }
+    if (!fs.existsSync(basePath + '/services/interfaces')) {
+        fs.mkdirSync(basePath + '/services/interfaces');
+    }
+    const template = fs.readFileSync(path.resolve(__dirname, './templates/interface.ejs'), 'utf-8');
+    const compiler = ejs.compile(template, {});
+    const result = compiler({
+        name: srvName,
+        service: srv
+    });
+    fs.writeFile(basePath + '/services/interfaces/' + srvName.toLowerCase() + '.interface.ts', result, function (err) {
+        if (err) {
+            logger.fg('red').write('[' + srvName + ']').writeln(err).reset();
+        }
 
+        logger.fg('green').write("---").fg('yellow').write(srvName).writeln(" [ + ]").reset();
+    });
 }
 
 function saveService(basePath,srvName,srv) {
@@ -464,8 +467,49 @@ function saveService(basePath,srvName,srv) {
     });
 }
 
-function createModule() {
+function saveServiceIndex(basePath, servicesList) {
+    const template = fs.readFileSync(path.resolve(__dirname, './templates/index.services.ejs'), 'utf-8');
+    const compiler = ejs.compile(template, {});
+    const result = compiler({
+        servicesList
+    });
+    fs.writeFile(basePath + '/services/index.ts', result, function (err) {
+        if (err) {
+            logger.fg('red').write('[ INDEX! ]').writeln(err).reset();
+        }
 
+        logger.fg('green').write("---").fg('yellow').write('index').writeln(" [ + ]").reset();
+    });
+}
+function saveInterfaceIndex(basePath, servicesList) {
+    const template = fs.readFileSync(path.resolve(__dirname, './templates/index.interfaces.ejs'), 'utf-8');
+    const compiler = ejs.compile(template, {});
+    const result = compiler({
+        servicesList
+    });
+    fs.writeFile(basePath + '/services/interfaces/index.ts', result, function (err) {
+        if (err) {
+            logger.fg('red').write('[ INDEX! ]').writeln(err).reset();
+        }
+
+        logger.fg('green').write("---").fg('yellow').write('index').writeln(" [ + ]").reset();
+    });
+}
+
+
+function createModule(basePath, servicesList) {
+    const template = fs.readFileSync(path.resolve(__dirname, './templates/module.ejs'), 'utf-8');
+    const compiler = ejs.compile(template, {});
+    const result = compiler({
+        servicesList
+    });
+    fs.writeFile(basePath + '/api.module.ts', result, function (err) {
+        if (err) {
+            logger.fg('red').write('[ INDEX! ]').writeln(err).reset();
+        }
+
+        logger.fg('green').write("---").fg('yellow').write('index').writeln(" [ + ]").reset();
+    });
 }
 
 function getArgs(keys) {
@@ -512,15 +556,14 @@ function main() {
     ];
     const params = getArgs(keys);
     if (params.help === true) {
-        const log = color()
+        logger
             .fg('green')
             .writeln('')
             .write('[HELP]')
             .write(':')
             .writeln('')
-
-            .reset();
-        log.writeln('');
+            .reset()
+            .writeln('');
         for (const key of keys) {
             let string = `     ${key.param}          `;
             string = string.substr(0, 15);
@@ -530,22 +573,21 @@ function main() {
                 args[i + 2] = arg;
                 i = i + 2;
             }
-            // console.log(args);
-            log.write(string)
+            logger.write(string)
                 .fg('yellow');
             args = args.join('');
             string = args.substr(0, 20);
-            log.write(string)
+            logger.write(string)
                 .reset();
             string = '     ' + key.description;
-            log.write(string);
-            log.writeln('');
+            logger.write(string);
+            logger.writeln('');
         }
         return;
     } else {
         const swagger = JSON.parse(fs.readFileSync(params.config, 'utf-8'));
         models = genModels(swagger.definitions);
-        
+        serivces = genServices(swagger.paths, swagger.basePath);
         const modelsList = [];
         const enumsList = [];
         const serviceList = [];
@@ -559,18 +601,22 @@ function main() {
             enumsList.push(elem.name);
             saveEnum(params.out, elem);
         }
-        serivces = genServices(swagger.paths);
+        
         for (const srv in serivces){
             if(serivces.hasOwnProperty(srv)){
                 if(serivces[srv].methods.length>0){
                     serviceList.push(srv);
                     saveService(params.out, srv, serivces[srv]);
+                    saveInterface(params.out, srv, serivces[srv]);
                 }
             }
         }
+        
         saveEnumIndex(params.out, enumsList);
         saveModelIndex(params.out, modelsList);
-        
+        saveServiceIndex(params.out, serviceList);
+        saveInterfaceIndex(params.out, serviceList);
+        createModule(params.out, serviceList);
     }
 }
 main();
