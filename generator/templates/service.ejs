@@ -32,12 +32,13 @@ export class <%= name %>APIService implements I<%= name %>APIService {
             headers: new HttpHeaders(),
             params: new HttpParams()};
         <%_ if(method.params.query.length!==0){_%>
-        options.params = new HttpParams();
-        <%_for(let query of method.params.query){_%>
-        if (<%=query.name%> !== undefined) {
-            options.params['<%=query.query_name%>'] = <%=query.name%>;
+        let paramString = '';
+        <%_for(let i=0; i< method.params.query.length;i++){_%>
+        if (<%=method.params.query[i].name%> !== undefined) {
+            paramString += '<%_ if(i>0){_%>&<%_}_%><%=method.params.query[i].query_name%>=' + encodeURIComponent(<%=method.params.query[i].name%><%=method.params.query[i].type[0]==='Date'?'.toISOString()':'.toString()'_%>);
         }
         <%_}_%>
+        options.params = new HttpParams({fromString: paramString});
         <%_}_%>
         <%_ if((method.type==='post')||(method.type==='put')){ _%>
         <%_ if(method.params.form.length!==0) {_%>
@@ -49,11 +50,18 @@ export class <%= name %>APIService implements I<%= name %>APIService {
         <%_}_%>
         return this.http.<%=method.type%><<%=method.resp.type%>>(this.uri + `<%=method.uri%>`, form, options);
         <%_} else {_%>
-        const payload = {};
+        let payload = {};
+        options.headers = new HttpHeaders({'Content-Type': 'application/json; charset=utf-8'});
+        <%_ if(method.params.payload.length>1){_%>
         <%_for(let param of method.params.payload){_%>
-        payload['<%=param.name%>'] = <%=param.name%>;
+        payload['<%=param.name%>'] =<%=param.name%>;
         <%_}_%>
-        return this.http.<%=method.type%><<%=method.resp.type%>>(this.uri + `<%=method.uri%>`, JSON.stringify(payload)<%=method.params.query.length!==0?', options':''%>);
+        <%_} else {_%>
+        <%_ if(method.params.payload.length>0){_%>
+        payload = <%=method.params.payload[0].name%>;
+        <%_}_%>
+        <%_}_%>
+        return this.http.<%=method.type%><<%=method.resp.type%>>(this.uri + `<%=method.uri%>`, JSON.stringify(payload), options);
         <%_}_%>
         <%_}_%>
 
