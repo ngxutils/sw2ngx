@@ -1,4 +1,4 @@
-![alt text](./logo.svg)
+![alt text](logo.svg)
 
 Generate Angular 5 API module from swagger.json
 
