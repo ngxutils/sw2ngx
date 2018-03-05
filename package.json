@@ -2,7 +2,7 @@
   "name": "sw2ngx",
   "version": "1.0.0",
   "description": "Generate Angular 5 API module form swagger.json",
-  "main": "index.js",
+  "main": "./generator/sw2ngx.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -12,18 +12,26 @@
   },
   "keywords": [
     "swagger",
-    "angularX",
+    "angular",
     "javascript",
-    "generator"
+    "generator",
+    "ngx",
+    "openapi",
+    "ng2",
+    "angular2",
+    "angularX"
   ],
   "author": "YAZART",
   "license": "WTFPL",
   "bugs": {
     "url": "https://github.com/YAZART/sw2ngx/issues"
   },
+  "bin": {
+    "sw2ngx": "./generator/sw2ngx.js"
+  },
   "homepage": "https://github.com/YAZART/sw2ngx#readme",
   "dependencies": {
     "ejs": "^2.5.7",
-    "lodash": "^4.17.5"
+    "rimraf": "^2.6.2"
   }
 }
