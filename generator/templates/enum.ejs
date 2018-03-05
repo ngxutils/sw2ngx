@@ -1,4 +1,4 @@
-export enum <%= elem.name%> {
-<%_for(let i = 0 ;i<elem.props.length;i++){_%>
-   <%=elem.props[i].key + ' = ' + elem.props[i].val+((i<elem.props.length-1)?',':'')_%><%_}_%>
-}
+export enum <%= model.name%> {
+<%for(let i = 0 ;i<model.props.length;i++){%>
+    <%=model.props[i].key + ' = ' + model.props[i].val_%><%=((i<model.props.length-1)?',':'}')_%>
+<%}%>

@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import {
-    <%_ for(let i=0; i<servicesList.length;i++){_%>
-    <%= servicesList[i]+'APIService'+((i<servicesList.length-1)?',':'')%>
+    <%_ for(let i=0; i<model.length;i++){_%>
+    <%= model[i]+'APIService'+((i<model.length-1)?',':'')%>
     <%_}_%>
  } from './services';
 import { HttpClientModule } from '@angular/common/http';
@@ -13,8 +13,8 @@ import { HttpClientModule } from '@angular/common/http';
   exports: [],
   declarations: [],
   providers: [
-    <%_ for(let i=0; i<servicesList.length;i++){_%>
-    <%= servicesList[i]+'APIService'+((i<servicesList.length-1)?',':'')%>
+    <%_ for(let i=0; i<model.length;i++){_%>
+    <%= model[i]+'APIService'+((i<model.length-1)?',':'')%>
     <%_}_%>
   ],
 })

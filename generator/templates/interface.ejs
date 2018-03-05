@@ -1,11 +1,11 @@
 import { Observable } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
-<%_ for( let imp of service.imports ){ _%>
+<%_ for( let imp of model.imports ){ _%>
 import { <%= imp %> } from '../../models';
 <%_}_%>
 
 export interface I<%= name %>APIService {
-<%_ for(let method of service.methods){ _%>
+<%_ for(let method of model.methods){ _%>
     /**
      * @method
      * @name  <%=method.name%>

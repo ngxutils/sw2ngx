@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Subject, Observable } from 'rxjs';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { I<%= name %>APIService } from './interfaces';
-<%_ for( let imp of service.imports ){ _%>
+<%_ for( let imp of model.imports ){ _%>
 import { <%= imp %> } from '../models';
 <%_}_%>
 
@@ -13,9 +13,9 @@ export class <%= name %>APIService implements I<%= name %>APIService {
     constructor(
         public http: HttpClient) {
         this.serviceName = '<%= name %>API';
-        this.uri = '<%=service.uri%>';
+        this.uri = '<%=model.uri%>';
     }
-<% for(let method of service.methods){ %>
+<% for(let method of model.methods){ %>
     /**
      * @method
      * @name  <%=method.name%>
@@ -50,6 +50,7 @@ export class <%= name %>APIService implements I<%= name %>APIService {
         <%_}_%>
         return this.http.<%=method.type%><<%=method.resp.type%>>(this.uri + `<%=method.uri%>`, form, options);
         <%_} else {_%>
+        // tslint:disable-next-line:prefer-const
         let payload = {};
         options.headers = new HttpHeaders({'Content-Type': 'application/json; charset=utf-8'});
         <%_ if(method.params.payload.length>1){_%>
