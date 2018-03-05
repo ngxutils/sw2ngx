@@ -1,4 +1,4 @@
-![alt text](https://raw.githubusercontent.com/YAZART/sw2ngx/master/logo.svg)
+![sw2ngx logo](https://raw.githubusercontent.com/YAZART/sw2ngx/master/sw2ngx.png)
 
 Generate Angular 5 API module from swagger.json
 
