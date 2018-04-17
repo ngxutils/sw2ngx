@@ -1,4 +1,4 @@
-import { NgModule } from '@angular/core';
+import { NgModule, ModuleWithProviders } from '@angular/core';
 import {
     <%_ for(let i=0; i<model.length;i++){_%>
     <%= model[i]+'APIService'+((i<model.length-1)?',':'')%>
@@ -13,9 +13,17 @@ import { HttpClientModule } from '@angular/common/http';
   exports: [],
   declarations: [],
   providers: [
-    <%_ for(let i=0; i<model.length;i++){_%>
-    <%= model[i]+'APIService'+((i<model.length-1)?',':'')%>
-    <%_}_%>
   ],
 })
-export class APIModule { }
+export class APIModule {
+  public static forRoot(): ModuleWithProviders {
+        return {
+            ngModule: APIModule,
+            providers: [
+                <%_ for(let i=0; i<model.length;i++){_%>
+                <%= model[i]+'APIService'+((i<model.length-1)?',':'')%>
+                <%_}_%>
+            ],
+        };
+    }
+}

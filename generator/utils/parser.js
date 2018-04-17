@@ -119,7 +119,12 @@ module.exports = (function () {
     _self.parseResponse = function (responses) {
         if (responses['200']) {
             if (responses['200']['schema']) {
-                const resolvedType = _self.resolveType(responses['200']['schema'], 'response');
+                let resolvedType = [null,null];
+                if(responses['200']['schema']['enum']){
+                    resolvedType = ['number', null];
+                }else{
+                    resolvedType = _self.resolveType(responses['200']['schema'], 'response');
+                }
                 if (resolvedType[0] === null) {
                     return {
                         type: 'any',
@@ -269,7 +274,7 @@ module.exports = (function () {
             }
         } else {
             if (prop.enum !== undefined) {
-                console.log(prop);
+                curname = curname + 'Set'
                 const temp = _self.extractEnums(prop.description ? prop.description:'', prop.enum);
                 let dublicate = '';
                 let equals = false;
@@ -390,7 +395,6 @@ module.exports = (function () {
     _self.getServices = function () {
         const idx = [];
         const data = [];
-        logger.fg('red').writeln('services').reset();
         for (const srv in _self.services) {
             if (_self.services.hasOwnProperty(srv)) {
                 if (_self.services[srv].methods.length > 0) {

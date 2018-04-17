@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 const ejs = require('ejs');
 const fs = require('fs');
 const path = require('path');
@@ -110,7 +108,7 @@ const generator = (function(){
                             logger.fg('red').write('[' + item.name + ']').writeln(err).reset();
                         }
 
-                        logger.fg('green').write("---").fg('yellow').write(item.name).writeln(" [ + ]").reset();
+                        logger.fg('green').write("|->").write(templateName).fg('yellow').write(' > ' + item.name).writeln(" [ + ]").reset();
                     });
                 }
             }
