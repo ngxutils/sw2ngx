@@ -34,7 +34,7 @@ export class <%= name %>APIService implements I<%= name %>APIService {
         <%_ if(method.params.query.length!==0){_%>
         let paramString = '';
         <%_for(let i=0; i< method.params.query.length;i++){_%>
-        if (<%=method.params.query[i].name%> !== undefined) {
+        if ((<%=method.params.query[i].name%> !== undefined)&&(<%=method.params.query[i].name%> !== null)) {
             paramString += '<%_ if(i>0){_%>&<%_}_%><%=method.params.query[i].query_name%>=' + encodeURIComponent(<%=method.params.query[i].name%><%=method.params.query[i].type[0]==='Date'?'.toISOString()':'.toString()'_%>);
         }
         <%_}_%>

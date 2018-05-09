@@ -16,6 +16,8 @@ Generate Angular 5 API module from swagger.json
 
 ## 3. last features
 
-Fix generate responce with enums, change return enum to return int.
+Fix generate response with enums, change return enum to return int.
 
 Add to module template forRoot() for singleton work api services.
+
+fix empty params in service template.
