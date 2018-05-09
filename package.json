@@ -1,6 +1,6 @@
 {
   "name": "sw2ngx",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Generate Angular 5 API module form swagger.json",
   "main": "./generator/sw2ngx.js",
   "scripts": {
