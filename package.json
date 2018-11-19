@@ -1,37 +1,34 @@
 {
   "name": "sw2ngx",
-  "version": "1.1.2",
-  "description": "Generate Angular 5 API module form swagger.json",
-  "main": "./generator/sw2ngx.js",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/sw2ngx.umd.js",
+  "module": "dist/sw2ngx.es5.js",
+  "typings": "dist/types/sw2ngx.d.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "lint": "tslint -t codeFrame 'src/**/*.ts' 'test/**/*.ts'",
+    "prebuild": "rimraf dist",
+    "build": "tsc --module commonjs && rollup -c rollup.config.ts && typedoc --out docs --target es6 --theme minimal --mode file src",
+    "start": "rollup -c rollup.config.ts -w"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/YAZART/sw2ngx.git"
-  },
-  "keywords": [
-    "swagger",
-    "angular",
-    "javascript",
-    "generator",
-    "ngx",
-    "openapi",
-    "ng2",
-    "angular2",
-    "angularX"
-  ],
-  "author": "YAZART",
+  "author": "",
   "license": "WTFPL",
-  "bugs": {
-    "url": "https://github.com/YAZART/sw2ngx/issues"
-  },
-  "bin": {
-    "sw2ngx": "./generator/sw2ngx.js"
-  },
-  "homepage": "https://github.com/YAZART/sw2ngx#readme",
-  "dependencies": {
-    "ejs": "^2.5.7",
-    "rimraf": "^2.6.2"
+  "devDependencies": {
+    "@types/node": "^10.0.3",
+    "@types/rimraf": "^2.0.2",
+    "cross-env": "^5.0.1",
+    "prettier": "^1.13.4",
+    "rimraf": "^2.6.2",
+    "rollup": "^0.59.2",
+    "rollup-plugin-commonjs": "^9.0.0",
+    "rollup-plugin-json": "^3.0.0",
+    "rollup-plugin-node-resolve": "^3.3.0",
+    "rollup-plugin-sourcemaps": "^0.4.2",
+    "rollup-plugin-typescript2": "^0.11.1",
+    "tslint": "^5.8.0",
+    "tslint-config-prettier": "^1.1.0",
+    "tslint-config-standard": "^7.0.0",
+    "typedoc": "^0.11.0",
+    "typescript": "^2.6.2"
   }
 }
