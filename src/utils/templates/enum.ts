@@ -3,7 +3,7 @@ export class EnumTemplate {
     public body(value: IParserEnum): string {
         const temp: string[] = [];
         for(const param of value.value){
-            temp.push( `${param.key}= ${param.val}`);
+            temp.push( `${param.key}= ${parseInt( param.val.toString() ,10).toString() !== 'NaN' ? param.val: '"'+param.val+'"'}`);
         }
         return temp.join(',\r\n\t');
     }

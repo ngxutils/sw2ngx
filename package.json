@@ -1,7 +1,7 @@
 {
   "name": "sw2ngx",
-  "version": "1.0.0",
-  "description": "",
+  "version": "2.0.0",
+  "description": "Generate Angular 6 API module form swagger.json",
   "main": "dist/sw2ngx.umd.js",
   "module": "dist/sw2ngx.es5.js",
   "typings": "dist/types/sw2ngx.d.ts",
@@ -11,24 +11,32 @@
     "build": "tsc --module commonjs && rollup -c rollup.config.ts && typedoc --out docs --target es6 --theme minimal --mode file src",
     "start": "rollup -c rollup.config.ts -w"
   },
-  "author": "",
+  "preferGlobal": true,
+  "bin": "./bin/sw2ngx",
+  "author": "https://github.com/YAZART",
   "license": "WTFPL",
   "devDependencies": {
-    "@types/node": "^10.0.3",
+    "@types/node": "^10.12.10",
     "@types/rimraf": "^2.0.2",
     "cross-env": "^5.0.1",
-    "prettier": "^1.13.4",
+    "prettier": "^1.15.2",
     "rimraf": "^2.6.2",
     "rollup": "^0.59.2",
-    "rollup-plugin-commonjs": "^9.0.0",
-    "rollup-plugin-json": "^3.0.0",
-    "rollup-plugin-node-resolve": "^3.3.0",
+    "rollup-plugin-commonjs": "^9.2.0",
+    "rollup-plugin-json": "^3.1.0",
+    "rollup-plugin-node-builtins": "^2.1.2",
+    "rollup-plugin-node-resolve": "^3.4.0",
     "rollup-plugin-sourcemaps": "^0.4.2",
     "rollup-plugin-typescript2": "^0.11.1",
     "tslint": "^5.8.0",
-    "tslint-config-prettier": "^1.1.0",
+    "tslint-config-prettier": "^1.16.0",
     "tslint-config-standard": "^7.0.0",
     "typedoc": "^0.11.0",
-    "typescript": "^2.6.2"
+    "typescript": "^2.6.2",
+    "rollup-plugin-node-globals": "^1.4.0"
+  },
+  "dependencies": {
+    "@types/request": "^2.48.1",
+    "request": "^2.88.0"
   }
 }
