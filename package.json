@@ -1,6 +1,6 @@
 {
   "name": "sw2ngx",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Generate Angular 6 API module form swagger.json",
   "main": "dist/sw2ngx.umd.js",
   "module": "dist/sw2ngx.es5.js",
