@@ -1,4 +1,0 @@
-export enum <%= model.name%> {
-<%for(let i = 0 ;i<model.props.length;i++){%>
-    <%=model.props[i].key + ' = ' + model.props[i].val_%><%=((i<model.props.length-1)?',':'}')_%>
-<%}%>

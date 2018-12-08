@@ -23,7 +23,7 @@ var ModelTemplate = /** @class */ (function () {
             if (param.description) {
                 itemp.push("/* " + param.description + " */");
             }
-            itemp.push(param.name + ": " + param.type + ";");
+            itemp.push(param.name + " : " + param.type + ";");
             temp.push("public " + param.name + ": " + param.type + ";");
         }
         return {
