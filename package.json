@@ -1,7 +1,7 @@
 {
   "name": "sw2ngx",
   "version": "2.0.1",
-  "description": "Generate Angular 6 API module form swagger.json",
+  "description": "Generate Angular API module form swagger.json",
   "main": "dist/sw2ngx.umd.js",
   "module": "dist/sw2ngx.es5.js",
   "typings": "dist/types/sw2ngx.d.ts",
@@ -12,19 +12,41 @@
     "start": "rollup -c rollup.config.ts -w"
   },
   "preferGlobal": true,
-  "bin": "./bin/sw2ngx",
+  "bin": {
+    "sw2ngx": "./bin/sw2ngx"
+  },
   "author": "https://github.com/YAZART",
   "license": "WTFPL",
+  "homepage": "https://github.com/YAZART/sw2ngx#readme",
+  "bugs": {
+    "url": "https://github.com/YAZART/sw2ngx/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/YAZART/sw2ngx.git"
+  },
+  "keywords": [
+    "swagger",
+    "angular",
+    "javascript",
+    "generator",
+    "ngx",
+    "openapi",
+    "ng2",
+    "angular2",
+    "angularX"
+  ],
   "devDependencies": {
     "@types/node": "^10.12.10",
+    "@types/request": "^2.48.1",
     "@types/rimraf": "^2.0.2",
     "cross-env": "^5.0.1",
     "prettier": "^1.15.2",
-    "rimraf": "^2.6.2",
     "rollup": "^0.59.2",
     "rollup-plugin-commonjs": "^9.2.0",
     "rollup-plugin-json": "^3.1.0",
     "rollup-plugin-node-builtins": "^2.1.2",
+    "rollup-plugin-node-globals": "^1.4.0",
     "rollup-plugin-node-resolve": "^3.4.0",
     "rollup-plugin-sourcemaps": "^0.4.2",
     "rollup-plugin-typescript2": "^0.11.1",
@@ -32,11 +54,10 @@
     "tslint-config-prettier": "^1.16.0",
     "tslint-config-standard": "^7.0.0",
     "typedoc": "^0.11.0",
-    "typescript": "^2.6.2",
-    "rollup-plugin-node-globals": "^1.4.0"
+    "typescript": "^2.6.2"
   },
   "dependencies": {
-    "@types/request": "^2.48.1",
-    "request": "^2.88.0"
+    "request": "^2.88.0",
+    "rimraf": "^2.6.2"
   }
 }
