@@ -144,7 +144,7 @@ var TemplatePrinter = /** @class */ (function () {
         var imports = [];
         for (var _i = 0, _a = this._printedServices; _i < _a.length; _i++) {
             var item = _a[_i];
-            imports.push("export { " + item + "APIService, I" + item + "APIService } from './" + item + ".service';");
+            imports.push("export { " + item + "APIService, I" + item + "APIService } from './" + change_case_1.kebabCase(item) + ".service';");
         }
         imports.push('');
         try {
@@ -158,7 +158,7 @@ var TemplatePrinter = /** @class */ (function () {
         var imports = [];
         for (var _i = 0, models_2 = models; _i < models_2.length; _i++) {
             var item = models_2[_i];
-            imports.push("export { " + item.name + ", I" + item.name + " } from './" + item.name + ".model';");
+            imports.push("export { " + item.name + ", I" + item.name + " } from './" + change_case_1.kebabCase(item.name) + ".model';");
         }
         imports.push("export * from './enums';");
         imports.push('');
@@ -173,7 +173,7 @@ var TemplatePrinter = /** @class */ (function () {
         var imports = [];
         for (var _i = 0, enums_2 = enums; _i < enums_2.length; _i++) {
             var item = enums_2[_i];
-            imports.push("export {" + item.name + "} from './" + item.name + ".enum';");
+            imports.push("export {" + item.name + "} from './" + change_case_1.kebabCase(item.name) + ".enum';");
         }
         imports.push('');
         try {

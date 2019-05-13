@@ -3,7 +3,6 @@ import commonjs from 'rollup-plugin-commonjs';
 import sourceMaps from 'rollup-plugin-sourcemaps';
 import typescript from 'rollup-plugin-typescript2';
 import json from 'rollup-plugin-json';
-import builtins from 'rollup-plugin-node-builtins';
 import globals from 'rollup-plugin-node-globals';
 
 const libraryName = 'sw2ngx'
@@ -25,9 +24,6 @@ export default {
       'rimraf': 'rimraf',
       'fs':'fs',
       'request':'request'
-    }),
-    builtins({
-      browser: false
     }),
     // Allow json resolution
     json(),
