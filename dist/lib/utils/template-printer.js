@@ -7,6 +7,7 @@ var enum_1 = require("./templates/enum");
 var fs = require("fs");
 var path = require("path");
 var model_1 = require("./templates/model");
+var change_case_1 = require("change-case");
 var TemplatePrinter = /** @class */ (function () {
     function TemplatePrinter() {
         this.out = '';
@@ -87,7 +88,7 @@ var TemplatePrinter = /** @class */ (function () {
         var compiled = this.enumCompiler.compile(value);
         // this._logger.ok(path.resolve(this.out + '/models/enums/' + value.name + '.enum.ts'));
         try {
-            fs.writeFileSync(path.resolve(this.out + '/models/enums/' + value.name + '.enum.ts'), compiled);
+            fs.writeFileSync(path.resolve(this.out + '/models/enums/' + change_case_1.kebabCase(value.name) + '.enum.ts'), compiled);
         }
         catch (e) {
             this._logger.err('[ ERROR ] file: ' + this.out + '/models/enums/' + value.name + '.enum.ts');
@@ -97,7 +98,7 @@ var TemplatePrinter = /** @class */ (function () {
         var _this = this;
         var compiled = this.modelCompiler.compile(model);
         /// this._logger.ok(path.resolve(this.out + '/models/' + model.name + '.model.ts'));
-        fs.writeFile(path.resolve(this.out + '/models/' + model.name + '.model.ts'), compiled, function (err) {
+        fs.writeFile(path.resolve(this.out + '/models/' + change_case_1.kebabCase(model.name) + '.model.ts'), compiled, function (err) {
             if (err) {
                 _this._logger.err('[ ERROR ] file: ' + _this.out + '/models/' + model.name + '.model.ts');
                 return;
@@ -110,7 +111,7 @@ var TemplatePrinter = /** @class */ (function () {
         var compiled = this.serviceCompiler.compile(service, name);
         if (compiled !== '') {
             this._printedServices.push(name);
-            fs.writeFile(path.resolve(this.out + '/services/' + name + '.service.ts'), compiled, function (err) {
+            fs.writeFile(path.resolve(this.out + '/services/' + change_case_1.kebabCase(name) + '.service.ts'), compiled, function (err) {
                 if (err) {
                     _this._logger.err('[ ERROR ] file: ' + _this.out + '/services/' + name + '.service.ts');
                     return;

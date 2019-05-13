@@ -5,6 +5,9 @@ var ModelTemplate = /** @class */ (function () {
     }
     ModelTemplate.prototype.modelImports = function (modelImports, name) {
         var imports = [];
+        if (modelImports.length === 0) {
+            return '';
+        }
         imports.push("import {");
         for (var _i = 0, modelImports_1 = modelImports; _i < modelImports_1.length; _i++) {
             var item = modelImports_1[_i];
@@ -33,7 +36,7 @@ var ModelTemplate = /** @class */ (function () {
     };
     ModelTemplate.prototype.compile = function (value) {
         var _a = this.body(value.props), iprop = _a.iprop, prop = _a.prop;
-        return "\n" + this.modelImports(value.imports, value.name) + "\n\nexport interface I" + value.name + " {\n    " + iprop + "\n}\n\nexport class " + value.name + " implements I" + value.name + " {\n    " + prop + "\n}\n";
+        return "\n" + this.modelImports(value.imports, value.name) + "\n\nexport interface I" + value.name + " {\n  " + iprop + "\n}\n\nexport class " + value.name + " implements I" + value.name + " {\n  " + prop + "\n}\n";
     };
     return ModelTemplate;
 }());

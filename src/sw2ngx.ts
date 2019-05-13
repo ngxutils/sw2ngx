@@ -1,3 +1,4 @@
+
 import { Parser } from "./utils/parser";
 import { ISwaggerConfig } from "./interfaces/swagger.interface";
 import { HelpCLI } from "./utils/helpcli";
@@ -13,7 +14,7 @@ import {
 import { TemplatePrinter } from "./utils/template-printer";
 
 request.defaults({
-  strictSSL: false
+  strictSSL: false,
 });
 
 export default class Generator {
@@ -119,9 +120,10 @@ export default class Generator {
     const promise = new Promise<any>((resolve, reject) => {
       if (/http(s?)\:\/\/\S/gi.test(conf)) {
         request.get(conf, (err, resp, body) => {
+          console.log(err);
           if (err) {
-              this._logger.err(err);
-              reject(err);
+            this._logger.err(err);
+            reject(err);
           } else {
             resolve(JSON.parse(body));
           }

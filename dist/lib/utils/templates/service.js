@@ -5,6 +5,9 @@ var ServiceTemplate = /** @class */ (function () {
     }
     ServiceTemplate.prototype.imports = function (imp) {
         var imports = [];
+        if (imp.length === 0) {
+            return '';
+        }
         imports.push("import {");
         for (var _i = 0, imp_1 = imp; _i < imp_1.length; _i++) {
             var item = imp_1[_i];
@@ -114,7 +117,7 @@ var ServiceTemplate = /** @class */ (function () {
         if (value.methods.length > 0) {
             var imports = this.imports(value.imports);
             var _a = this.body(value.methods), interfaceBody = _a.interfaceBody, serviceBody = _a.serviceBody;
-            return "import { Injectable } from '@angular/core';\nimport { Subject, Observable } from 'rxjs';\nimport { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';\n" + imports + "\nexport interface I" + name + "APIService {\n" + interfaceBody + "\n}\n\n@Injectable()\nexport class " + name + "APIService implements I" + name + "APIService {\n    public serviceName: string;\n    public uri: string;\n    constructor(\n        public http: HttpClient) {\n        this.serviceName = '" + name + "API';\n        this.uri = '" + value.uri + "';\n    }\n" + serviceBody + "\n}\r\n";
+            return "import { Injectable } from '@angular/core';\nimport { Subject, Observable } from 'rxjs';\nimport { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';\n" + imports + "\nexport interface I" + name + "APIService {\n" + interfaceBody + "\n}\n\n@Injectable()\nexport class " + name + "APIService implements I" + name + "APIService {\n  public serviceName: string;\n  public uri: string;\n  constructor(\n    public http: HttpClient) {\n    this.serviceName = '" + name + "API';\n    this.uri = '" + value.uri + "';\n  }\n" + serviceBody + "\n}\r\n";
         }
         else {
             return '';

@@ -7,7 +7,7 @@ var request = require("request");
 var logger_1 = require("./utils/logger");
 var template_printer_1 = require("./utils/template-printer");
 request.defaults({
-    strictSSL: false
+    strictSSL: false,
 });
 var Generator = /** @class */ (function () {
     function Generator(config) {
@@ -101,6 +101,7 @@ var Generator = /** @class */ (function () {
         var promise = new Promise(function (resolve, reject) {
             if (/http(s?)\:\/\/\S/gi.test(conf)) {
                 request.get(conf, function (err, resp, body) {
+                    console.log(err);
                     if (err) {
                         _this._logger.err(err);
                         reject(err);

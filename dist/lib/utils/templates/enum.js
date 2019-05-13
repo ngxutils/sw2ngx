@@ -12,7 +12,7 @@ var EnumTemplate = /** @class */ (function () {
         return temp.join(',\r\n\t');
     };
     EnumTemplate.prototype.compile = function (value) {
-        return "\nexport enum " + value.name + " {\n    " + this.body(value) + "\n}\n";
+        return "\nexport enum " + value.name + " {\n  " + this.body(value) + "\n}\n";
     };
     return EnumTemplate;
 }());
