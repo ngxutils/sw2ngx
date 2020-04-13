@@ -86,6 +86,10 @@ export class Parser {
                             this._logger.ok(path);
                             let parsedMethod = this.parseMethod(path, method, config.paths[path][method]);
                             if (result.hasOwnProperty(parsedMethod.tag)) {
+                                const duplicates = result[parsedMethod.tag].methods.filter(x=> x.name.replace(/\d+$/ig, '')===parsedMethod.name); 
+                                if(duplicates.length>0){
+                                    parsedMethod.name = parsedMethod.name+duplicates.length;
+                                }
                                 result[parsedMethod.tag].methods.push(parsedMethod);
                             } else {
                                 result[parsedMethod.tag] = {
@@ -118,7 +122,7 @@ export class Parser {
             uri: uri.replace(/\{/ig, '${'),
             type: type,
             tag: tag,
-            name: method.operationId,
+            name: camelCase(method.operationId),
             description: method.summary,
             params: params,
             resp: resp
@@ -381,6 +385,13 @@ export class Parser {
         //  this._logger.err(JSON.stringify({description, evalue, curname, parent}))
 
         if(extact === null){
+            const numbers='1234567890'.split('');
+            if(evalue.join('').split('').filter(x=> numbers.indexOf(x)===-1).length>0){
+                return {
+                    typeName: evalue.map(x=>`'${x}'`).join(' | '),
+                    typeImport: null
+                }
+            }
             return {
                 typeName: evalue.join(' | '),
                 typeImport: null

@@ -14,7 +14,7 @@ export declare class Parser {
         uri: string;
         type: string;
         tag: string;
-        name: any;
+        name: string;
         description: any;
         params: {
             [key: string]: IParserParam[];

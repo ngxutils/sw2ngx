@@ -16,31 +16,6 @@ export class TemplatePrinter {
   private moduleCompiler: ModuleTemplate = new ModuleTemplate();
   private _printedServices: string[] = [];
   private _logger: Logger = new Logger();
-
-  public cleanFolder(): Promise<boolean> {
-    this._logger.info('clean start');
-    return new Promise<boolean>((resolve, reject) => {
-      const deleteFolderRecursive = (path: string) => {
-        if (fs.existsSync(path)) {
-          fs.readdirSync(path).forEach(function (file, index) {
-            const curPath = path + "/" + file;
-            if (fs.lstatSync(curPath).isDirectory()) { // recurse
-              deleteFolderRecursive(curPath);
-            } else { // delete file
-              fs.unlinkSync(curPath);
-            }
-          });
-          fs.rmdirSync(path);
-        }
-      }
-      try {
-        deleteFolderRecursive(path.resolve(this.out));
-        resolve();
-      } catch (e) {
-        reject(e);
-      }
-    });
-  }
   public createFolders() {
     return new Promise(
       (resolve, reject) => {
@@ -49,7 +24,6 @@ export class TemplatePrinter {
           fs.mkdirSync(path.resolve(this.out + '/models/enums'));
           fs.mkdirSync(path.resolve(this.out + '/services'));
           resolve();
-        
       }
     );
   }
@@ -85,7 +59,7 @@ export class TemplatePrinter {
     try {
       fs.writeFileSync(path.resolve(this.out + '/models/enums/' + paramCase(value.name) + '.enum.ts'), compiled);
     } catch (e) {
-      this._logger.err('[ ERROR ] file: ' + this.out + '/models/enums/' + value.name + '.enum.ts');
+      this._logger.err('[ ERROR ] file: ' + this.out + '/models/enums/' + paramCase(value.name) + '.enum.ts');
     }
 
   }
@@ -95,10 +69,10 @@ export class TemplatePrinter {
 
     fs.writeFile(path.resolve(this.out + '/models/' + paramCase(model.name).replace(/^i\-/ig, '') + '.model.ts'), compiled, (err) => {
       if (err) {
-        this._logger.err('[ ERROR ] file: ' + this.out + '/models/' + model.name + '.model.ts');
+        this._logger.err('[ ERROR ] file: ' + this.out + '/models/' + paramCase(model.name).replace(/^i\-/ig, '') + '.model.ts');
         return;
       }
-      this._logger.ok('[ OK    ] file: ' + this.out + '/models/' + model.name + '.model.ts');
+      this._logger.ok('[ OK    ] file: ' + this.out + '/models/' + paramCase(model.name).replace(/^i\-/ig, '') + '.model.ts');
     });
 
   }
@@ -108,10 +82,10 @@ export class TemplatePrinter {
       this._printedServices.push(name);
       fs.writeFile(path.resolve(this.out + '/services/' + paramCase(name) + '.service.ts'), compiled, (err) => {
         if (err) {
-          this._logger.err('[ ERROR ] file: ' + this.out + '/services/' + name + '.service.ts');
+          this._logger.err('[ ERROR ] file: ' + this.out + '/services/' + paramCase(name) + '.service.ts');
           return;
         }
-        this._logger.ok('[ OK    ] file: ' + this.out + '/services/' + name + '.service.ts');
+        this._logger.ok('[ OK    ] file: ' + this.out + '/services/' + paramCase(name) + '.service.ts');
       });
     }
   }

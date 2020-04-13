@@ -1,4 +1,4 @@
-import { pascalCase, paramCase } from 'change-case';
+import { pascalCase, paramCase, camelCase } from 'change-case';
 import { mkdirSync, writeFileSync, writeFile, existsSync, readdirSync, lstatSync, unlinkSync, rmdirSync, readFileSync } from 'fs';
 import fetch from 'node-fetch';
 
@@ -402,21 +402,28 @@ var Parser = /** @class */ (function () {
             };
             for (var path in config.paths) {
                 if (config.paths.hasOwnProperty(path)) {
-                    for (var method in config.paths[path]) {
+                    var _loop_1 = function (method) {
                         if (config.paths[path].hasOwnProperty(method)) {
                             _this._logger.ok(path);
-                            var parsedMethod = _this.parseMethod(path, method, config.paths[path][method]);
-                            if (result.hasOwnProperty(parsedMethod.tag)) {
-                                result[parsedMethod.tag].methods.push(parsedMethod);
+                            var parsedMethod_1 = _this.parseMethod(path, method, config.paths[path][method]);
+                            if (result.hasOwnProperty(parsedMethod_1.tag)) {
+                                var duplicates = result[parsedMethod_1.tag].methods.filter(function (x) { return x.name.replace(/\d+$/ig, '') === parsedMethod_1.name; });
+                                if (duplicates.length > 0) {
+                                    parsedMethod_1.name = parsedMethod_1.name + duplicates.length;
+                                }
+                                result[parsedMethod_1.tag].methods.push(parsedMethod_1);
                             }
                             else {
-                                result[parsedMethod.tag] = {
+                                result[parsedMethod_1.tag] = {
                                     uri: config.basePath,
                                     imports: [],
-                                    methods: [parsedMethod]
+                                    methods: [parsedMethod_1]
                                 };
                             }
                         }
+                    };
+                    for (var method in config.paths[path]) {
+                        _loop_1(method);
                     }
                 }
             }
@@ -438,7 +445,7 @@ var Parser = /** @class */ (function () {
             uri: uri.replace(/\{/ig, '${'),
             type: type,
             tag: tag,
-            name: method.operationId,
+            name: camelCase(method.operationId),
             description: method.summary,
             params: params,
             resp: resp
@@ -704,6 +711,13 @@ var Parser = /** @class */ (function () {
         var extact = this.extractEnums(description ? description : '', evalue, curname);
         //  this._logger.err(JSON.stringify({description, evalue, curname, parent}))
         if (extact === null) {
+            var numbers_1 = '1234567890'.split('');
+            if (evalue.join('').split('').filter(function (x) { return numbers_1.indexOf(x) === -1; }).length > 0) {
+                return {
+                    typeName: evalue.map(function (x) { return "'" + x + "'"; }).join(' | '),
+                    typeImport: null
+                };
+            }
             return {
                 typeName: evalue.join(' | '),
                 typeImport: null
