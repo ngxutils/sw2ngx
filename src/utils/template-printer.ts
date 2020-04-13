@@ -7,7 +7,7 @@ import rimraf from 'rimraf';
 import * as fs from 'fs';
 import * as path from 'path';
 import { ModelTemplate } from './templates/model';
-import { kebabCase } from 'change-case';
+import { paramCase } from 'change-case';
 
 export class TemplatePrinter {
   private out: string = '';
@@ -86,7 +86,7 @@ export class TemplatePrinter {
     const compiled = this.enumCompiler.compile(value);
     // this._logger.ok(path.resolve(this.out + '/models/enums/' + value.name + '.enum.ts'));
     try {
-      fs.writeFileSync(path.resolve(this.out + '/models/enums/' + kebabCase(value.name) + '.enum.ts'), compiled);
+      fs.writeFileSync(path.resolve(this.out + '/models/enums/' + paramCase(value.name) + '.enum.ts'), compiled);
     } catch (e) {
       this._logger.err('[ ERROR ] file: ' + this.out + '/models/enums/' + value.name + '.enum.ts');
     }
@@ -96,7 +96,7 @@ export class TemplatePrinter {
     const compiled = this.modelCompiler.compile(model);
     /// this._logger.ok(path.resolve(this.out + '/models/' + model.name + '.model.ts'));
 
-    fs.writeFile(path.resolve(this.out + '/models/' + kebabCase(model.name) + '.model.ts'), compiled, (err) => {
+    fs.writeFile(path.resolve(this.out + '/models/' + paramCase(model.name) + '.model.ts'), compiled, (err) => {
       if (err) {
         this._logger.err('[ ERROR ] file: ' + this.out + '/models/' + model.name + '.model.ts');
         return;
@@ -109,7 +109,7 @@ export class TemplatePrinter {
     const compiled = this.serviceCompiler.compile(service, name);
     if (compiled !== '') {
       this._printedServices.push(name);
-      fs.writeFile(path.resolve(this.out + '/services/' + kebabCase(name) + '.service.ts'), compiled, (err) => {
+      fs.writeFile(path.resolve(this.out + '/services/' + paramCase(name) + '.service.ts'), compiled, (err) => {
         if (err) {
           this._logger.err('[ ERROR ] file: ' + this.out + '/services/' + name + '.service.ts');
           return;
@@ -142,7 +142,7 @@ export { APIModule } from './api.module';
   public printServiceIndex() {
     const imports = [];
     for (let item of this._printedServices) {
-      imports.push(`export { ${item}APIService, I${item}APIService } from './${kebabCase(item)}.service';`);
+      imports.push(`export { ${item}APIService, I${item}APIService } from './${paramCase(item)}.service';`);
     }
     imports.push('');
     try {
@@ -154,7 +154,7 @@ export { APIModule } from './api.module';
   public printModelIndex(models: IParserModel[]) {
     const imports = [];
     for (let item of models) {
-      imports.push(`export { ${item.name}, I${item.name} } from './${kebabCase(item.name)}.model';`);
+      imports.push(`export { ${item.name}, I${item.name} } from './${paramCase(item.name)}.model';`);
     }
     imports.push(`export * from './enums';`);
     imports.push('');
@@ -167,7 +167,7 @@ export { APIModule } from './api.module';
   public printEnumIndex(enums: IParserEnum[]) {
     const imports = [];
     for (let item of enums) {
-      imports.push(`export {${item.name}} from './${kebabCase(item.name)}.enum';`);
+      imports.push(`export {${item.name}} from './${paramCase(item.name)}.enum';`);
     }
     imports.push('');
     try {
