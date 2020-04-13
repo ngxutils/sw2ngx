@@ -3,12 +3,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var parser_1 = require("./utils/parser");
 var helpcli_1 = require("./utils/helpcli");
 var fs = require("fs");
-var request = require("request");
 var logger_1 = require("./utils/logger");
 var template_printer_1 = require("./utils/template-printer");
-request.defaults({
-    strictSSL: false,
-});
+var node_fetch_1 = require("node-fetch");
 var Generator = /** @class */ (function () {
     function Generator(config) {
         if (config === void 0) { config = null; }
@@ -100,15 +97,13 @@ var Generator = /** @class */ (function () {
         var _this = this;
         var promise = new Promise(function (resolve, reject) {
             if (/http(s?)\:\/\/\S/gi.test(conf)) {
-                request.get(conf, function (err, resp, body) {
-                    console.log(err);
-                    if (err) {
-                        _this._logger.err(err);
-                        reject(err);
-                    }
-                    else {
-                        resolve(JSON.parse(body));
-                    }
+                node_fetch_1.default(conf)
+                    .then(function (res) {
+                    resolve(res.json());
+                })
+                    .catch(function (err) {
+                    _this._logger.err(err);
+                    reject(err);
                 });
             }
             else {

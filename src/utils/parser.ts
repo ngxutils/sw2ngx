@@ -2,6 +2,7 @@ import { ISwaggerConfig, ISwaggerProperty, ISwaggerParam } from './../interfaces
 import { Logger } from './logger';
 import { IParserModel, IParserEnum, IParserService, IParserResolvedType, IParserServiceList, IParserParam } from '../interfaces/parser';
 import { SimHash } from './simhash/simhash';
+import { paramCase, camelCase, pascalCase } from 'change-case';
 
 export class Parser {
     private _enums: IParserEnum[] = [];
@@ -44,7 +45,7 @@ export class Parser {
                 } as IParserModel;
                 if (models.hasOwnProperty(key)) {
                     const imports = [];
-                    model.name = key;
+                    model.name = 'I'+key;
                     model.description = models[key].description;
                     for (const prop in models[key].properties) {
                         if (models[key].properties.hasOwnProperty(prop)) {
@@ -305,8 +306,8 @@ export class Parser {
             if (prop.$ref !== undefined) {
                 const temp = prop.$ref.split('/');
                 return {
-                    typeName: temp[temp.length - 1],
-                    typeImport: temp[temp.length - 1]
+                    typeName: 'I'+temp[temp.length - 1],
+                    typeImport: 'I'+temp[temp.length - 1]
                 };
             }
             if ((prop.type === 'boolean') ||
@@ -373,29 +374,53 @@ export class Parser {
     }
 
     public resolveEnums(description: string, evalue: number[], curname: string, parent: string): IParserResolvedType {
-        const hashName = this._simHash.hash(`${parent}_${curname}Set`);
+        const hashName = this._simHash.hash(evalue.join('|'));
         // this._logger.ok(`${parent}_${curname}Set: ${hashName.toString(16)}`);
         // this._logger.err(hashName);
         const extact = this.extractEnums(description ? description : '', evalue, curname);
         //  this._logger.err(JSON.stringify({description, evalue, curname, parent}))
+
+        if(extact === null){
+            return {
+                typeName: evalue.join(' | '),
+                typeImport: null
+            }
+        }
+        const withParentName = `${pascalCase(paramCase(parent).replace(/^i\-/ig,'')+'-'+paramCase(curname+'Set'))}`
         const propEnum: IParserEnum = {
-            name: `${parent}_${curname}Set`,
+            name: `${pascalCase(curname)}Set`,
             modelName: parent,
             value: extact,
             hash: hashName.toString(16)
         };
-        for(const item of this._enums){
-            if(item.hash === propEnum.hash){
+
+        const duplicate = this._enums.filter(x=> x.name.replace(/\d+$/ig,'')=== propEnum.name);
+        const extDuplicate = this._enums.filter(x=> x.name.replace(/\d+$/ig,'')===withParentName);
+        if(duplicate.length>0){
+            const equals = duplicate.filter(x=> x.hash===propEnum.hash);
+            if(equals.length>0){
+                return {
+                    typeName: equals[0].name,
+                    typeImport: equals[0].name
+                }
+            }else{
+                if(extDuplicate.length>0){
+                    propEnum.name = `${withParentName}${duplicate.length}`
+                }else{
+                    propEnum.name = withParentName;
+                }
+                this._enums.push(propEnum);
                 return {
                     typeName: propEnum.name,
                     typeImport: propEnum.name
                 }
             }
-        }
-        this._enums.push(propEnum);
-        return {
-            typeName: propEnum.name,
-            typeImport: propEnum.name
+        }else{
+            this._enums.push(propEnum);
+            return {
+                typeName: propEnum.name,
+                typeImport: propEnum.name
+            }
         }
     }
 
@@ -414,14 +439,7 @@ export class Parser {
                 });
             }
         } else {
-            for (const key in propEnum) {
-                if (propEnum.hasOwnProperty(key)) {
-                    result.push({
-                        key: name + propEnum[key],
-                        val: propEnum[key]
-                    });
-                }
-            }
+            return null;
         }
         return result;
     }

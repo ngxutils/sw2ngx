@@ -48,13 +48,11 @@ var TemplatePrinter = /** @class */ (function () {
     TemplatePrinter.prototype.createFolders = function () {
         var _this = this;
         return new Promise(function (resolve, reject) {
-            _this.cleanFolder().then(function () {
-                fs.mkdirSync(path.resolve(_this.out));
-                fs.mkdirSync(path.resolve(_this.out + '/models'));
-                fs.mkdirSync(path.resolve(_this.out + '/models/enums'));
-                fs.mkdirSync(path.resolve(_this.out + '/services'));
-                resolve();
-            }).catch(function () { reject(); });
+            fs.mkdirSync(path.resolve(_this.out));
+            fs.mkdirSync(path.resolve(_this.out + '/models'));
+            fs.mkdirSync(path.resolve(_this.out + '/models/enums'));
+            fs.mkdirSync(path.resolve(_this.out + '/services'));
+            resolve();
         });
     };
     TemplatePrinter.prototype.print = function (enums, models, services, out) {
@@ -88,7 +86,7 @@ var TemplatePrinter = /** @class */ (function () {
         var compiled = this.enumCompiler.compile(value);
         // this._logger.ok(path.resolve(this.out + '/models/enums/' + value.name + '.enum.ts'));
         try {
-            fs.writeFileSync(path.resolve(this.out + '/models/enums/' + change_case_1.kebabCase(value.name) + '.enum.ts'), compiled);
+            fs.writeFileSync(path.resolve(this.out + '/models/enums/' + change_case_1.paramCase(value.name) + '.enum.ts'), compiled);
         }
         catch (e) {
             this._logger.err('[ ERROR ] file: ' + this.out + '/models/enums/' + value.name + '.enum.ts');
@@ -98,7 +96,7 @@ var TemplatePrinter = /** @class */ (function () {
         var _this = this;
         var compiled = this.modelCompiler.compile(model);
         /// this._logger.ok(path.resolve(this.out + '/models/' + model.name + '.model.ts'));
-        fs.writeFile(path.resolve(this.out + '/models/' + change_case_1.kebabCase(model.name) + '.model.ts'), compiled, function (err) {
+        fs.writeFile(path.resolve(this.out + '/models/' + change_case_1.paramCase(model.name).replace(/^i\-/ig, '') + '.model.ts'), compiled, function (err) {
             if (err) {
                 _this._logger.err('[ ERROR ] file: ' + _this.out + '/models/' + model.name + '.model.ts');
                 return;
@@ -111,7 +109,7 @@ var TemplatePrinter = /** @class */ (function () {
         var compiled = this.serviceCompiler.compile(service, name);
         if (compiled !== '') {
             this._printedServices.push(name);
-            fs.writeFile(path.resolve(this.out + '/services/' + change_case_1.kebabCase(name) + '.service.ts'), compiled, function (err) {
+            fs.writeFile(path.resolve(this.out + '/services/' + change_case_1.paramCase(name) + '.service.ts'), compiled, function (err) {
                 if (err) {
                     _this._logger.err('[ ERROR ] file: ' + _this.out + '/services/' + name + '.service.ts');
                     return;
@@ -144,7 +142,7 @@ var TemplatePrinter = /** @class */ (function () {
         var imports = [];
         for (var _i = 0, _a = this._printedServices; _i < _a.length; _i++) {
             var item = _a[_i];
-            imports.push("export { " + item + "APIService, I" + item + "APIService } from './" + change_case_1.kebabCase(item) + ".service';");
+            imports.push("export { " + item + "APIService, I" + item + "APIService } from './" + change_case_1.paramCase(item) + ".service';");
         }
         imports.push('');
         try {
@@ -158,7 +156,7 @@ var TemplatePrinter = /** @class */ (function () {
         var imports = [];
         for (var _i = 0, models_2 = models; _i < models_2.length; _i++) {
             var item = models_2[_i];
-            imports.push("export { " + item.name + ", I" + item.name + " } from './" + change_case_1.kebabCase(item.name) + ".model';");
+            imports.push("export { " + item.name + " } from './" + change_case_1.paramCase(item.name).replace(/^i\-/ig, '') + ".model';");
         }
         imports.push("export * from './enums';");
         imports.push('');
@@ -173,7 +171,7 @@ var TemplatePrinter = /** @class */ (function () {
         var imports = [];
         for (var _i = 0, enums_2 = enums; _i < enums_2.length; _i++) {
             var item = enums_2[_i];
-            imports.push("export {" + item.name + "} from './" + change_case_1.kebabCase(item.name) + ".enum';");
+            imports.push("export {" + item.name + "} from './" + change_case_1.paramCase(item.name) + ".enum';");
         }
         imports.push('');
         try {

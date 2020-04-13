@@ -4,7 +4,6 @@ import { ISwaggerConfig } from "./interfaces/swagger.interface";
 import { HelpCLI } from "./utils/helpcli";
 import { IGeneratorConfig } from "./interfaces/config";
 import * as fs from "fs";
-import * as request from "request";
 import { Logger } from "./utils/logger";
 import {
   IParserEnum,
@@ -12,10 +11,7 @@ import {
   IParserServiceList
 } from "./interfaces/parser";
 import { TemplatePrinter } from "./utils/template-printer";
-
-request.defaults({
-  strictSSL: false,
-});
+import fetch from "node-fetch";
 
 export default class Generator {
   public config: IGeneratorConfig;
@@ -119,15 +115,14 @@ export default class Generator {
   private getConfig(conf: string): Promise<any> {
     const promise = new Promise<any>((resolve, reject) => {
       if (/http(s?)\:\/\/\S/gi.test(conf)) {
-        request.get(conf, (err, resp, body) => {
-          console.log(err);
-          if (err) {
+        fetch(conf)
+          .then((res:any)=>{
+            resolve(res.json())
+          })
+          .catch((err:any)=>{
             this._logger.err(err);
             reject(err);
-          } else {
-            resolve(JSON.parse(body));
-          }
-        });
+          });
       } else {
         this.swagger = JSON.parse(fs.readFileSync(conf, "utf-8"));
         resolve(this.swagger);

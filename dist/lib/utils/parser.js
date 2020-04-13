@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 var logger_1 = require("./logger");
 var simhash_1 = require("./simhash/simhash");
+var change_case_1 = require("change-case");
 var Parser = /** @class */ (function () {
     function Parser() {
         this._enums = [];
@@ -44,7 +45,7 @@ var Parser = /** @class */ (function () {
                 };
                 if (models.hasOwnProperty(key)) {
                     var imports = [];
-                    model.name = key;
+                    model.name = 'I' + key;
                     model.description = models[key].description;
                     for (var prop in models[key].properties) {
                         if (models[key].properties.hasOwnProperty(prop)) {
@@ -311,8 +312,8 @@ var Parser = /** @class */ (function () {
             if (prop.$ref !== undefined) {
                 var temp = prop.$ref.split('/');
                 return {
-                    typeName: temp[temp.length - 1],
-                    typeImport: temp[temp.length - 1]
+                    typeName: 'I' + temp[temp.length - 1],
+                    typeImport: 'I' + temp[temp.length - 1]
                 };
             }
             if ((prop.type === 'boolean') ||
@@ -376,31 +377,55 @@ var Parser = /** @class */ (function () {
         this._logger.reset().fg('red').writeln(e).reset();
     };
     Parser.prototype.resolveEnums = function (description, evalue, curname, parent) {
-        var hashName = this._simHash.hash(parent + "_" + curname + "Set");
+        var hashName = this._simHash.hash(evalue.join('|'));
         // this._logger.ok(`${parent}_${curname}Set: ${hashName.toString(16)}`);
         // this._logger.err(hashName);
         var extact = this.extractEnums(description ? description : '', evalue, curname);
         //  this._logger.err(JSON.stringify({description, evalue, curname, parent}))
+        if (extact === null) {
+            return {
+                typeName: evalue.join(' | '),
+                typeImport: null
+            };
+        }
+        var withParentName = "" + change_case_1.pascalCase(change_case_1.paramCase(parent).replace(/^i\-/ig, '') + '-' + change_case_1.paramCase(curname + 'Set'));
         var propEnum = {
-            name: parent + "_" + curname + "Set",
+            name: change_case_1.pascalCase(curname) + "Set",
             modelName: parent,
             value: extact,
             hash: hashName.toString(16)
         };
-        for (var _i = 0, _a = this._enums; _i < _a.length; _i++) {
-            var item = _a[_i];
-            if (item.hash === propEnum.hash) {
+        var duplicate = this._enums.filter(function (x) { return x.name.replace(/\d+$/ig, '') === propEnum.name; });
+        var extDuplicate = this._enums.filter(function (x) { return x.name.replace(/\d+$/ig, '') === withParentName; });
+        if (duplicate.length > 0) {
+            var equals = duplicate.filter(function (x) { return x.hash === propEnum.hash; });
+            if (equals.length > 0) {
+                return {
+                    typeName: equals[0].name,
+                    typeImport: equals[0].name
+                };
+            }
+            else {
+                if (extDuplicate.length > 0) {
+                    propEnum.name = "" + withParentName + duplicate.length;
+                }
+                else {
+                    propEnum.name = withParentName;
+                }
+                this._enums.push(propEnum);
                 return {
                     typeName: propEnum.name,
                     typeImport: propEnum.name
                 };
             }
         }
-        this._enums.push(propEnum);
-        return {
-            typeName: propEnum.name,
-            typeImport: propEnum.name
-        };
+        else {
+            this._enums.push(propEnum);
+            return {
+                typeName: propEnum.name,
+                typeImport: propEnum.name
+            };
+        }
     };
     Parser.prototype.extractEnums = function (description, propEnum, name) {
         if (name === void 0) { name = 'enum'; }
@@ -420,14 +445,7 @@ var Parser = /** @class */ (function () {
             }
         }
         else {
-            for (var key in propEnum) {
-                if (propEnum.hasOwnProperty(key)) {
-                    result.push({
-                        key: name + propEnum[key],
-                        val: propEnum[key]
-                    });
-                }
-            }
+            return null;
         }
         return result;
     };

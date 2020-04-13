@@ -35,12 +35,8 @@ export class ModelTemplate {
     return `
 ${this.modelImports(value.imports, value.name)}
 
-export interface I${value.name} {
+export interface ${value.name} {
   ${iprop}
-}
-
-export class ${value.name} implements I${value.name} {
-  ${prop}
 }
 `;
   }

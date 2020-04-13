@@ -22,9 +22,9 @@ export declare class Parser {
         resp: IParserResolvedType[];
     };
     resolveServiceImports(servicesList: IParserServiceList): IParserServiceList;
-    readonly models: IParserModel[];
-    readonly enums: IParserEnum[];
-    readonly services: IParserServiceList;
+    get models(): IParserModel[];
+    get enums(): IParserEnum[];
+    get services(): IParserServiceList;
     parseParams(params: ISwaggerParam[], method: string): {
         [key: string]: IParserParam[];
     };
@@ -44,5 +44,5 @@ export declare class Parser {
     extractEnums(description: string, propEnum: number[], name?: string): {
         key: string;
         val: number;
-    }[];
+    }[] | null;
 }
