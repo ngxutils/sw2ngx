@@ -1,10 +1,8 @@
 import { ISwaggerProperty, ISwaggerSchemaRef } from './swagger.interface';
-
 export interface ISwaggerConfig {
     basePath: string;
     definitions: ISwaggerDefinitions;
     paths: ISwaggerPaths;
-
 }
 export interface ISwaggerPaths {
     [key: string]: ISwaggerPath;
@@ -41,14 +39,12 @@ export interface ISwaggerPathProp {
     parameters: ISwaggerParam[];
 }
 export interface ISwaggerResponces {
-    [key: string]: ISwaggerResponce
+    [key: string]: ISwaggerResponce;
 }
-
 export interface ISwaggerResponce {
     description: string;
     schema: ISwaggerSchema;
 }
-
 export interface ISwaggerSchema {
     type?: string;
     format?: string;
@@ -67,5 +63,5 @@ export interface ISwaggerParam {
     type?: string;
     format?: string;
     enum?: number[];
-    schema?: ISwaggerSchema
+    schema?: ISwaggerSchema;
 }
