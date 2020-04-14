@@ -31,6 +31,7 @@ var SimHash = /** @class */ (function () {
         var tokens = this.tokenize(input);
         var shingles = [];
         var jenkins = new jenkins_1.Jenkins();
+        // eslint-disable-next-line @typescript-eslint/no-for-in-array
         for (var i in tokens) {
             shingles.push(jenkins.hash32(tokens[i]));
         }
@@ -38,7 +39,6 @@ var SimHash = /** @class */ (function () {
         simhash >>>= 0;
         return simhash;
     };
-    ;
     /**
      * Tokenizes input into 'kshingles' number of tokens.
      */
@@ -53,12 +53,12 @@ var SimHash = /** @class */ (function () {
         }
         return shingles;
     };
-    ;
     SimHash.prototype.combineShingles = function (shingles) {
         if (shingles.length === 0)
             return;
         if (shingles.length === 1)
             return shingles[0];
+        // eslint-disable-next-line @typescript-eslint/unbound-method
         shingles.sort(this.hashComparator);
         if (shingles.length > this.maxFeatures)
             shingles = shingles.splice(this.maxFeatures);
@@ -66,6 +66,7 @@ var SimHash = /** @class */ (function () {
         var mask = 0x1;
         for (var pos = 0; pos < 32; pos++) {
             var weight = 0;
+            // eslint-disable-next-line @typescript-eslint/no-for-in-array
             for (var i in shingles) {
                 var shingle = parseInt(shingles[i], 16);
                 weight += !(~shingle & mask) === true ? 1 : -1;
@@ -76,7 +77,6 @@ var SimHash = /** @class */ (function () {
         }
         return simhash;
     };
-    ;
     /**
      * Calculates binary hamming distance of two base 16 integers.
      */
@@ -89,7 +89,6 @@ var SimHash = /** @class */ (function () {
         }
         return distance;
     };
-    ;
     /**
      * TODO: Use a priority queue. Till then this comparator is
      * used to find the least 'maxFeatures' shingles.
@@ -97,9 +96,7 @@ var SimHash = /** @class */ (function () {
     SimHash.prototype.hashComparator = function (a, b) {
         return a < b ? -1 : (a > b ? 1 : 0);
     };
-    ;
     return SimHash;
 }());
 exports.SimHash = SimHash;
-;
 //# sourceMappingURL=simhash.js.map

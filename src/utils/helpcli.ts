@@ -6,7 +6,7 @@ import { IGeneratorConfig } from "../interfaces/config";
 export class HelpCLI {
     public logger: Logger  = new Logger();
     public parseArgs(): IGeneratorConfig {
-        let params: IGeneratorConfig = {
+        const params: IGeneratorConfig = {
             config: '',
             out: '',
             help: false
@@ -14,7 +14,7 @@ export class HelpCLI {
         const args = process.argv;
         for (let i = 0; i < args.length; i++) {
             for (const param of GeneratorParams) {
-                if (param.keys.indexOf(args[i]) !== -1) {
+                if (param.keys.includes(args[i])) {
                     if (param.noValue) {
                         params[param.name] = true;
                         break;
@@ -40,7 +40,7 @@ export class HelpCLI {
         for (const key of GeneratorParams) {
             let line = `     ${key.name}          `;
             line = line.substr(0, 15);
-            let args = new Array(40).fill(' ');
+            const args = new Array(40).fill(' ');
             let i = 1;
             for (const arg of key.keys) {
                 args[i + 2] = arg;

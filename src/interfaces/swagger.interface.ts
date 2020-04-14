@@ -39,7 +39,7 @@ export interface ISwaggerPathProp {
     parameters: ISwaggerParam[];
 }
 export interface ISwaggerResponces {
-    [key: string]: ISwaggerResponce
+    [key: string]: ISwaggerResponce;
 }
 
 export interface ISwaggerResponce {
@@ -65,5 +65,5 @@ export interface ISwaggerParam {
     type?: string;
     format?: string;
     enum?: number[];
-    schema?: ISwaggerSchema
+    schema?: ISwaggerSchema;
 }

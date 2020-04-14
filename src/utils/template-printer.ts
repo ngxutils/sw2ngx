@@ -9,21 +9,27 @@ import { ModelTemplate } from './templates/model';
 import { paramCase } from 'change-case';
 
 export class TemplatePrinter {
-  private out: string = '';
+  private out = '';
   private enumCompiler: EnumTemplate = new EnumTemplate();
   private modelCompiler: ModelTemplate = new ModelTemplate();
   private serviceCompiler: ServiceTemplate = new ServiceTemplate();
   private moduleCompiler: ModuleTemplate = new ModuleTemplate();
   private _printedServices: string[] = [];
   private _logger: Logger = new Logger();
-  public createFolders() {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public createFolders(): Promise<any> {
     return new Promise(
       (resolve, reject) => {
+        try {
           fs.mkdirSync(path.resolve(this.out));
           fs.mkdirSync(path.resolve(this.out + '/models'));
           fs.mkdirSync(path.resolve(this.out + '/models/enums'));
           fs.mkdirSync(path.resolve(this.out + '/services'));
           resolve();
+          return;
+        } catch (error) {
+          reject();
+        } 
       }
     );
   }
@@ -41,7 +47,7 @@ export class TemplatePrinter {
         }
         this.printModelIndex(models);
         for (const name in services) {
-          if (services.hasOwnProperty(name)) {
+          if (services[name]) {
             this.printService(services[name], name);
           }
         }
@@ -49,11 +55,12 @@ export class TemplatePrinter {
         this.printModule();
         this.printIndex();
         resolve();
-      });
+      })
+      .catch((err)=>reject(err));
     });
 
   }
-  public printEnum(value: IParserEnum) {
+  public printEnum(value: IParserEnum): void {
     const compiled = this.enumCompiler.compile(value);
     // this._logger.ok(path.resolve(this.out + '/models/enums/' + value.name + '.enum.ts'));
     try {
@@ -63,20 +70,20 @@ export class TemplatePrinter {
     }
 
   }
-  public printModel(model: IParserModel) {
+  public printModel(model: IParserModel): void {
     const compiled = this.modelCompiler.compile(model);
     /// this._logger.ok(path.resolve(this.out + '/models/' + model.name + '.model.ts'));
 
-    fs.writeFile(path.resolve(this.out + '/models/' + paramCase(model.name).replace(/^i\-/ig, '') + '.model.ts'), compiled, (err) => {
+    fs.writeFile(path.resolve(this.out + '/models/' + paramCase(model.name).replace(/^i-/ig, '') + '.model.ts'), compiled, (err) => {
       if (err) {
-        this._logger.err('[ ERROR ] file: ' + this.out + '/models/' + paramCase(model.name).replace(/^i\-/ig, '') + '.model.ts');
+        this._logger.err('[ ERROR ] file: ' + this.out + '/models/' + paramCase(model.name).replace(/^i-/ig, '') + '.model.ts');
         return;
       }
-      this._logger.ok('[ OK    ] file: ' + this.out + '/models/' + paramCase(model.name).replace(/^i\-/ig, '') + '.model.ts');
+      this._logger.ok('[ OK    ] file: ' + this.out + '/models/' + paramCase(model.name).replace(/^i-/ig, '') + '.model.ts');
     });
 
   }
-  public printService(service: IParserService, name: string) {
+  public printService(service: IParserService, name: string): void {
     const compiled = this.serviceCompiler.compile(service, name);
     if (compiled !== '') {
       this._printedServices.push(name);
@@ -89,7 +96,7 @@ export class TemplatePrinter {
       });
     }
   }
-  public printModule() {
+  public printModule(): void {
     const compiled = this.moduleCompiler.compile(this._printedServices);
     fs.writeFile(path.resolve(this.out + '/api.module.ts'), compiled, (err) => {
       if (err) {
@@ -99,7 +106,7 @@ export class TemplatePrinter {
       this._logger.ok('[ OK    ] file: ' + this.out + '/api.module.ts');
     });
   }
-  public printIndex() {
+  public printIndex(): void {
     const imports = `export * from './services';
 export * from './models';
 export { APIModule } from './api.module';
@@ -110,9 +117,9 @@ export { APIModule } from './api.module';
       this._logger.err('[ ERROR ] file: ' + this.out + '/index.ts');
     }
   }
-  public printServiceIndex() {
+  public printServiceIndex(): void {
     const imports = [];
-    for (let item of this._printedServices) {
+    for (const item of this._printedServices) {
       imports.push(`export { ${item}APIService, I${item}APIService } from './${paramCase(item)}.service';`);
     }
     imports.push('');
@@ -122,10 +129,10 @@ export { APIModule } from './api.module';
       this._logger.err('[ ERROR ] file: ' + this.out + '/services/index.ts');
     }
   }
-  public printModelIndex(models: IParserModel[]) {
+  public printModelIndex(models: IParserModel[]): void {
     const imports = [];
-    for (let item of models) {
-      imports.push(`export { ${item.name} } from './${paramCase(item.name).replace(/^i\-/ig, '')}.model';`);
+    for (const item of models) {
+      imports.push(`export { ${item.name} } from './${paramCase(item.name).replace(/^i-/ig, '')}.model';`);
     }
     imports.push(`export * from './enums';`);
     imports.push('');
@@ -135,9 +142,9 @@ export { APIModule } from './api.module';
       this._logger.err('[ ERROR ] file: ' + this.out + '/models/index.ts');
     }
   }
-  public printEnumIndex(enums: IParserEnum[]) {
+  public printEnumIndex(enums: IParserEnum[]): void {
     const imports = [];
-    for (let item of enums) {
+    for (const item of enums) {
       imports.push(`export {${item.name}} from './${paramCase(item.name)}.enum';`);
     }
     imports.push('');

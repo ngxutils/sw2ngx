@@ -58,8 +58,8 @@ var Generator = /** @class */ (function () {
                     }
                     if (extend.services) {
                         for (var key in extend.services) {
-                            if (extend.services.hasOwnProperty(key)) {
-                                if (res[2].hasOwnProperty(key)) {
+                            if (extend.services[key]) {
+                                if (res[2][key]) {
                                     if (extend.services[key].imports) {
                                         (_c = res[2][key].imports).push.apply(_c, extend.services[key].imports);
                                     }
@@ -96,7 +96,7 @@ var Generator = /** @class */ (function () {
     Generator.prototype.getConfig = function (conf) {
         var _this = this;
         var promise = new Promise(function (resolve, reject) {
-            if (/http(s?)\:\/\/\S/gi.test(conf)) {
+            if (/http(s?):\/\/\S/gi.test(conf)) {
                 node_fetch_1.default(conf)
                     .then(function (res) {
                     resolve(res.json());

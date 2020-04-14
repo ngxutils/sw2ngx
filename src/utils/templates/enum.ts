@@ -7,7 +7,7 @@ export class EnumTemplate {
     }
     return temp.join(',\r\n\t');
   }
-  public compile(value: IParserEnum) {
+  public compile(value: IParserEnum): string {
     return `
 export enum ${value.name} {
   ${this.body(value)}

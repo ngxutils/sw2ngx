@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+/* eslint-disable no-fallthrough */
 var Jenkins = /** @class */ (function () {
     function Jenkins() {
         this.pc = 0;
@@ -62,37 +63,26 @@ var Jenkins = /** @class */ (function () {
         switch (length) {
             case 12:
                 c += k.charCodeAt(offset + 11) << 24;
-            // tslint:disable-next-line:no-switch-case-fall-through
             case 11:
                 c += k.charCodeAt(offset + 10) << 16;
-            // tslint:disable-next-line:no-switch-case-fall-through
             case 10:
                 c += k.charCodeAt(offset + 9) << 8;
-            // tslint:disable-next-line:no-switch-case-fall-through
             case 9:
                 c += k.charCodeAt(offset + 8);
-            // tslint:disable-next-line:no-switch-case-fall-through
             case 8:
                 b += k.charCodeAt(offset + 7) << 24;
-            // tslint:disable-next-line:no-switch-case-fall-through
             case 7:
                 b += k.charCodeAt(offset + 6) << 16;
-            // tslint:disable-next-line:no-switch-case-fall-through
             case 6:
                 b += k.charCodeAt(offset + 5) << 8;
-            // tslint:disable-next-line:no-switch-case-fall-through
             case 5:
                 b += k.charCodeAt(offset + 4);
-            // tslint:disable-next-line:no-switch-case-fall-through
             case 4:
                 a += k.charCodeAt(offset + 3) << 24;
-            // tslint:disable-next-line:no-switch-case-fall-through
             case 3:
                 a += k.charCodeAt(offset + 2) << 16;
-            // tslint:disable-next-line:no-switch-case-fall-through
             case 2:
                 a += k.charCodeAt(offset + 1) << 8;
-            // tslint:disable-next-line:no-switch-case-fall-through
             case 1:
                 a += k.charCodeAt(offset + 0);
                 break;

@@ -1,5 +1,5 @@
 import { pascalCase, paramCase, camelCase } from 'change-case';
-import { mkdirSync, writeFileSync, writeFile, existsSync, readdirSync, lstatSync, unlinkSync, rmdirSync, readFileSync } from 'fs';
+import { mkdirSync, writeFileSync, writeFile, readFileSync } from 'fs';
 import fetch from 'node-fetch';
 
 var COLORS_HLP = {
@@ -67,6 +67,7 @@ var Logger = /** @class */ (function () {
     return Logger;
 }());
 
+/* eslint-disable no-fallthrough */
 var Jenkins = /** @class */ (function () {
     function Jenkins() {
         this.pc = 0;
@@ -129,37 +130,26 @@ var Jenkins = /** @class */ (function () {
         switch (length) {
             case 12:
                 c += k.charCodeAt(offset + 11) << 24;
-            // tslint:disable-next-line:no-switch-case-fall-through
             case 11:
                 c += k.charCodeAt(offset + 10) << 16;
-            // tslint:disable-next-line:no-switch-case-fall-through
             case 10:
                 c += k.charCodeAt(offset + 9) << 8;
-            // tslint:disable-next-line:no-switch-case-fall-through
             case 9:
                 c += k.charCodeAt(offset + 8);
-            // tslint:disable-next-line:no-switch-case-fall-through
             case 8:
                 b += k.charCodeAt(offset + 7) << 24;
-            // tslint:disable-next-line:no-switch-case-fall-through
             case 7:
                 b += k.charCodeAt(offset + 6) << 16;
-            // tslint:disable-next-line:no-switch-case-fall-through
             case 6:
                 b += k.charCodeAt(offset + 5) << 8;
-            // tslint:disable-next-line:no-switch-case-fall-through
             case 5:
                 b += k.charCodeAt(offset + 4);
-            // tslint:disable-next-line:no-switch-case-fall-through
             case 4:
                 a += k.charCodeAt(offset + 3) << 24;
-            // tslint:disable-next-line:no-switch-case-fall-through
             case 3:
                 a += k.charCodeAt(offset + 2) << 16;
-            // tslint:disable-next-line:no-switch-case-fall-through
             case 2:
                 a += k.charCodeAt(offset + 1) << 8;
-            // tslint:disable-next-line:no-switch-case-fall-through
             case 1:
                 a += k.charCodeAt(offset + 0);
                 break;
@@ -259,6 +249,7 @@ var SimHash = /** @class */ (function () {
         var tokens = this.tokenize(input);
         var shingles = [];
         var jenkins = new Jenkins();
+        // eslint-disable-next-line @typescript-eslint/no-for-in-array
         for (var i in tokens) {
             shingles.push(jenkins.hash32(tokens[i]));
         }
@@ -285,6 +276,7 @@ var SimHash = /** @class */ (function () {
             return;
         if (shingles.length === 1)
             return shingles[0];
+        // eslint-disable-next-line @typescript-eslint/unbound-method
         shingles.sort(this.hashComparator);
         if (shingles.length > this.maxFeatures)
             shingles = shingles.splice(this.maxFeatures);
@@ -292,6 +284,7 @@ var SimHash = /** @class */ (function () {
         var mask = 0x1;
         for (var pos = 0; pos < 32; pos++) {
             var weight = 0;
+            // eslint-disable-next-line @typescript-eslint/no-for-in-array
             for (var i in shingles) {
                 var shingle = parseInt(shingles[i], 16);
                 weight += !(~shingle & mask) === true ? 1 : -1;
@@ -336,9 +329,9 @@ var Parser = /** @class */ (function () {
         var _this = this;
         return new Promise(function (resolve, reject) {
             _this._logger.info('start parsing');
-            _this.parseModels(config).then(function (res) {
+            _this.parseModels(config).then(function () {
                 _this._logger.info('models parsed');
-                _this.parseServices(config).then(function (res) {
+                _this.parseServices(config).then(function () {
                     _this._logger.info('services parsed');
                     resolve([_this._enums, _this._models, _this._servicesList]);
                 }, function (err) {
@@ -356,7 +349,7 @@ var Parser = /** @class */ (function () {
     Parser.prototype.parseModels = function (config) {
         var _this = this;
         var models = config.definitions;
-        return new Promise(function (resolve, reject) {
+        return new Promise(function (resolve) {
             for (var key in models) {
                 var model = {
                     name: '',
@@ -364,12 +357,12 @@ var Parser = /** @class */ (function () {
                     imports: [],
                     props: []
                 };
-                if (models.hasOwnProperty(key)) {
+                if (models[key]) {
                     var imports = [];
                     model.name = 'I' + key;
                     model.description = models[key].description;
                     for (var prop in models[key].properties) {
-                        if (models[key].properties.hasOwnProperty(prop)) {
+                        if (models[key].properties[prop]) {
                             var temp = _this.parseModelProp(prop, models[key].properties[prop], model.name);
                             imports.push(temp.imports);
                             model.props.push(temp);
@@ -382,6 +375,7 @@ var Parser = /** @class */ (function () {
             resolve([_this._enums, _this._models]);
         });
     };
+    // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
     Parser.prototype.parseTags = function (tags) {
         if (tags.length >= 1) {
             return tags[0];
@@ -392,7 +386,7 @@ var Parser = /** @class */ (function () {
     };
     Parser.prototype.parseServices = function (config) {
         var _this = this;
-        return new Promise(function (resolve, reject) {
+        return new Promise(function (resolve) {
             var result = {
                 __common: {
                     uri: config.basePath,
@@ -401,12 +395,12 @@ var Parser = /** @class */ (function () {
                 }
             };
             for (var path in config.paths) {
-                if (config.paths.hasOwnProperty(path)) {
+                if (config.paths[path]) {
                     var _loop_1 = function (method) {
-                        if (config.paths[path].hasOwnProperty(method)) {
+                        if (config.paths[path][method]) {
                             _this._logger.ok(path);
                             var parsedMethod_1 = _this.parseMethod(path, method, config.paths[path][method]);
-                            if (result.hasOwnProperty(parsedMethod_1.tag)) {
+                            if (result[parsedMethod_1.tag]) {
                                 var duplicates = result[parsedMethod_1.tag].methods.filter(function (x) { return x.name.replace(/\d+$/ig, '') === parsedMethod_1.name; });
                                 if (duplicates.length > 0) {
                                     parsedMethod_1.name = parsedMethod_1.name + duplicates.length;
@@ -431,21 +425,30 @@ var Parser = /** @class */ (function () {
             resolve(_this._servicesList);
         });
     };
+    Parser.prototype.genMethodName = function (uri, type) {
+        var tmp = pascalCase(uri.replace(/\//ig, '-').replace(/\{|\}|\$/ig, ''));
+        switch (type.toLocaleLowerCase()) {
+            case 'post':
+                return 'send' + tmp;
+            case 'delete':
+                return 'delete' + tmp;
+            case 'put':
+                return 'update' + tmp;
+            case 'get':
+            default:
+                return 'get' + tmp;
+        }
+    };
     Parser.prototype.parseMethod = function (uri, type, method) {
-        try {
-            var tag_1 = this.parseParams(method.parameters, method.operationId);
-        }
-        catch (e) {
-            console.error('params');
-        }
+        var name = method.operationId ? method.operationId : this.genMethodName(uri, type);
         var tag = this.parseTags(method.tags);
-        var params = this.parseParams(method.parameters, method.operationId);
-        var resp = this.parseResponse(method.responses, method.operationId);
+        var params = this.parseParams(method.parameters, camelCase(name));
+        var resp = this.parseResponse(method.responses, camelCase(name));
         return {
             uri: uri.replace(/\{/ig, '${'),
             type: type,
             tag: tag,
-            name: camelCase(method.operationId),
+            name: camelCase(name),
             description: method.summary,
             params: params,
             resp: resp
@@ -453,7 +456,7 @@ var Parser = /** @class */ (function () {
     };
     Parser.prototype.resolveServiceImports = function (servicesList) {
         for (var serv in servicesList) {
-            if (servicesList.hasOwnProperty(serv)) {
+            if (servicesList[serv]) {
                 var imports = [];
                 for (var _i = 0, _a = servicesList[serv].methods; _i < _a.length; _i++) {
                     var method = _a[_i];
@@ -505,37 +508,34 @@ var Parser = /** @class */ (function () {
             form: [],
             urlencoded: []
         };
-        for (var param in params) {
-            if (params.hasOwnProperty(param)) {
+        for (var _i = 0, params_1 = params; _i < params_1.length; _i++) {
+            var param = params_1[_i];
+            if (param) {
                 var type = null;
-                this._logger.info(JSON.stringify(params[param]));
-                var paramName = this.resolveParamName(params[param].name);
-                this._logger.info(paramName);
-                if (params[param].schema) {
-                    this._logger.ok('type1');
-                    type = this.resolveType(params[param].schema, paramName, method);
+                var paramName = this.resolveParamName(param.name);
+                if (param.schema) {
+                    type = this.resolveType(param.schema, paramName, method);
                 }
                 else {
-                    this._logger.ok('type2');
-                    type = this.resolveType(params[param], paramName, method);
+                    type = this.resolveType(param, paramName, method);
                 }
                 var res = {
-                    name: this.clearName(params[param].name),
+                    name: this.clearName(param.name),
                     queryName: paramName,
-                    description: params[param].description ? params[param].description : '',
-                    required: params[param].required ? true : false,
+                    description: param.description ? param.description : '',
+                    required: param.required ? true : false,
                     type: type
                 };
-                if (params[param].in === 'path') {
+                if (param.in === 'path') {
                     parsed.uri.push(res);
                 }
-                if (params[param].in === 'query') {
+                if (param.in === 'query') {
                     parsed.query.push(res);
                 }
-                if (params[param].in === 'body') {
+                if (param.in === 'body') {
                     parsed.payload.push(res);
                 }
-                if (params[param].in === 'formData') {
+                if (param.in === 'formData') {
                     parsed.form.push(res);
                 }
                 parsed.all.push(res);
@@ -547,8 +547,8 @@ var Parser = /** @class */ (function () {
         var baseTypes = [
             'number', 'string', 'boolean', 'any', 'array'
         ];
-        var result = name.replace(/\.|\-/ig, '');
-        if (baseTypes.indexOf(result) !== -1) {
+        var result = name.replace(/\.|-/ig, '');
+        if (baseTypes.includes(result)) {
             result = result + 'Param';
         }
         return result;
@@ -611,7 +611,7 @@ var Parser = /** @class */ (function () {
         var result = [];
         for (var _i = 0, imports_1 = imports; _i < imports_1.length; _i++) {
             var imp = imports_1[_i];
-            if (result.indexOf(imp) === -1) {
+            if (!result.includes(imp)) {
                 if (imp !== null) {
                     result.push(imp);
                 }
@@ -629,7 +629,7 @@ var Parser = /** @class */ (function () {
         };
     };
     Parser.prototype.resolveType = function (prop, name, parent) {
-        var curname = name.replace(/\.|\-/ig, '_');
+        var curname = name.replace(/\.|-/ig, '_');
         if (prop === undefined) {
             return {
                 typeName: 'any',
@@ -708,11 +708,11 @@ var Parser = /** @class */ (function () {
         var hashName = this._simHash.hash(evalue.join('|'));
         // this._logger.ok(`${parent}_${curname}Set: ${hashName.toString(16)}`);
         // this._logger.err(hashName);
-        var extact = this.extractEnums(description ? description : '', evalue, curname);
+        var extact = this.extractEnumDescription(description ? description : '');
         //  this._logger.err(JSON.stringify({description, evalue, curname, parent}))
         if (extact === null) {
             var numbers_1 = '1234567890'.split('');
-            if (evalue.join('').split('').filter(function (x) { return numbers_1.indexOf(x) === -1; }).length > 0) {
+            if (evalue.join('').split('').filter(function (x) { return !numbers_1.includes(x); }).length > 0) {
                 return {
                     typeName: evalue.map(function (x) { return "'" + x + "'"; }).join(' | '),
                     typeImport: null
@@ -723,7 +723,7 @@ var Parser = /** @class */ (function () {
                 typeImport: null
             };
         }
-        var withParentName = "" + pascalCase(paramCase(parent).replace(/^i\-/ig, '') + '-' + paramCase(curname + 'Set'));
+        var withParentName = "" + pascalCase(paramCase(parent).replace(/^i-/ig, '') + '-' + paramCase(curname + 'Set'));
         var propEnum = {
             name: pascalCase(curname) + "Set",
             modelName: parent,
@@ -762,7 +762,7 @@ var Parser = /** @class */ (function () {
             };
         }
     };
-    Parser.prototype.extractEnums = function (description, propEnum, name) {
+    Parser.prototype.extractEnumDescription = function (description) {
         var result = [];
         var indexOf = description.search(/\(\d/ig);
         if (indexOf !== -1) {
@@ -776,11 +776,11 @@ var Parser = /** @class */ (function () {
                     val: parseInt(key[0], 10)
                 });
             }
+            return result;
         }
         else {
             return null;
         }
-        return result;
     };
     return Parser;
 }());
@@ -822,7 +822,7 @@ var HelpCLI = /** @class */ (function () {
         for (var i = 0; i < args.length; i++) {
             for (var _i = 0, GeneratorParams_1 = GeneratorParams; _i < GeneratorParams_1.length; _i++) {
                 var param = GeneratorParams_1[_i];
-                if (param.keys.indexOf(args[i]) !== -1) {
+                if (param.keys.includes(args[i])) {
                     if (param.noValue) {
                         params[param.name] = true;
                         break;
@@ -1154,7 +1154,7 @@ var ModelTemplate = /** @class */ (function () {
         };
     };
     ModelTemplate.prototype.compile = function (value) {
-        var _a = this.body(value.props), iprop = _a.iprop, prop = _a.prop;
+        var iprop = this.body(value.props).iprop;
         return "\n" + this.modelImports(value.imports, value.name) + "\n\nexport interface " + value.name + " {\n  " + iprop + "\n}\n";
     };
     return ModelTemplate;
@@ -1170,41 +1170,21 @@ var TemplatePrinter = /** @class */ (function () {
         this._printedServices = [];
         this._logger = new Logger();
     }
-    TemplatePrinter.prototype.cleanFolder = function () {
-        var _this = this;
-        this._logger.info('clean start');
-        return new Promise(function (resolve$1, reject) {
-            var deleteFolderRecursive = function (path) {
-                if (existsSync(path)) {
-                    readdirSync(path).forEach(function (file, index) {
-                        var curPath = path + "/" + file;
-                        if (lstatSync(curPath).isDirectory()) { // recurse
-                            deleteFolderRecursive(curPath);
-                        }
-                        else { // delete file
-                            unlinkSync(curPath);
-                        }
-                    });
-                    rmdirSync(path);
-                }
-            };
-            try {
-                deleteFolderRecursive(resolve(_this.out));
-                resolve$1();
-            }
-            catch (e) {
-                reject(e);
-            }
-        });
-    };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     TemplatePrinter.prototype.createFolders = function () {
         var _this = this;
         return new Promise(function (resolve$1, reject) {
-            mkdirSync(resolve(_this.out));
-            mkdirSync(resolve(_this.out + '/models'));
-            mkdirSync(resolve(_this.out + '/models/enums'));
-            mkdirSync(resolve(_this.out + '/services'));
-            resolve$1();
+            try {
+                mkdirSync(resolve(_this.out));
+                mkdirSync(resolve(_this.out + '/models'));
+                mkdirSync(resolve(_this.out + '/models/enums'));
+                mkdirSync(resolve(_this.out + '/services'));
+                resolve$1();
+                return;
+            }
+            catch (error) {
+                reject();
+            }
         });
     };
     TemplatePrinter.prototype.print = function (enums, models, services, out) {
@@ -1223,7 +1203,7 @@ var TemplatePrinter = /** @class */ (function () {
                 }
                 _this.printModelIndex(models);
                 for (var name_1 in services) {
-                    if (services.hasOwnProperty(name_1)) {
+                    if (services[name_1]) {
                         _this.printService(services[name_1], name_1);
                     }
                 }
@@ -1231,7 +1211,8 @@ var TemplatePrinter = /** @class */ (function () {
                 _this.printModule();
                 _this.printIndex();
                 resolve();
-            });
+            })
+                .catch(function (err) { return reject(err); });
         });
     };
     TemplatePrinter.prototype.printEnum = function (value) {
@@ -1241,19 +1222,19 @@ var TemplatePrinter = /** @class */ (function () {
             writeFileSync(resolve(this.out + '/models/enums/' + paramCase(value.name) + '.enum.ts'), compiled);
         }
         catch (e) {
-            this._logger.err('[ ERROR ] file: ' + this.out + '/models/enums/' + value.name + '.enum.ts');
+            this._logger.err('[ ERROR ] file: ' + this.out + '/models/enums/' + paramCase(value.name) + '.enum.ts');
         }
     };
     TemplatePrinter.prototype.printModel = function (model) {
         var _this = this;
         var compiled = this.modelCompiler.compile(model);
         /// this._logger.ok(path.resolve(this.out + '/models/' + model.name + '.model.ts'));
-        writeFile(resolve(this.out + '/models/' + paramCase(model.name).replace(/^i\-/ig, '') + '.model.ts'), compiled, function (err) {
+        writeFile(resolve(this.out + '/models/' + paramCase(model.name).replace(/^i-/ig, '') + '.model.ts'), compiled, function (err) {
             if (err) {
-                _this._logger.err('[ ERROR ] file: ' + _this.out + '/models/' + model.name + '.model.ts');
+                _this._logger.err('[ ERROR ] file: ' + _this.out + '/models/' + paramCase(model.name).replace(/^i-/ig, '') + '.model.ts');
                 return;
             }
-            _this._logger.ok('[ OK    ] file: ' + _this.out + '/models/' + model.name + '.model.ts');
+            _this._logger.ok('[ OK    ] file: ' + _this.out + '/models/' + paramCase(model.name).replace(/^i-/ig, '') + '.model.ts');
         });
     };
     TemplatePrinter.prototype.printService = function (service, name) {
@@ -1263,10 +1244,10 @@ var TemplatePrinter = /** @class */ (function () {
             this._printedServices.push(name);
             writeFile(resolve(this.out + '/services/' + paramCase(name) + '.service.ts'), compiled, function (err) {
                 if (err) {
-                    _this._logger.err('[ ERROR ] file: ' + _this.out + '/services/' + name + '.service.ts');
+                    _this._logger.err('[ ERROR ] file: ' + _this.out + '/services/' + paramCase(name) + '.service.ts');
                     return;
                 }
-                _this._logger.ok('[ OK    ] file: ' + _this.out + '/services/' + name + '.service.ts');
+                _this._logger.ok('[ OK    ] file: ' + _this.out + '/services/' + paramCase(name) + '.service.ts');
             });
         }
     };
@@ -1308,7 +1289,7 @@ var TemplatePrinter = /** @class */ (function () {
         var imports = [];
         for (var _i = 0, models_2 = models; _i < models_2.length; _i++) {
             var item = models_2[_i];
-            imports.push("export { " + item.name + " } from './" + paramCase(item.name).replace(/^i\-/ig, '') + ".model';");
+            imports.push("export { " + item.name + " } from './" + paramCase(item.name).replace(/^i-/ig, '') + ".model';");
         }
         imports.push("export * from './enums';");
         imports.push('');
@@ -1388,8 +1369,8 @@ var Generator = /** @class */ (function () {
                     }
                     if (extend.services) {
                         for (var key in extend.services) {
-                            if (extend.services.hasOwnProperty(key)) {
-                                if (res[2].hasOwnProperty(key)) {
+                            if (extend.services[key]) {
+                                if (res[2][key]) {
                                     if (extend.services[key].imports) {
                                         (_c = res[2][key].imports).push.apply(_c, extend.services[key].imports);
                                     }
@@ -1426,7 +1407,7 @@ var Generator = /** @class */ (function () {
     Generator.prototype.getConfig = function (conf) {
         var _this = this;
         var promise = new Promise(function (resolve, reject) {
-            if (/http(s?)\:\/\/\S/gi.test(conf)) {
+            if (/http(s?):\/\/\S/gi.test(conf)) {
                 fetch(conf)
                     .then(function (res) {
                     resolve(res.json());
@@ -1446,6 +1427,7 @@ var Generator = /** @class */ (function () {
     return Generator;
 }());
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 var app = new Generator();
 
 export default Generator;

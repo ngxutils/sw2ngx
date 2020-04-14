@@ -1,6 +1,6 @@
 import { ISwaggerConfig, ISwaggerProperty, ISwaggerParam } from './../interfaces/swagger.interface';
 import { Logger } from './logger';
-import { IParserModel, IParserEnum, IParserService, IParserResolvedType, IParserServiceList, IParserParam } from '../interfaces/parser';
+import { IParserModel, IParserEnum, IParserResolvedType, IParserServiceList, IParserParam, IParserMethod } from '../interfaces/parser';
 import { SimHash } from './simhash/simhash';
 import { paramCase, camelCase, pascalCase } from 'change-case';
 
@@ -14,9 +14,9 @@ export class Parser {
     public parse(config: ISwaggerConfig): Promise<any> {
         return new Promise<any>((resolve, reject) => {
             this._logger.info('start parsing');
-            this.parseModels(config).then((res) => {
+            this.parseModels(config).then(() => {
                 this._logger.info('models parsed');
-                this.parseServices(config).then((res) => {
+                this.parseServices(config).then(() => {
                     this._logger.info('services parsed');
                     resolve([this._enums, this._models, this._servicesList]);
                 }, (err) => {
@@ -35,7 +35,7 @@ export class Parser {
 
     public parseModels(config: ISwaggerConfig): Promise<[IParserEnum[], IParserModel[]]> {
         const models = config.definitions;
-        return new Promise<[IParserEnum[], IParserModel[]]>((resolve, reject) => {
+        return new Promise<[IParserEnum[], IParserModel[]]>((resolve) => {
             for (const key in models) {
                 const model = {
                     name: '',
@@ -43,12 +43,12 @@ export class Parser {
                     imports: [],
                     props: []
                 } as IParserModel;
-                if (models.hasOwnProperty(key)) {
+                if (models[key]) {
                     const imports = [];
                     model.name = 'I'+key;
                     model.description = models[key].description;
                     for (const prop in models[key].properties) {
-                        if (models[key].properties.hasOwnProperty(prop)) {
+                        if (models[key].properties[prop]) {
                             const temp = this.parseModelProp(prop, models[key].properties[prop], model.name);
                             imports.push(temp.imports);
                             model.props.push(temp);
@@ -62,6 +62,7 @@ export class Parser {
         });
     }
 
+    // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
     public parseTags(tags: string[]) {
         if (tags.length >= 1) {
             return tags[0];
@@ -71,21 +72,21 @@ export class Parser {
     }
 
     public parseServices(config: ISwaggerConfig): Promise<IParserServiceList> {
-        return new Promise<IParserServiceList>((resolve, reject) => {
-            let result: IParserServiceList = {
+        return new Promise<IParserServiceList>((resolve) => {
+            const result: IParserServiceList = {
                 __common: {
                     uri: config.basePath,
                     imports: [],
                     methods: []
                 }
             };
-            for (let path in config.paths) {
-                if (config.paths.hasOwnProperty(path)) {
-                    for (let method in config.paths[path]) {
-                        if (config.paths[path].hasOwnProperty(method)) {
+            for (const path in config.paths) {
+                if (config.paths[path]) {
+                    for (const method in config.paths[path]) {
+                        if (config.paths[path][method]) {
                             this._logger.ok(path);
-                            let parsedMethod = this.parseMethod(path, method, config.paths[path][method]);
-                            if (result.hasOwnProperty(parsedMethod.tag)) {
+                            const parsedMethod = this.parseMethod(path, method, config.paths[path][method]);
+                            if (result[parsedMethod.tag]) {
                                 const duplicates = result[parsedMethod.tag].methods.filter(x=> x.name.replace(/\d+$/ig, '')===parsedMethod.name); 
                                 if(duplicates.length>0){
                                     parsedMethod.name = parsedMethod.name+duplicates.length;
@@ -106,40 +107,48 @@ export class Parser {
             resolve(this._servicesList);
         });
     }
-
-    public parseMethod(uri: string, type: string, method: any) {
-
-        try {
-            const tag = this.parseParams(method.parameters, method.operationId);
-        } catch (e) {
-            console.error('params');
+    public genMethodName(uri: string, type: string): string {
+        const tmp = pascalCase(uri.replace(/\//ig, '-').replace(/\{|\}|\$/ig, ''));
+        switch (type.toLocaleLowerCase()) {
+            case 'post':
+                return 'send'+ tmp;
+            case 'delete':
+                return 'delete'+ tmp;
+            case 'put':
+                return 'update'+ tmp;
+            case 'get':
+            default:
+                return 'get'+ tmp;
         }
+    }
+    public parseMethod(uri: string, type: string, method: any): IParserMethod {
 
+        const name = method.operationId? method.operationId: this.genMethodName(uri, type);
         const tag = this.parseTags(method.tags);
-        const params = this.parseParams(method.parameters, method.operationId);
-        const resp = this.parseResponse(method.responses, method.operationId);
+        const params = this.parseParams(method.parameters, camelCase(name));
+        const resp = this.parseResponse(method.responses, camelCase(name));
         return {
             uri: uri.replace(/\{/ig, '${'),
             type: type,
             tag: tag,
-            name: camelCase(method.operationId),
+            name: camelCase(name),
             description: method.summary,
             params: params,
             resp: resp
         }
     }
 
-    public resolveServiceImports(servicesList: IParserServiceList) {
-        for (let serv in servicesList) {
-            if (servicesList.hasOwnProperty(serv)) {
-                let imports = [];
-                for (let method of servicesList[serv].methods) {
+    public resolveServiceImports(servicesList: IParserServiceList): IParserServiceList {
+        for (const serv in servicesList) {
+            if (servicesList[serv]) {
+                const imports = [];
+                for (const method of servicesList[serv].methods) {
                     if (method.resp.length > 0) {
-                        for (let item of method.resp) {
+                        for (const item of method.resp) {
                             imports.push(item.typeImport);
                         }
                     }
-                    for (let param of method.params.all) {
+                    for (const param of method.params.all) {
                         if (param.type.typeImport) {
                             imports.push(param.type.typeImport);
                         }
@@ -172,41 +181,37 @@ export class Parser {
             form: [],
             urlencoded:[]
         } as {
-                [key: string]: IParserParam[]
+                [key: string]: IParserParam[];
             };
-        for (const param in params) {
-            if (params.hasOwnProperty(param)) {
+        for (const param of params) {
+            if (param) {
                 let type = null;
-                this._logger.info(JSON.stringify(params[param]));
-                const paramName = this.resolveParamName(params[param].name);
-                this._logger.info(paramName);
-                if (params[param].schema) {
-                    this._logger.ok('type1');
-                    type = this.resolveType(params[param].schema as ISwaggerProperty, paramName, method);
+                const paramName = this.resolveParamName(param.name);
+                if (param.schema) {
+                    type = this.resolveType(param.schema as ISwaggerProperty, paramName, method);
                 } else {
-                    this._logger.ok('type2');
-                    type = this.resolveType(params[param] as ISwaggerProperty, paramName, method);
+                    type = this.resolveType(param as ISwaggerProperty, paramName, method);
                 }
 
 
-                let res = {
-                    name: this.clearName(params[param].name),
+                const res = {
+                    name: this.clearName(param.name),
                     queryName: paramName,
-                    description: params[param].description ? params[param].description : '',
-                    required: params[param].required ? true : false,
+                    description: param.description ? param.description : '',
+                    required: param.required ? true : false,
                     type: type
                 } as IParserParam;
 
-                if (params[param].in === 'path') {
+                if (param.in === 'path') {
                     parsed.uri.push(res);
                 }
-                if (params[param].in === 'query') {
+                if (param.in === 'query') {
                     parsed.query.push(res);
                 }
-                if (params[param].in === 'body') {
+                if (param.in === 'body') {
                     parsed.payload.push(res);
                 }
-                if (params[param].in === 'formData') {
+                if (param.in === 'formData') {
                     parsed.form.push(res);
                 }
                 parsed.all.push(res);
@@ -219,19 +224,19 @@ export class Parser {
         const baseTypes = [
             'number', 'string', 'boolean', 'any', 'array'
         ];
-        let result = name.replace(/\.|\-/ig, '');
-        if (baseTypes.indexOf(result) !== -1) {
+        let result = name.replace(/\.|-/ig, '');
+        if (baseTypes.includes(result)) {
             result = result + 'Param';
         }
         return result;
     }
     public resolveParamName(name: string): string {
         this._logger.ok(name);
-        let temp = name.split('.');
+        const temp = name.split('.');
         if (temp.length > 1) {
-            let result = temp.pop() as string;
+            const result = temp.pop() as string;
             console.log(result);
-            let tmpResult = result.split('');
+            const tmpResult = result.split('');
             tmpResult[0] = tmpResult[0].toUpperCase();
             return tmpResult.join('');
         }
@@ -277,9 +282,9 @@ export class Parser {
     }
 
     public resolveImports(imports: any[]): any[] {
-        const result = [];
+        const result: any[] = [];
         for (const imp of imports) {
-            if (result.indexOf(imp) === -1) {
+            if (!result.includes(imp)) {
                 if (imp !== null) {
                     result.push(imp);
                 }
@@ -299,7 +304,7 @@ export class Parser {
     }
 
     public resolveType(prop: ISwaggerProperty, name: string, parent: string): IParserResolvedType {
-        let curname = name.replace(/\.|\-/ig, '_');
+        const curname = name.replace(/\.|-/ig, '_');
         if (prop === undefined) {
             return {
                 typeName: 'any',
@@ -381,12 +386,12 @@ export class Parser {
         const hashName = this._simHash.hash(evalue.join('|'));
         // this._logger.ok(`${parent}_${curname}Set: ${hashName.toString(16)}`);
         // this._logger.err(hashName);
-        const extact = this.extractEnums(description ? description : '', evalue, curname);
+        const extact = this.extractEnumDescription(description ? description : '');
         //  this._logger.err(JSON.stringify({description, evalue, curname, parent}))
 
         if(extact === null){
             const numbers='1234567890'.split('');
-            if(evalue.join('').split('').filter(x=> numbers.indexOf(x)===-1).length>0){
+            if(evalue.join('').split('').filter(x=> !numbers.includes(x)).length>0){
                 return {
                     typeName: evalue.map(x=>`'${x}'`).join(' | '),
                     typeImport: null
@@ -397,7 +402,7 @@ export class Parser {
                 typeImport: null
             }
         }
-        const withParentName = `${pascalCase(paramCase(parent).replace(/^i\-/ig,'')+'-'+paramCase(curname+'Set'))}`
+        const withParentName = `${pascalCase(paramCase(parent).replace(/^i-/ig,'')+'-'+paramCase(curname+'Set'))}`
         const propEnum: IParserEnum = {
             name: `${pascalCase(curname)}Set`,
             modelName: parent,
@@ -435,23 +440,24 @@ export class Parser {
         }
     }
 
-    public extractEnums(description: string, propEnum: number[], name: string = 'enum') {
+    public extractEnumDescription(description: string) {
         const result = [];
-        let indexOf = description.search(/\(\d/ig);
+        const indexOf = description.search(/\(\d/ig);
         if (indexOf !== -1) {
             description = description.substr(indexOf + 1).replace(')', '');
-            let temp = description.split(',');
-            for (let tmp of temp) {
-                ;
-                let key = tmp.split('=');
+            const temp = description.split(',');
+            for (const tmp of temp) {
+                
+                const key = tmp.split('=');
                 result.push({
                     key: key[1],
                     val: parseInt(key[0], 10)
                 });
             }
+            return result;
         } else {
             return null;
         }
-        return result;
+        
     }
 }

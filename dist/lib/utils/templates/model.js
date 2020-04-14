@@ -35,7 +35,7 @@ var ModelTemplate = /** @class */ (function () {
         };
     };
     ModelTemplate.prototype.compile = function (value) {
-        var _a = this.body(value.props), iprop = _a.iprop, prop = _a.prop;
+        var iprop = this.body(value.props).iprop;
         return "\n" + this.modelImports(value.imports, value.name) + "\n\nexport interface " + value.name + " {\n  " + iprop + "\n}\n";
     };
     return ModelTemplate;

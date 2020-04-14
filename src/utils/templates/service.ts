@@ -69,7 +69,7 @@ export class ServiceTemplate {
         options.headers = new HttpHeaders();
         options.headers.delete('Content-Type');
         const form = new FormData();`);
-        for (let param of method.params.form) {
+        for (const param of method.params.form) {
           if (param.type.typeName === 'any') {
             temp.push(`
         form.append('${param.queryName}', ${param.name});`);
@@ -101,7 +101,7 @@ export class ServiceTemplate {
         let payload = {};
         options.headers = new HttpHeaders({'Content-Type': 'application/json; charset=utf-8'});`);
           if (method.params.payload.length > 1) {
-            for (let param of method.params.payload) {
+            for (const param of method.params.payload) {
               temp.push(`
         payload['${param.queryName}'] = ${param.name};`);
             }

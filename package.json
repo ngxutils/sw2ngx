@@ -6,7 +6,8 @@
   "module": "dist/sw2ngx.es5.js",
   "typings": "dist/types/sw2ngx.d.ts",
   "scripts": {
-    "lint": "tslint -t codeFrame 'src/**/*.ts' 'test/**/*.ts'",
+    "lint": "eslint --cache --ext .ts src",
+    "lint:fix": "npm run lint -- --fix",
     "prebuild": "rimraf dist",
     "build": "tsc --module commonjs && rollup -c rollup.config.ts",
     "start": "rollup -c rollup.config.ts -w"
@@ -43,6 +44,9 @@
     "@types/node": "^13.11.1",
     "@types/request": "^2.48.4",
     "@types/rimraf": "^3.0.0",
+    "@typescript-eslint/eslint-plugin": "^2.28.0",
+    "@typescript-eslint/parser": "^2.28.0",
+    "eslint": "^6.8.0",
     "rollup": "^2.6.1",
     "rollup-plugin-node-builtins": "^2.1.2",
     "rollup-plugin-node-globals": "^1.4.0",

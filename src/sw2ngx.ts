@@ -64,8 +64,8 @@ export default class Generator {
               }
               if (extend.services) {
                 for (const key in extend.services) {
-                  if (extend.services.hasOwnProperty(key)) {
-                    if (res[2].hasOwnProperty(key)) {
+                  if (extend.services[key]) {
+                    if (res[2][key]) {
                       if (extend.services[key].imports) {
                         res[2][key].imports.push(
                           ...extend.services[key].imports
@@ -114,12 +114,12 @@ export default class Generator {
 
   private getConfig(conf: string): Promise<any> {
     const promise = new Promise<any>((resolve, reject) => {
-      if (/http(s?)\:\/\/\S/gi.test(conf)) {
+      if (/http(s?):\/\/\S/gi.test(conf)) {
         fetch(conf)
-          .then((res:any)=>{
+          .then((res: any)=>{
             resolve(res.json())
           })
-          .catch((err:any)=>{
+          .catch((err: any)=>{
             this._logger.err(err);
             reject(err);
           });

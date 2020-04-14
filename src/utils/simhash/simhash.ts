@@ -6,8 +6,8 @@ export interface ISimHashOptions {
 }
 
 export class SimHash {
-    public kshingles: number = 4;
-    public maxFeatures: number = 128;
+    public kshingles = 4;
+    public maxFeatures = 128;
     constructor(options?: ISimHashOptions) {
         if (options) {
             /**
@@ -37,13 +37,14 @@ export class SimHash {
         const tokens = this.tokenize(input);
         const shingles = [];
         const jenkins = new Jenkins();
-        for (let i in tokens) {
+        // eslint-disable-next-line @typescript-eslint/no-for-in-array
+        for (const i in tokens) {
             shingles.push(jenkins.hash32(tokens[i]));
         }
         let simhash = this.combineShingles(shingles);
         simhash >>>= 0;
         return simhash;
-    };
+    }
     /**
      * Tokenizes input into 'kshingles' number of tokens.
      */
@@ -58,13 +59,14 @@ export class SimHash {
             shingles.push(i + this.kshingles < size ? original.slice(i, i + this.kshingles) : original.slice(i));
         }
         return shingles;
-    };
+    }
 
     private combineShingles(shingles: any[]) {
         if (shingles.length === 0) return;
 
         if (shingles.length === 1) return shingles[0];
 
+        // eslint-disable-next-line @typescript-eslint/unbound-method
         shingles.sort(this.hashComparator);
         if (shingles.length > this.maxFeatures) shingles = shingles.splice(this.maxFeatures);
 
@@ -72,8 +74,9 @@ export class SimHash {
         let mask = 0x1;
         for (let pos = 0; pos < 32; pos++) {
             let weight = 0;
-            for (let i in shingles) {
-                let shingle = parseInt(shingles[i], 16);
+            // eslint-disable-next-line @typescript-eslint/no-for-in-array
+            for (const i in shingles) {
+                const shingle = parseInt(shingles[i], 16);
                 weight += !(~shingle & mask) === true ? 1 : -1;
             }
             if (weight > 0) simhash |= mask;
@@ -81,7 +84,7 @@ export class SimHash {
         }
 
         return simhash;
-    };
+    }
 
 
 
@@ -96,7 +99,7 @@ export class SimHash {
             val &= val - 1;
         }
         return distance;
-    };
+    }
 
     /**
      * TODO: Use a priority queue. Till then this comparator is 
@@ -104,8 +107,8 @@ export class SimHash {
      */
     public hashComparator(a: number, b: number) {
         return a < b ? -1 : (a > b ? 1 : 0);
-    };
-};
+    }
+}
 
 
 

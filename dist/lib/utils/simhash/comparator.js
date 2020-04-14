@@ -19,7 +19,6 @@ var Comparator = /** @class */ (function () {
         var c2 = ((v2 + (v2 >> 4) & 0xF0F0F0F) * 0x1010101) >> 24;
         return c1 + c2;
     };
-    ;
     /**
      * Calculates bit-wise similarity - Jaccard index.
      */
@@ -30,7 +29,6 @@ var Comparator = /** @class */ (function () {
         var u = (x16 | y16);
         return Comparator.hammingWeight(i) / Comparator.hammingWeight(u);
     };
-    ;
     /**
      * Calculates Hamming weight (population count).
      */
@@ -40,7 +38,6 @@ var Comparator = /** @class */ (function () {
             l &= l - 1;
         return c;
     };
-    ;
     return Comparator;
 }());
 exports.Comparator = Comparator;
