@@ -7,8 +7,7 @@ export declare class TemplatePrinter {
     private moduleCompiler;
     private _printedServices;
     private _logger;
-    cleanFolder(): Promise<boolean>;
-    createFolders(): Promise<{}>;
+    createFolders(): Promise<any>;
     print(enums: IParserEnum[], models: IParserModel[], services: IParserServiceList, out: string): Promise<any>;
     printEnum(value: IParserEnum): void;
     printModel(model: IParserModel): void;

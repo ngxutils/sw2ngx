@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 var logger_1 = require("./logger");
 var simhash_1 = require("./simhash/simhash");
+var change_case_1 = require("change-case");
 var Parser = /** @class */ (function () {
     function Parser() {
         this._enums = [];
@@ -14,9 +15,9 @@ var Parser = /** @class */ (function () {
         var _this = this;
         return new Promise(function (resolve, reject) {
             _this._logger.info('start parsing');
-            _this.parseModels(config).then(function (res) {
+            _this.parseModels(config).then(function () {
                 _this._logger.info('models parsed');
-                _this.parseServices(config).then(function (res) {
+                _this.parseServices(config).then(function () {
                     _this._logger.info('services parsed');
                     resolve([_this._enums, _this._models, _this._servicesList]);
                 }, function (err) {
@@ -34,7 +35,7 @@ var Parser = /** @class */ (function () {
     Parser.prototype.parseModels = function (config) {
         var _this = this;
         var models = config.definitions;
-        return new Promise(function (resolve, reject) {
+        return new Promise(function (resolve) {
             for (var key in models) {
                 var model = {
                     name: '',
@@ -42,12 +43,12 @@ var Parser = /** @class */ (function () {
                     imports: [],
                     props: []
                 };
-                if (models.hasOwnProperty(key)) {
+                if (models[key]) {
                     var imports = [];
-                    model.name = key;
+                    model.name = 'I' + key;
                     model.description = models[key].description;
                     for (var prop in models[key].properties) {
-                        if (models[key].properties.hasOwnProperty(prop)) {
+                        if (models[key].properties[prop]) {
                             var temp = _this.parseModelProp(prop, models[key].properties[prop], model.name);
                             imports.push(temp.imports);
                             model.props.push(temp);
@@ -60,6 +61,7 @@ var Parser = /** @class */ (function () {
             resolve([_this._enums, _this._models]);
         });
     };
+    // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
     Parser.prototype.parseTags = function (tags) {
         if (tags.length >= 1) {
             return tags[0];
@@ -70,7 +72,7 @@ var Parser = /** @class */ (function () {
     };
     Parser.prototype.parseServices = function (config) {
         var _this = this;
-        return new Promise(function (resolve, reject) {
+        return new Promise(function (resolve) {
             var result = {
                 __common: {
                     uri: config.basePath,
@@ -79,22 +81,29 @@ var Parser = /** @class */ (function () {
                 }
             };
             for (var path in config.paths) {
-                if (config.paths.hasOwnProperty(path)) {
-                    for (var method in config.paths[path]) {
-                        if (config.paths[path].hasOwnProperty(method)) {
+                if (config.paths[path]) {
+                    var _loop_1 = function (method) {
+                        if (config.paths[path][method]) {
                             _this._logger.ok(path);
-                            var parsedMethod = _this.parseMethod(path, method, config.paths[path][method]);
-                            if (result.hasOwnProperty(parsedMethod.tag)) {
-                                result[parsedMethod.tag].methods.push(parsedMethod);
+                            var parsedMethod_1 = _this.parseMethod(path, method, config.paths[path][method]);
+                            if (result[parsedMethod_1.tag]) {
+                                var duplicates = result[parsedMethod_1.tag].methods.filter(function (x) { return x.name.replace(/\d+$/ig, '') === parsedMethod_1.name; });
+                                if (duplicates.length > 0) {
+                                    parsedMethod_1.name = parsedMethod_1.name + duplicates.length;
+                                }
+                                result[parsedMethod_1.tag].methods.push(parsedMethod_1);
                             }
                             else {
-                                result[parsedMethod.tag] = {
+                                result[parsedMethod_1.tag] = {
                                     uri: config.basePath,
                                     imports: [],
-                                    methods: [parsedMethod]
+                                    methods: [parsedMethod_1]
                                 };
                             }
                         }
+                    };
+                    for (var method in config.paths[path]) {
+                        _loop_1(method);
                     }
                 }
             }
@@ -102,21 +111,30 @@ var Parser = /** @class */ (function () {
             resolve(_this._servicesList);
         });
     };
+    Parser.prototype.genMethodName = function (uri, type) {
+        var tmp = change_case_1.pascalCase(uri.replace(/\//ig, '-').replace(/\{|\}|\$/ig, ''));
+        switch (type.toLocaleLowerCase()) {
+            case 'post':
+                return 'send' + tmp;
+            case 'delete':
+                return 'delete' + tmp;
+            case 'put':
+                return 'update' + tmp;
+            case 'get':
+            default:
+                return 'get' + tmp;
+        }
+    };
     Parser.prototype.parseMethod = function (uri, type, method) {
-        try {
-            var tag_1 = this.parseParams(method.parameters, method.operationId);
-        }
-        catch (e) {
-            console.error('params');
-        }
+        var name = method.operationId ? method.operationId : this.genMethodName(uri, type);
         var tag = this.parseTags(method.tags);
-        var params = this.parseParams(method.parameters, method.operationId);
-        var resp = this.parseResponse(method.responses, method.operationId);
+        var params = this.parseParams(method.parameters, change_case_1.camelCase(name));
+        var resp = this.parseResponse(method.responses, change_case_1.camelCase(name));
         return {
             uri: uri.replace(/\{/ig, '${'),
             type: type,
             tag: tag,
-            name: method.operationId,
+            name: change_case_1.camelCase(name),
             description: method.summary,
             params: params,
             resp: resp
@@ -124,7 +142,7 @@ var Parser = /** @class */ (function () {
     };
     Parser.prototype.resolveServiceImports = function (servicesList) {
         for (var serv in servicesList) {
-            if (servicesList.hasOwnProperty(serv)) {
+            if (servicesList[serv]) {
                 var imports = [];
                 for (var _i = 0, _a = servicesList[serv].methods; _i < _a.length; _i++) {
                     var method = _a[_i];
@@ -176,37 +194,34 @@ var Parser = /** @class */ (function () {
             form: [],
             urlencoded: []
         };
-        for (var param in params) {
-            if (params.hasOwnProperty(param)) {
+        for (var _i = 0, params_1 = params; _i < params_1.length; _i++) {
+            var param = params_1[_i];
+            if (param) {
                 var type = null;
-                this._logger.info(JSON.stringify(params[param]));
-                var paramName = this.resolveParamName(params[param].name);
-                this._logger.info(paramName);
-                if (params[param].schema) {
-                    this._logger.ok('type1');
-                    type = this.resolveType(params[param].schema, paramName, method);
+                var paramName = this.resolveParamName(param.name);
+                if (param.schema) {
+                    type = this.resolveType(param.schema, paramName, method);
                 }
                 else {
-                    this._logger.ok('type2');
-                    type = this.resolveType(params[param], paramName, method);
+                    type = this.resolveType(param, paramName, method);
                 }
                 var res = {
-                    name: this.clearName(params[param].name),
+                    name: this.clearName(param.name),
                     queryName: paramName,
-                    description: params[param].description ? params[param].description : '',
-                    required: params[param].required ? true : false,
+                    description: param.description ? param.description : '',
+                    required: param.required ? true : false,
                     type: type
                 };
-                if (params[param].in === 'path') {
+                if (param.in === 'path') {
                     parsed.uri.push(res);
                 }
-                if (params[param].in === 'query') {
+                if (param.in === 'query') {
                     parsed.query.push(res);
                 }
-                if (params[param].in === 'body') {
+                if (param.in === 'body') {
                     parsed.payload.push(res);
                 }
-                if (params[param].in === 'formData') {
+                if (param.in === 'formData') {
                     parsed.form.push(res);
                 }
                 parsed.all.push(res);
@@ -218,8 +233,8 @@ var Parser = /** @class */ (function () {
         var baseTypes = [
             'number', 'string', 'boolean', 'any', 'array'
         ];
-        var result = name.replace(/\.|\-/ig, '');
-        if (baseTypes.indexOf(result) !== -1) {
+        var result = name.replace(/\.|-/ig, '');
+        if (baseTypes.includes(result)) {
             result = result + 'Param';
         }
         return result;
@@ -282,7 +297,7 @@ var Parser = /** @class */ (function () {
         var result = [];
         for (var _i = 0, imports_1 = imports; _i < imports_1.length; _i++) {
             var imp = imports_1[_i];
-            if (result.indexOf(imp) === -1) {
+            if (!result.includes(imp)) {
                 if (imp !== null) {
                     result.push(imp);
                 }
@@ -300,7 +315,7 @@ var Parser = /** @class */ (function () {
         };
     };
     Parser.prototype.resolveType = function (prop, name, parent) {
-        var curname = name.replace(/\.|\-/ig, '_');
+        var curname = name.replace(/\.|-/ig, '_');
         if (prop === undefined) {
             return {
                 typeName: 'any',
@@ -311,8 +326,8 @@ var Parser = /** @class */ (function () {
             if (prop.$ref !== undefined) {
                 var temp = prop.$ref.split('/');
                 return {
-                    typeName: temp[temp.length - 1],
-                    typeImport: temp[temp.length - 1]
+                    typeName: 'I' + temp[temp.length - 1],
+                    typeImport: 'I' + temp[temp.length - 1]
                 };
             }
             if ((prop.type === 'boolean') ||
@@ -376,34 +391,64 @@ var Parser = /** @class */ (function () {
         this._logger.reset().fg('red').writeln(e).reset();
     };
     Parser.prototype.resolveEnums = function (description, evalue, curname, parent) {
-        var hashName = this._simHash.hash(parent + "_" + curname + "Set");
+        var hashName = this._simHash.hash(evalue.join('|'));
         // this._logger.ok(`${parent}_${curname}Set: ${hashName.toString(16)}`);
         // this._logger.err(hashName);
-        var extact = this.extractEnums(description ? description : '', evalue, curname);
+        var extact = this.extractEnumDescription(description ? description : '');
         //  this._logger.err(JSON.stringify({description, evalue, curname, parent}))
+        if (extact === null) {
+            var numbers_1 = '1234567890'.split('');
+            if (evalue.join('').split('').filter(function (x) { return !numbers_1.includes(x); }).length > 0) {
+                return {
+                    typeName: evalue.map(function (x) { return "'" + x + "'"; }).join(' | '),
+                    typeImport: null
+                };
+            }
+            return {
+                typeName: evalue.join(' | '),
+                typeImport: null
+            };
+        }
+        var withParentName = "" + change_case_1.pascalCase(change_case_1.paramCase(parent).replace(/^i-/ig, '') + '-' + change_case_1.paramCase(curname + 'Set'));
         var propEnum = {
-            name: parent + "_" + curname + "Set",
+            name: change_case_1.pascalCase(curname) + "Set",
             modelName: parent,
             value: extact,
             hash: hashName.toString(16)
         };
-        for (var _i = 0, _a = this._enums; _i < _a.length; _i++) {
-            var item = _a[_i];
-            if (item.hash === propEnum.hash) {
+        var duplicate = this._enums.filter(function (x) { return x.name.replace(/\d+$/ig, '') === propEnum.name; });
+        var extDuplicate = this._enums.filter(function (x) { return x.name.replace(/\d+$/ig, '') === withParentName; });
+        if (duplicate.length > 0) {
+            var equals = duplicate.filter(function (x) { return x.hash === propEnum.hash; });
+            if (equals.length > 0) {
+                return {
+                    typeName: equals[0].name,
+                    typeImport: equals[0].name
+                };
+            }
+            else {
+                if (extDuplicate.length > 0) {
+                    propEnum.name = "" + withParentName + duplicate.length;
+                }
+                else {
+                    propEnum.name = withParentName;
+                }
+                this._enums.push(propEnum);
                 return {
                     typeName: propEnum.name,
                     typeImport: propEnum.name
                 };
             }
         }
-        this._enums.push(propEnum);
-        return {
-            typeName: propEnum.name,
-            typeImport: propEnum.name
-        };
+        else {
+            this._enums.push(propEnum);
+            return {
+                typeName: propEnum.name,
+                typeImport: propEnum.name
+            };
+        }
     };
-    Parser.prototype.extractEnums = function (description, propEnum, name) {
-        if (name === void 0) { name = 'enum'; }
+    Parser.prototype.extractEnumDescription = function (description) {
         var result = [];
         var indexOf = description.search(/\(\d/ig);
         if (indexOf !== -1) {
@@ -411,25 +456,17 @@ var Parser = /** @class */ (function () {
             var temp = description.split(',');
             for (var _i = 0, temp_1 = temp; _i < temp_1.length; _i++) {
                 var tmp = temp_1[_i];
-                ;
                 var key = tmp.split('=');
                 result.push({
                     key: key[1],
                     val: parseInt(key[0], 10)
                 });
             }
+            return result;
         }
         else {
-            for (var key in propEnum) {
-                if (propEnum.hasOwnProperty(key)) {
-                    result.push({
-                        key: name + propEnum[key],
-                        val: propEnum[key]
-                    });
-                }
-            }
+            return null;
         }
-        return result;
     };
     return Parser;
 }());

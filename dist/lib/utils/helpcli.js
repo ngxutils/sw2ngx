@@ -16,7 +16,7 @@ var HelpCLI = /** @class */ (function () {
         for (var i = 0; i < args.length; i++) {
             for (var _i = 0, GeneratorParams_1 = params_1.GeneratorParams; _i < GeneratorParams_1.length; _i++) {
                 var param = GeneratorParams_1[_i];
-                if (param.keys.indexOf(args[i]) !== -1) {
+                if (param.keys.includes(args[i])) {
                     if (param.noValue) {
                         params[param.name] = true;
                         break;

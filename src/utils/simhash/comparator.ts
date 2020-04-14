@@ -16,7 +16,7 @@ export class Comparator {
         const c2 = ((v2 + (v2 >> 4) & 0xF0F0F0F) * 0x1010101) >> 24;
 
         return c1 + c2;
-    };
+    }
 
     /**
      * Calculates bit-wise similarity - Jaccard index.
@@ -27,7 +27,7 @@ export class Comparator {
         const i = (x16 & y16);
         const u = (x16 | y16);
         return Comparator.hammingWeight(i) / Comparator.hammingWeight(u);
-    };
+    }
 
     /**
      * Calculates Hamming weight (population count).
@@ -36,6 +36,6 @@ export class Comparator {
         let c;
         for (c = 0; l; c++) l &= l - 1;
         return c;
-    };
+    }
 
 }

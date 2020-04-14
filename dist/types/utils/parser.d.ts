@@ -1,5 +1,5 @@
 import { ISwaggerConfig, ISwaggerProperty, ISwaggerParam } from './../interfaces/swagger.interface';
-import { IParserModel, IParserEnum, IParserResolvedType, IParserServiceList, IParserParam } from '../interfaces/parser';
+import { IParserModel, IParserEnum, IParserResolvedType, IParserServiceList, IParserParam, IParserMethod } from '../interfaces/parser';
 export declare class Parser {
     private _enums;
     private _models;
@@ -10,21 +10,12 @@ export declare class Parser {
     parseModels(config: ISwaggerConfig): Promise<[IParserEnum[], IParserModel[]]>;
     parseTags(tags: string[]): string;
     parseServices(config: ISwaggerConfig): Promise<IParserServiceList>;
-    parseMethod(uri: string, type: string, method: any): {
-        uri: string;
-        type: string;
-        tag: string;
-        name: any;
-        description: any;
-        params: {
-            [key: string]: IParserParam[];
-        };
-        resp: IParserResolvedType[];
-    };
+    genMethodName(uri: string, type: string): string;
+    parseMethod(uri: string, type: string, method: any): IParserMethod;
     resolveServiceImports(servicesList: IParserServiceList): IParserServiceList;
-    readonly models: IParserModel[];
-    readonly enums: IParserEnum[];
-    readonly services: IParserServiceList;
+    get models(): IParserModel[];
+    get enums(): IParserEnum[];
+    get services(): IParserServiceList;
     parseParams(params: ISwaggerParam[], method: string): {
         [key: string]: IParserParam[];
     };
@@ -41,8 +32,8 @@ export declare class Parser {
     resolveType(prop: ISwaggerProperty, name: string, parent: string): IParserResolvedType;
     handleError(e: any): void;
     resolveEnums(description: string, evalue: number[], curname: string, parent: string): IParserResolvedType;
-    extractEnums(description: string, propEnum: number[], name?: string): {
+    extractEnumDescription(description: string): {
         key: string;
         val: number;
-    }[];
+    }[] | null;
 }

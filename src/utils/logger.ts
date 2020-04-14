@@ -1,5 +1,5 @@
 export interface IColor {
-    [key:string]: string
+    [key: string]: string;
 }
 export const COLORS_HLP = {
     reset: "\x1b[0m",
@@ -39,7 +39,7 @@ export class Logger {
         process.stdout.write(COLORS_HLP.reset);
         return this;
     }
-    public bg(color: string):Logger {
+    public bg(color: string): Logger {
         process.stdout.write(COLORS_BG[color]);
         return this;
 

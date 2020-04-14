@@ -1,4 +1,3 @@
-import { ISwaggerProperty, ISwaggerSchemaRef } from './swagger.interface';
 export interface ISwaggerConfig {
     basePath: string;
     definitions: ISwaggerDefinitions;

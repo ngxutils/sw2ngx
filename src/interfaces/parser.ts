@@ -8,13 +8,13 @@ export interface IParserEnum {
     hash: string;
 }
 export interface IParserServiceList{
-    [key:string]: IParserService
+    [key: string]: IParserService;
 }
 
 export interface IParserService {
-    uri: string,
-    imports: string[],
-    methods: IParserMethod[]
+    uri: string;
+    imports: string[];
+    methods: IParserMethod[];
 }
 export interface IParserModel {
     name: string;
@@ -33,7 +33,7 @@ export interface IParserMethod {
     name: string;
     description: string;
     params: {
-        [key:string]: IParserParam[]
+        [key: string]: IParserParam[];
     };
     resp: IParserResolvedType[];
 }
@@ -44,5 +44,5 @@ export interface IParserParam {
     description: string;
     required: boolean;
     type: IParserResolvedType;
-    default?:string;
+    default?: string;
 }

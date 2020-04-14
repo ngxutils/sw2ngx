@@ -3,12 +3,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var parser_1 = require("./utils/parser");
 var helpcli_1 = require("./utils/helpcli");
 var fs = require("fs");
-var request = require("request");
 var logger_1 = require("./utils/logger");
 var template_printer_1 = require("./utils/template-printer");
-request.defaults({
-    strictSSL: false,
-});
+var node_fetch_1 = require("node-fetch");
 var Generator = /** @class */ (function () {
     function Generator(config) {
         if (config === void 0) { config = null; }
@@ -61,8 +58,8 @@ var Generator = /** @class */ (function () {
                     }
                     if (extend.services) {
                         for (var key in extend.services) {
-                            if (extend.services.hasOwnProperty(key)) {
-                                if (res[2].hasOwnProperty(key)) {
+                            if (extend.services[key]) {
+                                if (res[2][key]) {
                                     if (extend.services[key].imports) {
                                         (_c = res[2][key].imports).push.apply(_c, extend.services[key].imports);
                                     }
@@ -99,16 +96,14 @@ var Generator = /** @class */ (function () {
     Generator.prototype.getConfig = function (conf) {
         var _this = this;
         var promise = new Promise(function (resolve, reject) {
-            if (/http(s?)\:\/\/\S/gi.test(conf)) {
-                request.get(conf, function (err, resp, body) {
-                    console.log(err);
-                    if (err) {
-                        _this._logger.err(err);
-                        reject(err);
-                    }
-                    else {
-                        resolve(JSON.parse(body));
-                    }
+            if (/http(s?):\/\/\S/gi.test(conf)) {
+                node_fetch_1.default(conf)
+                    .then(function (res) {
+                    resolve(res.json());
+                })
+                    .catch(function (err) {
+                    _this._logger.err(err);
+                    reject(err);
                 });
             }
             else {

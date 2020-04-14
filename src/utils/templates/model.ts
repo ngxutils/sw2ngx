@@ -31,16 +31,12 @@ export class ModelTemplate {
     }
   }
   public compile(value: IParserModel) {
-    const { iprop, prop } = this.body(value.props);
+    const { iprop } = this.body(value.props);
     return `
 ${this.modelImports(value.imports, value.name)}
 
-export interface I${value.name} {
+export interface ${value.name} {
   ${iprop}
-}
-
-export class ${value.name} implements I${value.name} {
-  ${prop}
 }
 `;
   }
