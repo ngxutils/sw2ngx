@@ -1,9 +1,10 @@
 import { IParserModel } from './../../interfaces/parser';
 export class ModelTemplate {
-
   public modelImports(modelImports: string[], name: string) {
     const imports = [];
-    if (modelImports.length === 0) { return ''; }
+    if (modelImports.length === 0) {
+      return '';
+    }
     imports.push(`import {`);
     for (const item of modelImports) {
       if (item !== name) {
@@ -12,11 +13,10 @@ export class ModelTemplate {
     }
     imports.push(`} from './';`);
     return imports.join('\r\n');
-
   }
 
   public body(value: any): { [key: string]: string } {
-    const itemp: string[] = []
+    const itemp: string[] = [];
     const temp: string[] = [];
     for (const param of value) {
       if (param.description) {
@@ -28,7 +28,7 @@ export class ModelTemplate {
     return {
       iprop: itemp.join('\r\n\t'),
       prop: temp.join('\r\n\t')
-    }
+    };
   }
   public compile(value: IParserModel) {
     const { iprop } = this.body(value.props);

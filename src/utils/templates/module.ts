@@ -1,5 +1,4 @@
 export class ModuleTemplate {
-
   public compile(value: string[]) {
     const servicesList: string[] = [];
     for (const el of value) {

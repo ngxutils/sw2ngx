@@ -399,11 +399,14 @@
                     }
                 };
                 for (var path in config.paths) {
+                    console.log(config.paths[path]);
                     if (config.paths[path]) {
                         var _loop_1 = function (method) {
+                            console.log(config.paths[path][method]);
                             if (config.paths[path][method]) {
                                 _this._logger.ok(path);
                                 var parsedMethod_1 = _this.parseMethod(path, method, config.paths[path][method]);
+                                console.log('parsed', parsedMethod_1);
                                 if (result[parsedMethod_1.tag]) {
                                     var duplicates = result[parsedMethod_1.tag].methods.filter(function (x) { return x.name.replace(/\d+$/ig, '') === parsedMethod_1.name; });
                                     if (duplicates.length > 0) {
@@ -444,10 +447,26 @@
             }
         };
         Parser.prototype.parseMethod = function (uri, type, method) {
+            try {
+                var tag_1 = this.parseParams(method.parameters, method.operationId);
+            }
+            catch (e) {
+                console.error('params');
+            }
             var name = method.operationId ? method.operationId : this.genMethodName(uri, type);
+            console.log('name', name);
             var tag = this.parseTags(method.tags);
+            console.log('tag', tag);
+            try {
+                var nnnd = this.parseParams(method.parameters, changeCase.camelCase(name));
+            }
+            catch (error) {
+                console.log(error);
+            }
             var params = this.parseParams(method.parameters, changeCase.camelCase(name));
+            console.log('params', params);
             var resp = this.parseResponse(method.responses, changeCase.camelCase(name));
+            console.log('resp', resp);
             return {
                 uri: uri.replace(/\{/ig, '${'),
                 type: type,
@@ -512,38 +531,40 @@
                 form: [],
                 urlencoded: []
             };
+            console.log('params', JSON.stringify(params));
+            if (!params) {
+                return parsed;
+            }
             for (var _i = 0, params_1 = params; _i < params_1.length; _i++) {
                 var param = params_1[_i];
-                if (param) {
-                    var type = null;
-                    var paramName = this.resolveParamName(param.name);
-                    if (param.schema) {
-                        type = this.resolveType(param.schema, paramName, method);
-                    }
-                    else {
-                        type = this.resolveType(param, paramName, method);
-                    }
-                    var res = {
-                        name: this.clearName(param.name),
-                        queryName: paramName,
-                        description: param.description ? param.description : '',
-                        required: param.required ? true : false,
-                        type: type
-                    };
-                    if (param.in === 'path') {
-                        parsed.uri.push(res);
-                    }
-                    if (param.in === 'query') {
-                        parsed.query.push(res);
-                    }
-                    if (param.in === 'body') {
-                        parsed.payload.push(res);
-                    }
-                    if (param.in === 'formData') {
-                        parsed.form.push(res);
-                    }
-                    parsed.all.push(res);
+                var type = null;
+                var paramName = this.resolveParamName(param.name);
+                if (param.schema) {
+                    type = this.resolveType(param.schema, paramName, method);
                 }
+                else {
+                    type = this.resolveType(param, paramName, method);
+                }
+                var res = {
+                    name: this.clearName(param.name),
+                    queryName: paramName,
+                    description: param.description ? param.description : '',
+                    required: param.required ? true : false,
+                    type: type
+                };
+                if (param.in === 'path') {
+                    parsed.uri.push(res);
+                }
+                if (param.in === 'query') {
+                    parsed.query.push(res);
+                }
+                if (param.in === 'body') {
+                    parsed.payload.push(res);
+                }
+                if (param.in === 'formData') {
+                    parsed.form.push(res);
+                }
+                parsed.all.push(res);
             }
             return parsed;
         };
@@ -1008,7 +1029,7 @@
             if (value.methods.length > 0) {
                 var imports = this.imports(value.imports);
                 var _a = this.body(value.methods), interfaceBody = _a.interfaceBody, serviceBody = _a.serviceBody;
-                return "import { Injectable } from '@angular/core';\nimport { Subject, Observable } from 'rxjs';\nimport { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';\n" + imports + "\nexport interface I" + name + "APIService {\n" + interfaceBody + "\n}\n\n@Injectable({ providedIn:'root' })\nexport class " + name + "APIService implements I" + name + "APIService {\n  public serviceName: string;\n  public uri: string;\n  constructor(\n    public http: HttpClient) {\n    this.serviceName = '" + name + "API';\n    this.uri = '" + value.uri + "';\n  }\n" + serviceBody + "\n}\r\n";
+                return "import { Injectable } from '@angular/core';\nimport { Subject, Observable } from 'rxjs';\nimport { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';\n" + imports + "\nexport interface I" + name + "APIService {\n" + interfaceBody + "\n}\n\n@Injectable({ providedIn: 'root' })\nexport class " + name + "APIService implements I" + name + "APIService {\n  public serviceName: string;\n  public uri: string;\n  constructor(\n    public http: HttpClient) {\n    this.serviceName = '" + name + "API';\n    this.uri = '" + value.uri + "';\n  }\n" + serviceBody + "\n}\r\n";
             }
             else {
                 return '';

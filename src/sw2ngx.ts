@@ -1,17 +1,16 @@
-
-import { Parser } from "./utils/parser";
-import { ISwaggerConfig } from "./interfaces/swagger.interface";
-import { HelpCLI } from "./utils/helpcli";
-import { IGeneratorConfig } from "./interfaces/config";
-import * as fs from "fs";
-import { Logger } from "./utils/logger";
+import { Parser } from './utils/parser';
+import { ISwaggerConfig } from './interfaces/swagger.interface';
+import { HelpCLI } from './utils/helpcli';
+import { IGeneratorConfig } from './interfaces/config';
+import * as fs from 'fs';
+import { Logger } from './utils/logger';
 import {
   IParserEnum,
   IParserModel,
   IParserServiceList
-} from "./interfaces/parser";
-import { TemplatePrinter } from "./utils/template-printer";
-import fetch from "node-fetch";
+} from './interfaces/parser';
+import { TemplatePrinter } from './utils/template-printer';
+import fetch from 'node-fetch';
 
 export default class Generator {
   public config: IGeneratorConfig;
@@ -30,30 +29,30 @@ export default class Generator {
     if (this.config.help) {
       this.helper.printHelp();
     } else {
-      if (this.config.config !== "" && this.config.out !== "") {
+      if (this.config.config !== '' && this.config.out !== '') {
         this.start();
       } else {
-        this._logger.err("Params not set, see help and try again:");
+        this._logger.err('Params not set, see help and try again:');
         this.helper.printHelp();
       }
     }
   }
   public start() {
     this.getConfig(this.config.config).then(
-      res => {
-        this._logger.info("<Parsing Processed...>");
+      (res) => {
+        this._logger.info('<Parsing Processed...>');
         this._logger.ok(JSON.stringify(res));
         this.parser.parse(res).then(
           (res: [IParserEnum[], IParserModel[], IParserServiceList]) => {
-            this._logger.ok("[ SUCCESS ]: Swagger JSON Parsed Successfull!");
-            this._logger.info("<Files Saving>");
+            this._logger.ok('[ SUCCESS ]: Swagger JSON Parsed Successfull!');
+            this._logger.info('<Files Saving>');
             let extend = null;
             try {
               extend = JSON.parse(
-                fs.readFileSync("./sw2ngx-extend.json", "utf-8")
+                fs.readFileSync('./sw2ngx-extend.json', 'utf-8')
               );
             } catch (e) {
-              this._logger.info("Not have extends");
+              this._logger.info('Not have extends');
             }
             if (extend) {
               if (extend.enums) {
@@ -91,22 +90,22 @@ export default class Generator {
             this._printer.print(res[0], res[1], res[2], this.config.out).then(
               () => {
                 this._logger.ok(
-                  "[ SUCCESS ]: Generation API Module Successfull!"
+                  '[ SUCCESS ]: Generation API Module Successfull!'
                 );
               },
-              reject => {
-                console.log("end here");
+              (reject) => {
+                console.log('end here');
                 this._logger.err(JSON.stringify(reject));
               }
             );
           },
-          err => {
+          (err) => {
             this._logger.err(JSON.stringify(err));
           }
         );
         // this._logger.info('<Create Swagger Map Object>');
       },
-      err => {
+      (err) => {
         this._logger.err(JSON.stringify(err));
       }
     );
@@ -116,15 +115,15 @@ export default class Generator {
     const promise = new Promise<any>((resolve, reject) => {
       if (/http(s?):\/\/\S/gi.test(conf)) {
         fetch(conf)
-          .then((res: any)=>{
-            resolve(res.json())
+          .then((res: any) => {
+            resolve(res.json());
           })
-          .catch((err: any)=>{
+          .catch((err: any) => {
             this._logger.err(err);
             reject(err);
           });
       } else {
-        this.swagger = JSON.parse(fs.readFileSync(conf, "utf-8"));
+        this.swagger = JSON.parse(fs.readFileSync(conf, 'utf-8'));
         resolve(this.swagger);
       }
     });
