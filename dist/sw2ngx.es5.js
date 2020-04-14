@@ -882,7 +882,7 @@ var ModuleTemplate = /** @class */ (function () {
         }
         var importsHead = servicesList.join('\r\n\t');
         var importsBody = servicesList.join('\r\n\t\t\t\t');
-        return "\nimport { NgModule, ModuleWithProviders } from '@angular/core';\nimport { HttpClientModule } from '@angular/common/http';\nimport {\n  " + importsHead + "\n} from './services';\n\n@NgModule({\n  imports: [\n    HttpClientModule\n  ],\n  exports: [],\n  declarations: [],\n  providers: [\n  ],\n})\nexport class APIModule {\n  public static forRoot(): ModuleWithProviders {\n    return {\n      ngModule: APIModule,\n      providers: [\n        " + importsBody + "\n      ],\n    };\n  }\n}\n";
+        return "\nimport { NgModule, ModuleWithProviders } from '@angular/core';\nimport { HttpClientModule } from '@angular/common/http';\nimport {\n  " + importsHead + "\n} from './services';\n\n@NgModule({\n  imports: [\n    HttpClientModule\n  ],\n  exports: [],\n  declarations: [],\n  providers: [\n    " + importsBody + "\n  ],\n})\nexport class APIModule { }\n";
     };
     return ModuleTemplate;
 }());
@@ -1004,7 +1004,7 @@ var ServiceTemplate = /** @class */ (function () {
         if (value.methods.length > 0) {
             var imports = this.imports(value.imports);
             var _a = this.body(value.methods), interfaceBody = _a.interfaceBody, serviceBody = _a.serviceBody;
-            return "import { Injectable } from '@angular/core';\nimport { Subject, Observable } from 'rxjs';\nimport { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';\n" + imports + "\nexport interface I" + name + "APIService {\n" + interfaceBody + "\n}\n\n@Injectable()\nexport class " + name + "APIService implements I" + name + "APIService {\n  public serviceName: string;\n  public uri: string;\n  constructor(\n    public http: HttpClient) {\n    this.serviceName = '" + name + "API';\n    this.uri = '" + value.uri + "';\n  }\n" + serviceBody + "\n}\r\n";
+            return "import { Injectable } from '@angular/core';\nimport { Subject, Observable } from 'rxjs';\nimport { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';\n" + imports + "\nexport interface I" + name + "APIService {\n" + interfaceBody + "\n}\n\n@Injectable({ providedIn:'root' })\nexport class " + name + "APIService implements I" + name + "APIService {\n  public serviceName: string;\n  public uri: string;\n  constructor(\n    public http: HttpClient) {\n    this.serviceName = '" + name + "API';\n    this.uri = '" + value.uri + "';\n  }\n" + serviceBody + "\n}\r\n";
         }
         else {
             return '';

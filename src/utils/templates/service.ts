@@ -152,7 +152,7 @@ export interface I${name}APIService {
 ${interfaceBody}
 }
 
-@Injectable()
+@Injectable({ providedIn:'root' })
 export class ${name}APIService implements I${name}APIService {
   public serviceName: string;
   public uri: string;

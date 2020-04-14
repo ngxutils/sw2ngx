@@ -11,7 +11,7 @@ var ModuleTemplate = /** @class */ (function () {
         }
         var importsHead = servicesList.join('\r\n\t');
         var importsBody = servicesList.join('\r\n\t\t\t\t');
-        return "\nimport { NgModule, ModuleWithProviders } from '@angular/core';\nimport { HttpClientModule } from '@angular/common/http';\nimport {\n  " + importsHead + "\n} from './services';\n\n@NgModule({\n  imports: [\n    HttpClientModule\n  ],\n  exports: [],\n  declarations: [],\n  providers: [\n  ],\n})\nexport class APIModule {\n  public static forRoot(): ModuleWithProviders {\n    return {\n      ngModule: APIModule,\n      providers: [\n        " + importsBody + "\n      ],\n    };\n  }\n}\n";
+        return "\nimport { NgModule, ModuleWithProviders } from '@angular/core';\nimport { HttpClientModule } from '@angular/common/http';\nimport {\n  " + importsHead + "\n} from './services';\n\n@NgModule({\n  imports: [\n    HttpClientModule\n  ],\n  exports: [],\n  declarations: [],\n  providers: [\n    " + importsBody + "\n  ],\n})\nexport class APIModule { }\n";
     };
     return ModuleTemplate;
 }());

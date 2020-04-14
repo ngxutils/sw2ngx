@@ -21,18 +21,10 @@ import {
   exports: [],
   declarations: [],
   providers: [
+    ${importsBody}
   ],
 })
-export class APIModule {
-  public static forRoot(): ModuleWithProviders {
-    return {
-      ngModule: APIModule,
-      providers: [
-        ${importsBody}
-      ],
-    };
-  }
-}
+export class APIModule { }
 `;
   }
 }
