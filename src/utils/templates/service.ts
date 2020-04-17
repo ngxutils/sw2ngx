@@ -42,6 +42,12 @@ export class ServiceTemplate {
         temp.push(`${param.name}${param.required ? '' : '?'}: ${param.type.typeName}`);
       }
     }
+    if(isInterface){
+      temp.push('customHeaders?: {[key:string]:string}');
+    }else{
+      temp.push('customHeaders: {[key:string]:string} = { }');
+    }
+
     return temp.join(', ');
   }
 
@@ -66,7 +72,7 @@ export class ServiceTemplate {
 
       if (method.params.form.length !== 0) {
         temp.push(`
-        options.headers = new HttpHeaders();
+        options.headers = new HttpHeaders( customHeaders );
         options.headers.delete('Content-Type');
         const form = new FormData();`);
         for (const param of method.params.form) {
@@ -84,7 +90,7 @@ export class ServiceTemplate {
         if (method.params.urlencoded.length !== 0) {
           temp.push(`
         let payload = '';
-        options.headers = new HttpHeaders({'Content-Type': 'application/x-www-form-urlencoded'});`);
+        options.headers = new HttpHeaders(Object.assign( customHeaders, {'Content-Type': 'application/x-www-form-urlencoded'}));`);
           let isFirst = true;
           for (const param of method.params.urlencoded) {
             temp.push(`
@@ -99,7 +105,7 @@ export class ServiceTemplate {
           temp.push(`
         // tslint:disable-next-line:prefer-const
         let payload = {};
-        options.headers = new HttpHeaders({'Content-Type': 'application/json; charset=utf-8'});`);
+        options.headers = new HttpHeaders(Object.assign( customHeaders, {'Content-Type': 'application/json; charset=utf-8'}));`);
           if (method.params.payload.length > 1) {
             for (const param of method.params.payload) {
               temp.push(`
@@ -132,7 +138,7 @@ export class ServiceTemplate {
     ${method.name}(${this.methodParams(method, true)}): Observable<${method.resp[0].typeName}>;`);
       serviceBody.push(`\tpublic ${method.name}(${this.methodParams(method, false)}): Observable<${method.resp[0].typeName}> {
         const options = {
-            headers: new HttpHeaders(),
+            headers: new HttpHeaders( customHeaders ),
             params: new HttpParams()
         };
 ${this.methodBody(method)}

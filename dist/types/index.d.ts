@@ -1,2 +1,2 @@
-import Generator from "./sw2ngx";
+import Generator from './sw2ngx';
 export default Generator;

@@ -42,6 +42,12 @@ var ServiceTemplate = /** @class */ (function () {
                 temp.push("" + param.name + (param.required ? '' : '?') + ": " + param.type.typeName);
             }
         }
+        if (isInterface) {
+            temp.push('customHeaders?: {[key:string]:string}');
+        }
+        else {
+            temp.push('customHeaders: {[key:string]:string} = { }');
+        }
         return temp.join(', ');
     };
     ServiceTemplate.prototype.methodBody = function (method) {
@@ -58,7 +64,7 @@ var ServiceTemplate = /** @class */ (function () {
         }
         if ((method.type === 'post') || (method.type === 'put')) {
             if (method.params.form.length !== 0) {
-                temp.push("\n        options.headers = new HttpHeaders();\n        options.headers.delete('Content-Type');\n        const form = new FormData();");
+                temp.push("\n        options.headers = new HttpHeaders( customHeaders );\n        options.headers.delete('Content-Type');\n        const form = new FormData();");
                 for (var _b = 0, _c = method.params.form; _b < _c.length; _b++) {
                     var param = _c[_b];
                     if (param.type.typeName === 'any') {
@@ -72,7 +78,7 @@ var ServiceTemplate = /** @class */ (function () {
             }
             else {
                 if (method.params.urlencoded.length !== 0) {
-                    temp.push("\n        let payload = '';\n        options.headers = new HttpHeaders({'Content-Type': 'application/x-www-form-urlencoded'});");
+                    temp.push("\n        let payload = '';\n        options.headers = new HttpHeaders(Object.assign( customHeaders, {'Content-Type': 'application/x-www-form-urlencoded'}));");
                     var isFirst = true;
                     for (var _d = 0, _e = method.params.urlencoded; _d < _e.length; _d++) {
                         var param = _e[_d];
@@ -82,7 +88,7 @@ var ServiceTemplate = /** @class */ (function () {
                     temp.push("\n        return this.http." + method.type + "<" + method.resp[0].typeName + ">(this.uri + `" + method.uri + "`, payload, options);");
                 }
                 else {
-                    temp.push("\n        // tslint:disable-next-line:prefer-const\n        let payload = {};\n        options.headers = new HttpHeaders({'Content-Type': 'application/json; charset=utf-8'});");
+                    temp.push("\n        // tslint:disable-next-line:prefer-const\n        let payload = {};\n        options.headers = new HttpHeaders(Object.assign( customHeaders, {'Content-Type': 'application/json; charset=utf-8'}));");
                     if (method.params.payload.length > 1) {
                         for (var _f = 0, _g = method.params.payload; _f < _g.length; _f++) {
                             var param = _g[_f];
@@ -109,7 +115,7 @@ var ServiceTemplate = /** @class */ (function () {
         for (var _i = 0, methods_1 = methods; _i < methods_1.length; _i++) {
             var method = methods_1[_i];
             interBody.push(this.methodDescription(method) + "\n    " + method.name + "(" + this.methodParams(method, true) + "): Observable<" + method.resp[0].typeName + ">;");
-            serviceBody.push("\tpublic " + method.name + "(" + this.methodParams(method, false) + "): Observable<" + method.resp[0].typeName + "> {\n        const options = {\n            headers: new HttpHeaders(),\n            params: new HttpParams()\n        };\n" + this.methodBody(method) + "\n    }");
+            serviceBody.push("\tpublic " + method.name + "(" + this.methodParams(method, false) + "): Observable<" + method.resp[0].typeName + "> {\n        const options = {\n            headers: new HttpHeaders( customHeaders ),\n            params: new HttpParams()\n        };\n" + this.methodBody(method) + "\n    }");
         }
         return { interfaceBody: interBody.join('\r\n'), serviceBody: serviceBody.join('\r\n') };
     };

@@ -39,7 +39,8 @@ var TemplatePrinter = /** @class */ (function () {
         var _this = this;
         this.out = out;
         return new Promise(function (resolve, reject) {
-            _this.createFolders().then(function () {
+            _this.createFolders()
+                .then(function () {
                 for (var _i = 0, enums_1 = enums; _i < enums_1.length; _i++) {
                     var item = enums_1[_i];
                     _this.printEnum(item);
@@ -70,19 +71,34 @@ var TemplatePrinter = /** @class */ (function () {
             fs.writeFileSync(path.resolve(this.out + '/models/enums/' + change_case_1.paramCase(value.name) + '.enum.ts'), compiled);
         }
         catch (e) {
-            this._logger.err('[ ERROR ] file: ' + this.out + '/models/enums/' + change_case_1.paramCase(value.name) + '.enum.ts');
+            this._logger.err('[ ERROR ] file: ' +
+                this.out +
+                '/models/enums/' +
+                change_case_1.paramCase(value.name) +
+                '.enum.ts');
         }
     };
     TemplatePrinter.prototype.printModel = function (model) {
         var _this = this;
         var compiled = this.modelCompiler.compile(model);
         /// this._logger.ok(path.resolve(this.out + '/models/' + model.name + '.model.ts'));
-        fs.writeFile(path.resolve(this.out + '/models/' + change_case_1.paramCase(model.name).replace(/^i-/ig, '') + '.model.ts'), compiled, function (err) {
+        fs.writeFile(path.resolve(this.out +
+            '/models/' +
+            change_case_1.paramCase(model.name).replace(/^i-/gi, '') +
+            '.model.ts'), compiled, function (err) {
             if (err) {
-                _this._logger.err('[ ERROR ] file: ' + _this.out + '/models/' + change_case_1.paramCase(model.name).replace(/^i-/ig, '') + '.model.ts');
+                _this._logger.err('[ ERROR ] file: ' +
+                    _this.out +
+                    '/models/' +
+                    change_case_1.paramCase(model.name).replace(/^i-/gi, '') +
+                    '.model.ts');
                 return;
             }
-            _this._logger.ok('[ OK    ] file: ' + _this.out + '/models/' + change_case_1.paramCase(model.name).replace(/^i-/ig, '') + '.model.ts');
+            _this._logger.ok('[ OK    ] file: ' +
+                _this.out +
+                '/models/' +
+                change_case_1.paramCase(model.name).replace(/^i-/gi, '') +
+                '.model.ts');
         });
     };
     TemplatePrinter.prototype.printService = function (service, name) {
@@ -92,10 +108,18 @@ var TemplatePrinter = /** @class */ (function () {
             this._printedServices.push(name);
             fs.writeFile(path.resolve(this.out + '/services/' + change_case_1.paramCase(name) + '.service.ts'), compiled, function (err) {
                 if (err) {
-                    _this._logger.err('[ ERROR ] file: ' + _this.out + '/services/' + change_case_1.paramCase(name) + '.service.ts');
+                    _this._logger.err('[ ERROR ] file: ' +
+                        _this.out +
+                        '/services/' +
+                        change_case_1.paramCase(name) +
+                        '.service.ts');
                     return;
                 }
-                _this._logger.ok('[ OK    ] file: ' + _this.out + '/services/' + change_case_1.paramCase(name) + '.service.ts');
+                _this._logger.ok('[ OK    ] file: ' +
+                    _this.out +
+                    '/services/' +
+                    change_case_1.paramCase(name) +
+                    '.service.ts');
             });
         }
     };
@@ -137,7 +161,7 @@ var TemplatePrinter = /** @class */ (function () {
         var imports = [];
         for (var _i = 0, models_2 = models; _i < models_2.length; _i++) {
             var item = models_2[_i];
-            imports.push("export { " + item.name + " } from './" + change_case_1.paramCase(item.name).replace(/^i-/ig, '') + ".model';");
+            imports.push("export { " + item.name + " } from './" + change_case_1.paramCase(item.name).replace(/^i-/gi, '') + ".model';");
         }
         imports.push("export * from './enums';");
         imports.push('');

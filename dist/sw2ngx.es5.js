@@ -3,33 +3,33 @@ import { mkdirSync, writeFileSync, writeFile, readFileSync } from 'fs';
 import fetch from 'node-fetch';
 
 var COLORS_HLP = {
-    reset: "\x1b[0m",
-    bright: "\x1b[1m",
-    dim: "\x1b[2m",
-    underscore: "\x1b[4m",
-    blink: "\x1b[5m",
-    reverse: "\x1b[7m",
-    hidden: "\x1b[8m"
+    reset: '\x1b[0m',
+    bright: '\x1b[1m',
+    dim: '\x1b[2m',
+    underscore: '\x1b[4m',
+    blink: '\x1b[5m',
+    reverse: '\x1b[7m',
+    hidden: '\x1b[8m'
 };
 var COLORS_TXT = {
-    black: "\x1b[30m",
-    red: "\x1b[31m",
-    green: "\x1b[32m",
-    yellow: "\x1b[33m",
-    blue: "\x1b[34m",
-    magenta: "\x1b[35m",
-    cyan: "\x1b[36m",
-    white: "\x1b[37m"
+    black: '\x1b[30m',
+    red: '\x1b[31m',
+    green: '\x1b[32m',
+    yellow: '\x1b[33m',
+    blue: '\x1b[34m',
+    magenta: '\x1b[35m',
+    cyan: '\x1b[36m',
+    white: '\x1b[37m'
 };
 var COLORS_BG = {
-    black: "\x1b[40m",
-    red: "\x1b[41m",
-    green: "\x1b[42m",
-    yellow: "\x1b[43m",
-    blue: "\x1b[44m",
-    magenta: "\x1b[45m",
-    cyan: "\x1b[46m",
-    white: "\x1b[47m"
+    black: '\x1b[40m',
+    red: '\x1b[41m',
+    green: '\x1b[42m',
+    yellow: '\x1b[43m',
+    blue: '\x1b[44m',
+    magenta: '\x1b[45m',
+    cyan: '\x1b[46m',
+    white: '\x1b[47m'
 };
 var Logger = /** @class */ (function () {
     function Logger() {
@@ -395,16 +395,13 @@ var Parser = /** @class */ (function () {
                 }
             };
             for (var path in config.paths) {
-                console.log(config.paths[path]);
                 if (config.paths[path]) {
                     var _loop_1 = function (method) {
-                        console.log(config.paths[path][method]);
                         if (config.paths[path][method]) {
                             _this._logger.ok(path);
                             var parsedMethod_1 = _this.parseMethod(path, method, config.paths[path][method]);
-                            console.log('parsed', parsedMethod_1);
                             if (result[parsedMethod_1.tag]) {
-                                var duplicates = result[parsedMethod_1.tag].methods.filter(function (x) { return x.name.replace(/\d+$/ig, '') === parsedMethod_1.name; });
+                                var duplicates = result[parsedMethod_1.tag].methods.filter(function (x) { return x.name.replace(/\d+$/gi, '') === parsedMethod_1.name; });
                                 if (duplicates.length > 0) {
                                     parsedMethod_1.name = parsedMethod_1.name + duplicates.length;
                                 }
@@ -429,7 +426,7 @@ var Parser = /** @class */ (function () {
         });
     };
     Parser.prototype.genMethodName = function (uri, type) {
-        var tmp = pascalCase(uri.replace(/\//ig, '-').replace(/\{|\}|\$/ig, ''));
+        var tmp = pascalCase(uri.replace(/\//gi, '-').replace(/\{|\}|\$/gi, ''));
         switch (type.toLocaleLowerCase()) {
             case 'post':
                 return 'send' + tmp;
@@ -443,28 +440,14 @@ var Parser = /** @class */ (function () {
         }
     };
     Parser.prototype.parseMethod = function (uri, type, method) {
-        try {
-            var tag_1 = this.parseParams(method.parameters, method.operationId);
-        }
-        catch (e) {
-            console.error('params');
-        }
-        var name = method.operationId ? method.operationId : this.genMethodName(uri, type);
-        console.log('name', name);
+        var name = method.operationId
+            ? method.operationId
+            : this.genMethodName(uri, type);
         var tag = this.parseTags(method.tags);
-        console.log('tag', tag);
-        try {
-            var nnnd = this.parseParams(method.parameters, camelCase(name));
-        }
-        catch (error) {
-            console.log(error);
-        }
         var params = this.parseParams(method.parameters, camelCase(name));
-        console.log('params', params);
         var resp = this.parseResponse(method.responses, camelCase(name));
-        console.log('resp', resp);
         return {
-            uri: uri.replace(/\{/ig, '${'),
+            uri: uri.replace(/\{/gi, '${'),
             type: type,
             tag: tag,
             name: camelCase(name),
@@ -527,7 +510,6 @@ var Parser = /** @class */ (function () {
             form: [],
             urlencoded: []
         };
-        console.log('params', JSON.stringify(params));
         if (!params) {
             return parsed;
         }
@@ -565,10 +547,8 @@ var Parser = /** @class */ (function () {
         return parsed;
     };
     Parser.prototype.clearName = function (name) {
-        var baseTypes = [
-            'number', 'string', 'boolean', 'any', 'array'
-        ];
-        var result = name.replace(/\.|-/ig, '');
+        var baseTypes = ['number', 'string', 'boolean', 'any', 'array'];
+        var result = name.replace(/\.|-/gi, '');
         if (baseTypes.includes(result)) {
             result = result + 'Param';
         }
@@ -589,7 +569,10 @@ var Parser = /** @class */ (function () {
     Parser.prototype.parseResponse = function (responses, method) {
         if (responses['200']) {
             if (responses['200']['schema']) {
-                var resolvedType = { typeName: '', typeImport: '' };
+                var resolvedType = {
+                    typeName: '',
+                    typeImport: ''
+                };
                 if (responses['200']['schema']['enum']) {
                     resolvedType.typeName = 'number';
                 }
@@ -597,35 +580,43 @@ var Parser = /** @class */ (function () {
                     resolvedType = this.resolveType(responses['200']['schema'], 'response', method);
                 }
                 if (resolvedType.typeName === '') {
-                    return [{
+                    return [
+                        {
                             typeName: 'any',
                             typeImport: null
-                        }];
+                        }
+                    ];
                 }
                 else {
                     if (resolvedType.typeImport !== '') {
                         return [resolvedType];
                     }
                     else {
-                        return [{
+                        return [
+                            {
                                 typeName: resolvedType.typeName,
                                 typeImport: null
-                            }];
+                            }
+                        ];
                     }
                 }
             }
             else {
-                return [{
+                return [
+                    {
                         typeName: 'any',
                         typeImport: null
-                    }];
+                    }
+                ];
             }
         }
         else {
-            return [{
+            return [
+                {
                     typeName: 'any',
                     typeImport: null
-                }];
+                }
+            ];
         }
     };
     Parser.prototype.resolveImports = function (imports) {
@@ -650,14 +641,14 @@ var Parser = /** @class */ (function () {
         };
     };
     Parser.prototype.resolveType = function (prop, name, parent) {
-        var curname = name.replace(/\.|-/ig, '_');
+        var curname = name.replace(/\.|-/gi, '_');
         if (prop === undefined) {
             return {
                 typeName: 'any',
                 typeImport: null
             };
         }
-        if ((!prop.enum) && (!prop.format)) {
+        if (!prop.enum && !prop.format) {
             if (prop.$ref !== undefined) {
                 var temp = prop.$ref.split('/');
                 return {
@@ -665,9 +656,9 @@ var Parser = /** @class */ (function () {
                     typeImport: 'I' + temp[temp.length - 1]
                 };
             }
-            if ((prop.type === 'boolean') ||
-                (prop.type === 'string') ||
-                (prop.type === 'number')) {
+            if (prop.type === 'boolean' ||
+                prop.type === 'string' ||
+                prop.type === 'number') {
                 return {
                     typeName: prop.type,
                     typeImport: null
@@ -677,7 +668,7 @@ var Parser = /** @class */ (function () {
                 if (prop.items) {
                     var temp = this.resolveType(prop.items, curname, parent);
                     return {
-                        typeName: temp.typeName + "[]",
+                        typeName: temp.typeName + '[]',
                         typeImport: temp.typeImport
                     };
                 }
@@ -733,7 +724,10 @@ var Parser = /** @class */ (function () {
         //  this._logger.err(JSON.stringify({description, evalue, curname, parent}))
         if (extact === null) {
             var numbers_1 = '1234567890'.split('');
-            if (evalue.join('').split('').filter(function (x) { return !numbers_1.includes(x); }).length > 0) {
+            if (evalue
+                .join('')
+                .split('')
+                .filter(function (x) { return !numbers_1.includes(x); }).length > 0) {
                 return {
                     typeName: evalue.map(function (x) { return "'" + x + "'"; }).join(' | '),
                     typeImport: null
@@ -744,15 +738,15 @@ var Parser = /** @class */ (function () {
                 typeImport: null
             };
         }
-        var withParentName = "" + pascalCase(paramCase(parent).replace(/^i-/ig, '') + '-' + paramCase(curname + 'Set'));
+        var withParentName = "" + pascalCase(paramCase(parent).replace(/^i-/gi, '') + '-' + paramCase(curname + 'Set'));
         var propEnum = {
             name: pascalCase(curname) + "Set",
             modelName: parent,
             value: extact,
             hash: hashName.toString(16)
         };
-        var duplicate = this._enums.filter(function (x) { return x.name.replace(/\d+$/ig, '') === propEnum.name; });
-        var extDuplicate = this._enums.filter(function (x) { return x.name.replace(/\d+$/ig, '') === withParentName; });
+        var duplicate = this._enums.filter(function (x) { return x.name.replace(/\d+$/gi, '') === propEnum.name; });
+        var extDuplicate = this._enums.filter(function (x) { return x.name.replace(/\d+$/gi, '') === withParentName; });
         if (duplicate.length > 0) {
             var equals = duplicate.filter(function (x) { return x.hash === propEnum.hash; });
             if (equals.length > 0) {
@@ -785,7 +779,7 @@ var Parser = /** @class */ (function () {
     };
     Parser.prototype.extractEnumDescription = function (description) {
         var result = [];
-        var indexOf = description.search(/\(\d/ig);
+        var indexOf = description.search(/\(\d/gi);
         if (indexOf !== -1) {
             description = description.substr(indexOf + 1).replace(')', '');
             var temp = description.split(',');
@@ -821,9 +815,7 @@ var GeneratorParams = [
     },
     {
         name: 'help',
-        keys: [
-            '-h', '--h', 'help', '-help'
-        ],
+        keys: ['-h', '--h', 'help', '-help'],
         noValue: true,
         description: 'Call help'
     }
@@ -878,12 +870,10 @@ var HelpCLI = /** @class */ (function () {
                 args[i + 2] = arg;
                 i = i + 2;
             }
-            this.logger.write(line)
-                .fg('yellow');
+            this.logger.write(line).fg('yellow');
             line = args.join('');
             line = line.substr(0, 20);
-            this.logger.write(line)
-                .reset();
+            this.logger.write(line).reset();
             line = '     ' + key.description;
             this.logger.write(line);
             this.logger.writeln('');
@@ -950,6 +940,12 @@ var ServiceTemplate = /** @class */ (function () {
                 temp.push("" + param.name + (param.required ? '' : '?') + ": " + param.type.typeName);
             }
         }
+        if (isInterface) {
+            temp.push('customHeaders?: {[key:string]:string}');
+        }
+        else {
+            temp.push('customHeaders: {[key:string]:string} = { }');
+        }
         return temp.join(', ');
     };
     ServiceTemplate.prototype.methodBody = function (method) {
@@ -966,7 +962,7 @@ var ServiceTemplate = /** @class */ (function () {
         }
         if ((method.type === 'post') || (method.type === 'put')) {
             if (method.params.form.length !== 0) {
-                temp.push("\n        options.headers = new HttpHeaders();\n        options.headers.delete('Content-Type');\n        const form = new FormData();");
+                temp.push("\n        options.headers = new HttpHeaders( customHeaders );\n        options.headers.delete('Content-Type');\n        const form = new FormData();");
                 for (var _b = 0, _c = method.params.form; _b < _c.length; _b++) {
                     var param = _c[_b];
                     if (param.type.typeName === 'any') {
@@ -980,7 +976,7 @@ var ServiceTemplate = /** @class */ (function () {
             }
             else {
                 if (method.params.urlencoded.length !== 0) {
-                    temp.push("\n        let payload = '';\n        options.headers = new HttpHeaders({'Content-Type': 'application/x-www-form-urlencoded'});");
+                    temp.push("\n        let payload = '';\n        options.headers = new HttpHeaders(Object.assign( customHeaders, {'Content-Type': 'application/x-www-form-urlencoded'}));");
                     var isFirst = true;
                     for (var _d = 0, _e = method.params.urlencoded; _d < _e.length; _d++) {
                         var param = _e[_d];
@@ -990,7 +986,7 @@ var ServiceTemplate = /** @class */ (function () {
                     temp.push("\n        return this.http." + method.type + "<" + method.resp[0].typeName + ">(this.uri + `" + method.uri + "`, payload, options);");
                 }
                 else {
-                    temp.push("\n        // tslint:disable-next-line:prefer-const\n        let payload = {};\n        options.headers = new HttpHeaders({'Content-Type': 'application/json; charset=utf-8'});");
+                    temp.push("\n        // tslint:disable-next-line:prefer-const\n        let payload = {};\n        options.headers = new HttpHeaders(Object.assign( customHeaders, {'Content-Type': 'application/json; charset=utf-8'}));");
                     if (method.params.payload.length > 1) {
                         for (var _f = 0, _g = method.params.payload; _f < _g.length; _f++) {
                             var param = _g[_f];
@@ -1017,7 +1013,7 @@ var ServiceTemplate = /** @class */ (function () {
         for (var _i = 0, methods_1 = methods; _i < methods_1.length; _i++) {
             var method = methods_1[_i];
             interBody.push(this.methodDescription(method) + "\n    " + method.name + "(" + this.methodParams(method, true) + "): Observable<" + method.resp[0].typeName + ">;");
-            serviceBody.push("\tpublic " + method.name + "(" + this.methodParams(method, false) + "): Observable<" + method.resp[0].typeName + "> {\n        const options = {\n            headers: new HttpHeaders(),\n            params: new HttpParams()\n        };\n" + this.methodBody(method) + "\n    }");
+            serviceBody.push("\tpublic " + method.name + "(" + this.methodParams(method, false) + "): Observable<" + method.resp[0].typeName + "> {\n        const options = {\n            headers: new HttpHeaders( customHeaders ),\n            params: new HttpParams()\n        };\n" + this.methodBody(method) + "\n    }");
         }
         return { interfaceBody: interBody.join('\r\n'), serviceBody: serviceBody.join('\r\n') };
     };
@@ -1041,7 +1037,9 @@ var EnumTemplate = /** @class */ (function () {
         var temp = [];
         for (var _i = 0, _a = value.value; _i < _a.length; _i++) {
             var param = _a[_i];
-            temp.push(param.key + "= " + (parseInt(param.val.toString(), 10).toString() !== 'NaN' ? param.val : '"' + param.val + '"'));
+            temp.push(param.key + "= " + (parseInt(param.val.toString(), 10).toString() !== 'NaN'
+                ? param.val
+                : '"' + param.val + '"'));
         }
         return temp.join(',\r\n\t');
     };
@@ -1212,7 +1210,8 @@ var TemplatePrinter = /** @class */ (function () {
         var _this = this;
         this.out = out;
         return new Promise(function (resolve, reject) {
-            _this.createFolders().then(function () {
+            _this.createFolders()
+                .then(function () {
                 for (var _i = 0, enums_1 = enums; _i < enums_1.length; _i++) {
                     var item = enums_1[_i];
                     _this.printEnum(item);
@@ -1243,19 +1242,34 @@ var TemplatePrinter = /** @class */ (function () {
             writeFileSync(resolve(this.out + '/models/enums/' + paramCase(value.name) + '.enum.ts'), compiled);
         }
         catch (e) {
-            this._logger.err('[ ERROR ] file: ' + this.out + '/models/enums/' + paramCase(value.name) + '.enum.ts');
+            this._logger.err('[ ERROR ] file: ' +
+                this.out +
+                '/models/enums/' +
+                paramCase(value.name) +
+                '.enum.ts');
         }
     };
     TemplatePrinter.prototype.printModel = function (model) {
         var _this = this;
         var compiled = this.modelCompiler.compile(model);
         /// this._logger.ok(path.resolve(this.out + '/models/' + model.name + '.model.ts'));
-        writeFile(resolve(this.out + '/models/' + paramCase(model.name).replace(/^i-/ig, '') + '.model.ts'), compiled, function (err) {
+        writeFile(resolve(this.out +
+            '/models/' +
+            paramCase(model.name).replace(/^i-/gi, '') +
+            '.model.ts'), compiled, function (err) {
             if (err) {
-                _this._logger.err('[ ERROR ] file: ' + _this.out + '/models/' + paramCase(model.name).replace(/^i-/ig, '') + '.model.ts');
+                _this._logger.err('[ ERROR ] file: ' +
+                    _this.out +
+                    '/models/' +
+                    paramCase(model.name).replace(/^i-/gi, '') +
+                    '.model.ts');
                 return;
             }
-            _this._logger.ok('[ OK    ] file: ' + _this.out + '/models/' + paramCase(model.name).replace(/^i-/ig, '') + '.model.ts');
+            _this._logger.ok('[ OK    ] file: ' +
+                _this.out +
+                '/models/' +
+                paramCase(model.name).replace(/^i-/gi, '') +
+                '.model.ts');
         });
     };
     TemplatePrinter.prototype.printService = function (service, name) {
@@ -1265,10 +1279,18 @@ var TemplatePrinter = /** @class */ (function () {
             this._printedServices.push(name);
             writeFile(resolve(this.out + '/services/' + paramCase(name) + '.service.ts'), compiled, function (err) {
                 if (err) {
-                    _this._logger.err('[ ERROR ] file: ' + _this.out + '/services/' + paramCase(name) + '.service.ts');
+                    _this._logger.err('[ ERROR ] file: ' +
+                        _this.out +
+                        '/services/' +
+                        paramCase(name) +
+                        '.service.ts');
                     return;
                 }
-                _this._logger.ok('[ OK    ] file: ' + _this.out + '/services/' + paramCase(name) + '.service.ts');
+                _this._logger.ok('[ OK    ] file: ' +
+                    _this.out +
+                    '/services/' +
+                    paramCase(name) +
+                    '.service.ts');
             });
         }
     };
@@ -1310,7 +1332,7 @@ var TemplatePrinter = /** @class */ (function () {
         var imports = [];
         for (var _i = 0, models_2 = models; _i < models_2.length; _i++) {
             var item = models_2[_i];
-            imports.push("export { " + item.name + " } from './" + paramCase(item.name).replace(/^i-/ig, '') + ".model';");
+            imports.push("export { " + item.name + " } from './" + paramCase(item.name).replace(/^i-/gi, '') + ".model';");
         }
         imports.push("export * from './enums';");
         imports.push('');
@@ -1356,11 +1378,11 @@ var Generator = /** @class */ (function () {
             this.helper.printHelp();
         }
         else {
-            if (this.config.config !== "" && this.config.out !== "") {
+            if (this.config.config !== '' && this.config.out !== '') {
                 this.start();
             }
             else {
-                this._logger.err("Params not set, see help and try again:");
+                this._logger.err('Params not set, see help and try again:');
                 this.helper.printHelp();
             }
         }
@@ -1368,18 +1390,18 @@ var Generator = /** @class */ (function () {
     Generator.prototype.start = function () {
         var _this = this;
         this.getConfig(this.config.config).then(function (res) {
-            _this._logger.info("<Parsing Processed...>");
+            _this._logger.info('<Parsing Processed...>');
             _this._logger.ok(JSON.stringify(res));
             _this.parser.parse(res).then(function (res) {
                 var _a, _b, _c, _d;
-                _this._logger.ok("[ SUCCESS ]: Swagger JSON Parsed Successfull!");
-                _this._logger.info("<Files Saving>");
+                _this._logger.ok('[ SUCCESS ]: Swagger JSON Parsed Successfull!');
+                _this._logger.info('<Files Saving>');
                 var extend = null;
                 try {
-                    extend = JSON.parse(readFileSync("./sw2ngx-extend.json", "utf-8"));
+                    extend = JSON.parse(readFileSync('./sw2ngx-extend.json', 'utf-8'));
                 }
                 catch (e) {
-                    _this._logger.info("Not have extends");
+                    _this._logger.info('Not have extends');
                 }
                 if (extend) {
                     if (extend.enums) {
@@ -1412,9 +1434,9 @@ var Generator = /** @class */ (function () {
                 //     services: res[2]
                 // }));
                 _this._printer.print(res[0], res[1], res[2], _this.config.out).then(function () {
-                    _this._logger.ok("[ SUCCESS ]: Generation API Module Successfull!");
+                    _this._logger.ok('[ SUCCESS ]: Generation API Module Successfull!');
                 }, function (reject) {
-                    console.log("end here");
+                    console.log('end here');
                     _this._logger.err(JSON.stringify(reject));
                 });
             }, function (err) {
@@ -1439,7 +1461,7 @@ var Generator = /** @class */ (function () {
                 });
             }
             else {
-                _this.swagger = JSON.parse(readFileSync(conf, "utf-8"));
+                _this.swagger = JSON.parse(readFileSync(conf, 'utf-8'));
                 resolve(_this.swagger);
             }
         });

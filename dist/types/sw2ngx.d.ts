@@ -1,5 +1,5 @@
-import { ISwaggerConfig } from "./interfaces/swagger.interface";
-import { IGeneratorConfig } from "./interfaces/config";
+import { ISwaggerConfig } from './interfaces/swagger.interface';
+import { IGeneratorConfig } from './interfaces/config';
 export default class Generator {
     config: IGeneratorConfig;
     swagger: ISwaggerConfig | null;

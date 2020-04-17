@@ -51,12 +51,10 @@ var HelpCLI = /** @class */ (function () {
                 args[i + 2] = arg;
                 i = i + 2;
             }
-            this.logger.write(line)
-                .fg('yellow');
+            this.logger.write(line).fg('yellow');
             line = args.join('');
             line = line.substr(0, 20);
-            this.logger.write(line)
-                .reset();
+            this.logger.write(line).reset();
             line = '     ' + key.description;
             this.logger.write(line);
             this.logger.writeln('');

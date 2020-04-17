@@ -15,9 +15,7 @@ exports.GeneratorParams = [
     },
     {
         name: 'help',
-        keys: [
-            '-h', '--h', 'help', '-help'
-        ],
+        keys: ['-h', '--h', 'help', '-help'],
         noValue: true,
         description: 'Call help'
     }

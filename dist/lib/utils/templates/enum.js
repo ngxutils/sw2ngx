@@ -7,7 +7,9 @@ var EnumTemplate = /** @class */ (function () {
         var temp = [];
         for (var _i = 0, _a = value.value; _i < _a.length; _i++) {
             var param = _a[_i];
-            temp.push(param.key + "= " + (parseInt(param.val.toString(), 10).toString() !== 'NaN' ? param.val : '"' + param.val + '"'));
+            temp.push(param.key + "= " + (parseInt(param.val.toString(), 10).toString() !== 'NaN'
+                ? param.val
+                : '"' + param.val + '"'));
         }
         return temp.join(',\r\n\t');
     };

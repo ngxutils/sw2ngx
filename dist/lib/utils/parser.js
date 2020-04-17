@@ -81,16 +81,13 @@ var Parser = /** @class */ (function () {
                 }
             };
             for (var path in config.paths) {
-                console.log(config.paths[path]);
                 if (config.paths[path]) {
                     var _loop_1 = function (method) {
-                        console.log(config.paths[path][method]);
                         if (config.paths[path][method]) {
                             _this._logger.ok(path);
                             var parsedMethod_1 = _this.parseMethod(path, method, config.paths[path][method]);
-                            console.log('parsed', parsedMethod_1);
                             if (result[parsedMethod_1.tag]) {
-                                var duplicates = result[parsedMethod_1.tag].methods.filter(function (x) { return x.name.replace(/\d+$/ig, '') === parsedMethod_1.name; });
+                                var duplicates = result[parsedMethod_1.tag].methods.filter(function (x) { return x.name.replace(/\d+$/gi, '') === parsedMethod_1.name; });
                                 if (duplicates.length > 0) {
                                     parsedMethod_1.name = parsedMethod_1.name + duplicates.length;
                                 }
@@ -115,7 +112,7 @@ var Parser = /** @class */ (function () {
         });
     };
     Parser.prototype.genMethodName = function (uri, type) {
-        var tmp = change_case_1.pascalCase(uri.replace(/\//ig, '-').replace(/\{|\}|\$/ig, ''));
+        var tmp = change_case_1.pascalCase(uri.replace(/\//gi, '-').replace(/\{|\}|\$/gi, ''));
         switch (type.toLocaleLowerCase()) {
             case 'post':
                 return 'send' + tmp;
@@ -129,28 +126,14 @@ var Parser = /** @class */ (function () {
         }
     };
     Parser.prototype.parseMethod = function (uri, type, method) {
-        try {
-            var tag_1 = this.parseParams(method.parameters, method.operationId);
-        }
-        catch (e) {
-            console.error('params');
-        }
-        var name = method.operationId ? method.operationId : this.genMethodName(uri, type);
-        console.log('name', name);
+        var name = method.operationId
+            ? method.operationId
+            : this.genMethodName(uri, type);
         var tag = this.parseTags(method.tags);
-        console.log('tag', tag);
-        try {
-            var nnnd = this.parseParams(method.parameters, change_case_1.camelCase(name));
-        }
-        catch (error) {
-            console.log(error);
-        }
         var params = this.parseParams(method.parameters, change_case_1.camelCase(name));
-        console.log('params', params);
         var resp = this.parseResponse(method.responses, change_case_1.camelCase(name));
-        console.log('resp', resp);
         return {
-            uri: uri.replace(/\{/ig, '${'),
+            uri: uri.replace(/\{/gi, '${'),
             type: type,
             tag: tag,
             name: change_case_1.camelCase(name),
@@ -213,7 +196,6 @@ var Parser = /** @class */ (function () {
             form: [],
             urlencoded: []
         };
-        console.log('params', JSON.stringify(params));
         if (!params) {
             return parsed;
         }
@@ -251,10 +233,8 @@ var Parser = /** @class */ (function () {
         return parsed;
     };
     Parser.prototype.clearName = function (name) {
-        var baseTypes = [
-            'number', 'string', 'boolean', 'any', 'array'
-        ];
-        var result = name.replace(/\.|-/ig, '');
+        var baseTypes = ['number', 'string', 'boolean', 'any', 'array'];
+        var result = name.replace(/\.|-/gi, '');
         if (baseTypes.includes(result)) {
             result = result + 'Param';
         }
@@ -275,7 +255,10 @@ var Parser = /** @class */ (function () {
     Parser.prototype.parseResponse = function (responses, method) {
         if (responses['200']) {
             if (responses['200']['schema']) {
-                var resolvedType = { typeName: '', typeImport: '' };
+                var resolvedType = {
+                    typeName: '',
+                    typeImport: ''
+                };
                 if (responses['200']['schema']['enum']) {
                     resolvedType.typeName = 'number';
                 }
@@ -283,35 +266,43 @@ var Parser = /** @class */ (function () {
                     resolvedType = this.resolveType(responses['200']['schema'], 'response', method);
                 }
                 if (resolvedType.typeName === '') {
-                    return [{
+                    return [
+                        {
                             typeName: 'any',
                             typeImport: null
-                        }];
+                        }
+                    ];
                 }
                 else {
                     if (resolvedType.typeImport !== '') {
                         return [resolvedType];
                     }
                     else {
-                        return [{
+                        return [
+                            {
                                 typeName: resolvedType.typeName,
                                 typeImport: null
-                            }];
+                            }
+                        ];
                     }
                 }
             }
             else {
-                return [{
+                return [
+                    {
                         typeName: 'any',
                         typeImport: null
-                    }];
+                    }
+                ];
             }
         }
         else {
-            return [{
+            return [
+                {
                     typeName: 'any',
                     typeImport: null
-                }];
+                }
+            ];
         }
     };
     Parser.prototype.resolveImports = function (imports) {
@@ -336,14 +327,14 @@ var Parser = /** @class */ (function () {
         };
     };
     Parser.prototype.resolveType = function (prop, name, parent) {
-        var curname = name.replace(/\.|-/ig, '_');
+        var curname = name.replace(/\.|-/gi, '_');
         if (prop === undefined) {
             return {
                 typeName: 'any',
                 typeImport: null
             };
         }
-        if ((!prop.enum) && (!prop.format)) {
+        if (!prop.enum && !prop.format) {
             if (prop.$ref !== undefined) {
                 var temp = prop.$ref.split('/');
                 return {
@@ -351,9 +342,9 @@ var Parser = /** @class */ (function () {
                     typeImport: 'I' + temp[temp.length - 1]
                 };
             }
-            if ((prop.type === 'boolean') ||
-                (prop.type === 'string') ||
-                (prop.type === 'number')) {
+            if (prop.type === 'boolean' ||
+                prop.type === 'string' ||
+                prop.type === 'number') {
                 return {
                     typeName: prop.type,
                     typeImport: null
@@ -363,7 +354,7 @@ var Parser = /** @class */ (function () {
                 if (prop.items) {
                     var temp = this.resolveType(prop.items, curname, parent);
                     return {
-                        typeName: temp.typeName + "[]",
+                        typeName: temp.typeName + '[]',
                         typeImport: temp.typeImport
                     };
                 }
@@ -419,7 +410,10 @@ var Parser = /** @class */ (function () {
         //  this._logger.err(JSON.stringify({description, evalue, curname, parent}))
         if (extact === null) {
             var numbers_1 = '1234567890'.split('');
-            if (evalue.join('').split('').filter(function (x) { return !numbers_1.includes(x); }).length > 0) {
+            if (evalue
+                .join('')
+                .split('')
+                .filter(function (x) { return !numbers_1.includes(x); }).length > 0) {
                 return {
                     typeName: evalue.map(function (x) { return "'" + x + "'"; }).join(' | '),
                     typeImport: null
@@ -430,15 +424,15 @@ var Parser = /** @class */ (function () {
                 typeImport: null
             };
         }
-        var withParentName = "" + change_case_1.pascalCase(change_case_1.paramCase(parent).replace(/^i-/ig, '') + '-' + change_case_1.paramCase(curname + 'Set'));
+        var withParentName = "" + change_case_1.pascalCase(change_case_1.paramCase(parent).replace(/^i-/gi, '') + '-' + change_case_1.paramCase(curname + 'Set'));
         var propEnum = {
             name: change_case_1.pascalCase(curname) + "Set",
             modelName: parent,
             value: extact,
             hash: hashName.toString(16)
         };
-        var duplicate = this._enums.filter(function (x) { return x.name.replace(/\d+$/ig, '') === propEnum.name; });
-        var extDuplicate = this._enums.filter(function (x) { return x.name.replace(/\d+$/ig, '') === withParentName; });
+        var duplicate = this._enums.filter(function (x) { return x.name.replace(/\d+$/gi, '') === propEnum.name; });
+        var extDuplicate = this._enums.filter(function (x) { return x.name.replace(/\d+$/gi, '') === withParentName; });
         if (duplicate.length > 0) {
             var equals = duplicate.filter(function (x) { return x.hash === propEnum.hash; });
             if (equals.length > 0) {
@@ -471,7 +465,7 @@ var Parser = /** @class */ (function () {
     };
     Parser.prototype.extractEnumDescription = function (description) {
         var result = [];
-        var indexOf = description.search(/\(\d/ig);
+        var indexOf = description.search(/\(\d/gi);
         if (indexOf !== -1) {
             description = description.substr(indexOf + 1).replace(')', '');
             var temp = description.split(',');

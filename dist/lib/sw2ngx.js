@@ -24,11 +24,11 @@ var Generator = /** @class */ (function () {
             this.helper.printHelp();
         }
         else {
-            if (this.config.config !== "" && this.config.out !== "") {
+            if (this.config.config !== '' && this.config.out !== '') {
                 this.start();
             }
             else {
-                this._logger.err("Params not set, see help and try again:");
+                this._logger.err('Params not set, see help and try again:');
                 this.helper.printHelp();
             }
         }
@@ -36,18 +36,18 @@ var Generator = /** @class */ (function () {
     Generator.prototype.start = function () {
         var _this = this;
         this.getConfig(this.config.config).then(function (res) {
-            _this._logger.info("<Parsing Processed...>");
+            _this._logger.info('<Parsing Processed...>');
             _this._logger.ok(JSON.stringify(res));
             _this.parser.parse(res).then(function (res) {
                 var _a, _b, _c, _d;
-                _this._logger.ok("[ SUCCESS ]: Swagger JSON Parsed Successfull!");
-                _this._logger.info("<Files Saving>");
+                _this._logger.ok('[ SUCCESS ]: Swagger JSON Parsed Successfull!');
+                _this._logger.info('<Files Saving>');
                 var extend = null;
                 try {
-                    extend = JSON.parse(fs.readFileSync("./sw2ngx-extend.json", "utf-8"));
+                    extend = JSON.parse(fs.readFileSync('./sw2ngx-extend.json', 'utf-8'));
                 }
                 catch (e) {
-                    _this._logger.info("Not have extends");
+                    _this._logger.info('Not have extends');
                 }
                 if (extend) {
                     if (extend.enums) {
@@ -80,9 +80,9 @@ var Generator = /** @class */ (function () {
                 //     services: res[2]
                 // }));
                 _this._printer.print(res[0], res[1], res[2], _this.config.out).then(function () {
-                    _this._logger.ok("[ SUCCESS ]: Generation API Module Successfull!");
+                    _this._logger.ok('[ SUCCESS ]: Generation API Module Successfull!');
                 }, function (reject) {
-                    console.log("end here");
+                    console.log('end here');
                     _this._logger.err(JSON.stringify(reject));
                 });
             }, function (err) {
@@ -107,7 +107,7 @@ var Generator = /** @class */ (function () {
                 });
             }
             else {
-                _this.swagger = JSON.parse(fs.readFileSync(conf, "utf-8"));
+                _this.swagger = JSON.parse(fs.readFileSync(conf, 'utf-8'));
                 resolve(_this.swagger);
             }
         });
