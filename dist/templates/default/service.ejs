@@ -15,7 +15,7 @@ export interface I<%=`${fnpascalCase(name)}`%>APIService {
       <%_temp.push(`\t*/`)-%>
   <%-temp.join('\r\n')_%>
   <%_ const params = []-%> 
-  <%_ for(const param of method.params.all.sort(x=>x.required?-1:1)) {-%>
+  <%_ for(const param of method.params.all) {-%>
     <%_ params.push(`${param.name}${param.required ? '' : '?'}: ${param.type.typeName}`)-%>
   <%_}-%>
 <%_params.push(...['customOptions?: {[key:string]:string}','customHeaders?: {[key:string]:string}'])-%>
@@ -44,7 +44,7 @@ export class <%=`${fnpascalCase(name)}`%>APIService implements I<%=`${fnpascalCa
       <%_temp.push(`\t*/`)-%>
   <%-temp.join('\r\n')_%>
   <%_ const params = []-%> 
-  <%_ for(const param of method.params.all.sort(x=>x.required?-1:1)) {-%>
+  <%_ for(const param of method.params.all) {-%>
       <%_  params.push(`${param.name}${param.required ? '' : '?'}: ${param.type.typeName}`)-%>
   <%_}-%>
 <%_params.push(...['customOptions: {[key:string]:string} = { }','customHeaders: {[key:string]:string} = { }'])-%>
