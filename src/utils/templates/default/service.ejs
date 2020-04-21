@@ -58,7 +58,7 @@ export class <%=`${fnpascalCase(name)}`%>APIService implements I<%=`${fnpascalCa
   <% if (method.params.query.length > 0) { -%>
   const paramString = [
   <% for(const param of method.params.query) {-%>
-<%-`{ 'name': '${param.queryName}', 'value': ${param.name}${param.type.typeName === 'Date' ? '.toISOString()' : '.toString()'} },\r\n`_%> 
+<%-`{ 'name': '${param.queryName}', 'value': ${param.name}?${param.name}${param.type.typeName === 'Date' ? '.toISOString()' : '.toString()'}:null },\r\n`_%> 
   <%}-%>
   ].filter(x=>x.name&&x.value)
     .map(x=>x.name+'='+encodeURIComponent(x.value))
@@ -83,7 +83,7 @@ export class <%=`${fnpascalCase(name)}`%>APIService implements I<%=`${fnpascalCa
     options.headers = new HttpHeaders(Object.assign({'Content-Type': 'application/x-www-form-urlencoded'}, customHeaders));
     const payload = [
       <% for(const param of method.params.urlencoded) {-%>
-      <%-`{ 'name': '${param.queryName}', 'value': ${param.name}${param.type.typeName === 'Date' ? '.toISOString()' : '.toString()'} },\r\n`_%> 
+      <%-`{ 'name': '${param.queryName}', 'value': ${param.name}?${param.name}${param.type.typeName === 'Date' ? '.toISOString()' : '.toString()'}:null },\r\n`_%> 
       <%}-%>
       ].filter(x=>x.name&&x.value)
         .map(x=>x.name+'='+encodeURIComponent(x.value))
