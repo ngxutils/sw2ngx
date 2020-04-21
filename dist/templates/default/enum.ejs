@@ -1,0 +1,5 @@
+/* TEST TEMPLATES*/
+export enum <%=`${value.name}`%> {
+<%const params = value.value.map(x=> `${x.key}=${parseInt(x.val.toString(), 10).toString() !== 'NaN'? x.val: '"' + x.val + '"'}`)-%>
+<%-`\t${params.join(',\r\n\t')}`%>
+}

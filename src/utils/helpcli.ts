@@ -8,6 +8,7 @@ export class HelpCLI {
     const params: IGeneratorConfig = {
       config: '',
       out: '',
+      templateFolder: '',
       help: false
     };
     const args = process.argv;

@@ -1,23 +1,21 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var module_1 = require("./templates/module");
-var service_1 = require("./templates/service");
 var logger_1 = require("./logger");
-var enum_1 = require("./templates/enum");
 var fs = require("fs");
 var path = require("path");
-var model_1 = require("./templates/model");
 var change_case_1 = require("change-case");
+var ejs = require("ejs");
 var TemplatePrinter = /** @class */ (function () {
     function TemplatePrinter() {
         this.out = '';
-        this.enumCompiler = new enum_1.EnumTemplate();
-        this.modelCompiler = new model_1.ModelTemplate();
-        this.serviceCompiler = new service_1.ServiceTemplate();
-        this.moduleCompiler = new module_1.ModuleTemplate();
         this._printedServices = [];
         this._logger = new logger_1.Logger();
+        this._templateFolder = '';
+        this._stdTemplateFolder = path.resolve(__dirname, '../../templates/default/');
+        this._singleFileTemplateFolrder = path.resolve(__dirname, './templates/default/');
     }
+    ;
+    ;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     TemplatePrinter.prototype.createFolders = function () {
         var _this = this;
@@ -35,9 +33,10 @@ var TemplatePrinter = /** @class */ (function () {
             }
         });
     };
-    TemplatePrinter.prototype.print = function (enums, models, services, out) {
+    TemplatePrinter.prototype.print = function (enums, models, services, out, templateFolder) {
         var _this = this;
         this.out = out;
+        this._templateFolder = templateFolder ? templateFolder : '';
         return new Promise(function (resolve, reject) {
             _this.createFolders()
                 .then(function () {
@@ -52,7 +51,7 @@ var TemplatePrinter = /** @class */ (function () {
                 }
                 _this.printModelIndex(models);
                 for (var name_1 in services) {
-                    if (services[name_1]) {
+                    if (services[name_1] && services[name_1].methods.length > 0) {
                         _this.printService(services[name_1], name_1);
                     }
                 }
@@ -65,48 +64,80 @@ var TemplatePrinter = /** @class */ (function () {
         });
     };
     TemplatePrinter.prototype.printEnum = function (value) {
-        var compiled = this.enumCompiler.compile(value);
-        // this._logger.ok(path.resolve(this.out + '/models/enums/' + value.name + '.enum.ts'));
-        try {
-            fs.writeFileSync(path.resolve(this.out + '/models/enums/' + change_case_1.paramCase(value.name) + '.enum.ts'), compiled);
+        var _this = this;
+        var template = this.getTemplate('enum');
+        if (template === '') {
+            return;
         }
-        catch (e) {
-            this._logger.err('[ ERROR ] file: ' +
-                this.out +
-                '/models/enums/' +
-                change_case_1.paramCase(value.name) +
-                '.enum.ts');
-        }
+        ejs.renderFile(template, {
+            value: value
+        }, {}, function (err, str) {
+            if (err) {
+                _this._logger.err("[ ERROR ] EJS print error: " + err);
+                return;
+            }
+            try {
+                fs.writeFileSync(path.resolve(_this.out + '/models/enums/' + change_case_1.paramCase(value.name) + '.enum.ts'), str);
+            }
+            catch (e) {
+                _this._logger.err('[ ERROR ] file: ' +
+                    _this.out +
+                    '/models/enums/' +
+                    change_case_1.paramCase(value.name) +
+                    '.enum.ts');
+            }
+        });
     };
     TemplatePrinter.prototype.printModel = function (model) {
         var _this = this;
-        var compiled = this.modelCompiler.compile(model);
-        /// this._logger.ok(path.resolve(this.out + '/models/' + model.name + '.model.ts'));
-        fs.writeFile(path.resolve(this.out +
-            '/models/' +
-            change_case_1.paramCase(model.name).replace(/^i-/gi, '') +
-            '.model.ts'), compiled, function (err) {
+        var template = this.getTemplate('model');
+        if (template === '') {
+            return;
+        }
+        ejs.renderFile(template, {
+            model: model
+        }, {}, function (err, str) {
             if (err) {
-                _this._logger.err('[ ERROR ] file: ' +
+                _this._logger.err("[ ERROR ] EJS print error: " + err);
+                return;
+            }
+            fs.writeFile(path.resolve(_this.out +
+                '/models/' +
+                change_case_1.paramCase(model.name).replace(/^i-/gi, '') +
+                '.model.ts'), str, function (err) {
+                if (err) {
+                    _this._logger.err('[ ERROR ] file: ' +
+                        _this.out +
+                        '/models/' +
+                        change_case_1.paramCase(model.name).replace(/^i-/gi, '') +
+                        '.model.ts');
+                    return;
+                }
+                _this._logger.ok('[ OK    ] file: ' +
                     _this.out +
                     '/models/' +
                     change_case_1.paramCase(model.name).replace(/^i-/gi, '') +
                     '.model.ts');
-                return;
-            }
-            _this._logger.ok('[ OK    ] file: ' +
-                _this.out +
-                '/models/' +
-                change_case_1.paramCase(model.name).replace(/^i-/gi, '') +
-                '.model.ts');
+            });
         });
     };
     TemplatePrinter.prototype.printService = function (service, name) {
         var _this = this;
-        var compiled = this.serviceCompiler.compile(service, name);
-        if (compiled !== '') {
-            this._printedServices.push(name);
-            fs.writeFile(path.resolve(this.out + '/services/' + change_case_1.paramCase(name) + '.service.ts'), compiled, function (err) {
+        var template = this.getTemplate('service');
+        if (template === '') {
+            return;
+        }
+        ejs.renderFile(template, {
+            service: service,
+            fnpascalCase: change_case_1.pascalCase,
+            name: name
+        }, {}, function (err, str) {
+            if (err) {
+                _this._logger.err("[ ERROR ] EJS print error: " + err);
+                return;
+            }
+            _this._printedServices.push(change_case_1.pascalCase(name));
+            fs.writeFile(path.resolve(_this.out + '/services/' + change_case_1.paramCase(name) + '.service.ts'), str, function (err) {
                 if (err) {
                     _this._logger.err('[ ERROR ] file: ' +
                         _this.out +
@@ -121,17 +152,28 @@ var TemplatePrinter = /** @class */ (function () {
                     change_case_1.paramCase(name) +
                     '.service.ts');
             });
-        }
+        });
     };
     TemplatePrinter.prototype.printModule = function () {
         var _this = this;
-        var compiled = this.moduleCompiler.compile(this._printedServices);
-        fs.writeFile(path.resolve(this.out + '/api.module.ts'), compiled, function (err) {
+        var template = this.getTemplate('module');
+        if (template === '') {
+            return;
+        }
+        ejs.renderFile(template, {
+            servicesList: this._printedServices.map(function (x) { return x + 'APIService'; })
+        }, {}, function (err, str) {
             if (err) {
-                _this._logger.err('[ ERROR ] file: ' + _this.out + '/api.module.ts');
+                _this._logger.err("[ ERROR ] EJS print MODULE error: " + err);
                 return;
             }
-            _this._logger.ok('[ OK    ] file: ' + _this.out + '/api.module.ts');
+            fs.writeFile(path.resolve(_this.out + '/api.module.ts'), str, function (err) {
+                if (err) {
+                    _this._logger.err('[ ERROR ] file: ' + _this.out + '/api.module.ts');
+                    return;
+                }
+                _this._logger.ok('[ OK    ] file: ' + _this.out + '/api.module.ts');
+            });
         });
     };
     TemplatePrinter.prototype.printIndex = function () {
@@ -147,7 +189,7 @@ var TemplatePrinter = /** @class */ (function () {
         var imports = [];
         for (var _i = 0, _a = this._printedServices; _i < _a.length; _i++) {
             var item = _a[_i];
-            imports.push("export { " + item + "APIService, I" + item + "APIService } from './" + change_case_1.paramCase(item) + ".service';");
+            imports.push("export { " + change_case_1.pascalCase(item) + "APIService, I" + change_case_1.pascalCase(item) + "APIService } from './" + change_case_1.paramCase(item) + ".service';");
         }
         imports.push('');
         try {
@@ -185,6 +227,23 @@ var TemplatePrinter = /** @class */ (function () {
         catch (e) {
             this._logger.err('[ ERROR ] file: ' + this.out + '/models/enums/index.ts');
         }
+    };
+    TemplatePrinter.prototype.getTemplate = function (type) {
+        var template = '';
+        if (this._templateFolder && fs.existsSync(path.resolve(process.cwd(), this._templateFolder, type + ".ejs"))) {
+            template = path.resolve(process.cwd(), this._templateFolder, type + ".ejs");
+        }
+        else if (fs.existsSync(path.resolve(this._stdTemplateFolder, type + ".ejs"))) {
+            template = path.resolve(this._stdTemplateFolder, type + ".ejs");
+        }
+        else if (fs.existsSync(path.resolve(this._singleFileTemplateFolrder, type + ".ejs"))) {
+            template = path.resolve(this._singleFileTemplateFolrder, type + ".ejs");
+        }
+        else {
+            this._logger.err('[ ERROR ] template: not found!');
+            return '';
+        }
+        return template;
     };
     return TemplatePrinter;
 }());

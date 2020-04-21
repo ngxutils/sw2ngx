@@ -458,12 +458,12 @@ export class Parser {
           .filter((x) => !numbers.includes(x)).length > 0
       ) {
         return {
-          typeName: evalue.map((x) => `'${x}'`).join(' | '),
+          typeName: '( ' + evalue.map((x) => `'${x}'`).join(' | ') + ' )',
           typeImport: null
         };
       }
       return {
-        typeName: evalue.join(' | '),
+        typeName: '( ' + evalue.join(' | ') + ' )',
         typeImport: null
       };
     }

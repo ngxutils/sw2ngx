@@ -10,6 +10,7 @@ var HelpCLI = /** @class */ (function () {
         var params = {
             config: '',
             out: '',
+            templateFolder: '',
             help: false
         };
         var args = process.argv;

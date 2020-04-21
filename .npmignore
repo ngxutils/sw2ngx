@@ -2,3 +2,4 @@
 .rpt2_cache
 .DS_Store
 .github
+.package-lock.json

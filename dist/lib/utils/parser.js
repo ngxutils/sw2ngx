@@ -415,12 +415,12 @@ var Parser = /** @class */ (function () {
                 .split('')
                 .filter(function (x) { return !numbers_1.includes(x); }).length > 0) {
                 return {
-                    typeName: evalue.map(function (x) { return "'" + x + "'"; }).join(' | '),
+                    typeName: '( ' + evalue.map(function (x) { return "'" + x + "'"; }).join(' | ') + ' )',
                     typeImport: null
                 };
             }
             return {
-                typeName: evalue.join(' | '),
+                typeName: '( ' + evalue.join(' | ') + ' )',
                 typeImport: null
             };
         }

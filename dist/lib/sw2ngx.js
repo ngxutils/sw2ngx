@@ -79,7 +79,7 @@ var Generator = /** @class */ (function () {
                 //     models: res[1],
                 //     services: res[2]
                 // }));
-                _this._printer.print(res[0], res[1], res[2], _this.config.out).then(function () {
+                _this._printer.print(res[0], res[1], res[2], _this.config.out, _this.config.templateFolder).then(function () {
                     _this._logger.ok('[ SUCCESS ]: Generation API Module Successfull!');
                 }, function (reject) {
                     console.log('end here');

@@ -4,3 +4,4 @@ node_modules
 .rpt2_cache
 docs
 api
+package-lock.json

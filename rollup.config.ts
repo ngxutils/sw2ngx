@@ -4,6 +4,7 @@ import sourceMaps from 'rollup-plugin-sourcemaps';
 import typescript from 'rollup-plugin-typescript2';
 import json from '@rollup/plugin-json';
 import builtins from 'rollup-plugin-node-builtins';
+import copy from 'rollup-plugin-copy'
 
 const libraryName = 'sw2ngx'
 
@@ -20,6 +21,11 @@ export default {
     include: 'src/**',
   },
   plugins: [
+    copy({
+      targets: [
+        { src: 'src/utils/templates/default/**/*', dest: 'dist/templates/default' }
+      ]
+    }),
     commonjs(),
     resolve({
       browser:false,

@@ -1,7 +1,4 @@
-import { ModuleTemplate } from './templates/module';
-import { ServiceTemplate } from './templates/service';
 import { Logger } from './logger';
-import { EnumTemplate } from './templates/enum';
 import {
   IParserEnum,
   IParserServiceList,
@@ -10,17 +7,15 @@ import {
 } from './../interfaces/parser';
 import * as fs from 'fs';
 import * as path from 'path';
-import { ModelTemplate } from './templates/model';
-import { paramCase } from 'change-case';
-
+import { paramCase, pascalCase } from 'change-case';
+import * as ejs from 'ejs';
 export class TemplatePrinter {
   private out = '';
-  private enumCompiler: EnumTemplate = new EnumTemplate();
-  private modelCompiler: ModelTemplate = new ModelTemplate();
-  private serviceCompiler: ServiceTemplate = new ServiceTemplate();
-  private moduleCompiler: ModuleTemplate = new ModuleTemplate();
   private _printedServices: string[] = [];
   private _logger: Logger = new Logger();
+  private _templateFolder = '';
+  private _stdTemplateFolder = path.resolve( __dirname, '../../templates/default/');;
+  private _singleFileTemplateFolrder= path.resolve( __dirname, './templates/default/');;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public createFolders(): Promise<any> {
     return new Promise((resolve, reject) => {
@@ -41,9 +36,11 @@ export class TemplatePrinter {
     enums: IParserEnum[],
     models: IParserModel[],
     services: IParserServiceList,
-    out: string
+    out: string,
+    templateFolder: string
   ): Promise<any> {
     this.out = out;
+    this._templateFolder = templateFolder? templateFolder: '';
     return new Promise<any>((resolve, reject) => {
       this.createFolders()
         .then(() => {
@@ -56,7 +53,7 @@ export class TemplatePrinter {
           }
           this.printModelIndex(models);
           for (const name in services) {
-            if (services[name]) {
+            if (services[name] && services[name].methods.length>0) {
               this.printService(services[name], name);
             }
           }
@@ -69,65 +66,90 @@ export class TemplatePrinter {
     });
   }
   public printEnum(value: IParserEnum): void {
-    const compiled = this.enumCompiler.compile(value);
-    // this._logger.ok(path.resolve(this.out + '/models/enums/' + value.name + '.enum.ts'));
-    try {
-      fs.writeFileSync(
-        path.resolve(
-          this.out + '/models/enums/' + paramCase(value.name) + '.enum.ts'
-        ),
-        compiled
-      );
-    } catch (e) {
-      this._logger.err(
-        '[ ERROR ] file: ' +
-          this.out +
-          '/models/enums/' +
-          paramCase(value.name) +
-          '.enum.ts'
-      );
-    }
+    const template = this.getTemplate('enum');
+    if(template === ''){return}
+    ejs.renderFile(template, {
+      value: value
+    }, {}, (err:any, str:any)=>{
+      if(err){
+        this._logger.err(`[ ERROR ] EJS print error: ${err}`);
+        return;
+      }
+      try {
+        fs.writeFileSync(
+          path.resolve(
+            this.out + '/models/enums/' + paramCase(value.name) + '.enum.ts'
+          ),
+          str
+        );
+      } catch (e) {
+        this._logger.err(
+          '[ ERROR ] file: ' +
+            this.out +
+            '/models/enums/' +
+            paramCase(value.name) +
+            '.enum.ts'
+        );
+      }
+    });
+    
   }
   public printModel(model: IParserModel): void {
-    const compiled = this.modelCompiler.compile(model);
-    /// this._logger.ok(path.resolve(this.out + '/models/' + model.name + '.model.ts'));
-
-    fs.writeFile(
-      path.resolve(
-        this.out +
-          '/models/' +
-          paramCase(model.name).replace(/^i-/gi, '') +
-          '.model.ts'
-      ),
-      compiled,
-      (err) => {
-        if (err) {
-          this._logger.err(
-            '[ ERROR ] file: ' +
+    const template = this.getTemplate('model');
+    if(template === ''){return}
+    ejs.renderFile(template, {
+      model: model
+    }, {}, (err:any, str:any)=>{
+      if(err){
+        this._logger.err(`[ ERROR ] EJS print error: ${err}`);
+        return;
+      }
+      fs.writeFile(
+        path.resolve(
+          this.out +
+            '/models/' +
+            paramCase(model.name).replace(/^i-/gi, '') +
+            '.model.ts'
+        ),
+        str,
+        (err) => {
+          if (err) {
+            this._logger.err(
+              '[ ERROR ] file: ' +
+                this.out +
+                '/models/' +
+                paramCase(model.name).replace(/^i-/gi, '') +
+                '.model.ts'
+            );
+            return;
+          }
+          this._logger.ok(
+            '[ OK    ] file: ' +
               this.out +
               '/models/' +
               paramCase(model.name).replace(/^i-/gi, '') +
               '.model.ts'
           );
-          return;
         }
-        this._logger.ok(
-          '[ OK    ] file: ' +
-            this.out +
-            '/models/' +
-            paramCase(model.name).replace(/^i-/gi, '') +
-            '.model.ts'
-        );
-      }
-    );
+      );
+    });
   }
   public printService(service: IParserService, name: string): void {
-    const compiled = this.serviceCompiler.compile(service, name);
-    if (compiled !== '') {
-      this._printedServices.push(name);
+    const template = this.getTemplate('service');
+    if(template === ''){return}
+    ejs.renderFile(template, {
+      service: service,
+      fnpascalCase: pascalCase,
+      name: name
+    }, {}, (err:any, str:any)=>{
+      if(err){
+        this._logger.err(`[ ERROR ] EJS print error: ${err}`);
+        return;
+      }
+      this._printedServices.push(pascalCase(name));
       fs.writeFile(
         path.resolve(this.out + '/services/' + paramCase(name) + '.service.ts'),
-        compiled,
+        str,
         (err) => {
           if (err) {
             this._logger.err(
@@ -148,16 +170,25 @@ export class TemplatePrinter {
           );
         }
       );
-    }
+  });
   }
   public printModule(): void {
-    const compiled = this.moduleCompiler.compile(this._printedServices);
-    fs.writeFile(path.resolve(this.out + '/api.module.ts'), compiled, (err) => {
-      if (err) {
-        this._logger.err('[ ERROR ] file: ' + this.out + '/api.module.ts');
+    const template = this.getTemplate('module');
+    if(template === ''){return}
+    ejs.renderFile(template, {
+      servicesList: this._printedServices.map(x=> x+'APIService')
+    }, {}, (err:any, str:any)=>{
+      if(err){
+        this._logger.err(`[ ERROR ] EJS print MODULE error: ${err}`);
         return;
       }
-      this._logger.ok('[ OK    ] file: ' + this.out + '/api.module.ts');
+      fs.writeFile(path.resolve(this.out + '/api.module.ts'), str, (err) => {
+        if (err) {
+          this._logger.err('[ ERROR ] file: ' + this.out + '/api.module.ts');
+          return;
+        }
+        this._logger.ok('[ OK    ] file: ' + this.out + '/api.module.ts');
+      });
     });
   }
   public printIndex(): void {
@@ -175,7 +206,7 @@ export { APIModule } from './api.module';
     const imports = [];
     for (const item of this._printedServices) {
       imports.push(
-        `export { ${item}APIService, I${item}APIService } from './${paramCase(
+        `export { ${pascalCase(item)}APIService, I${pascalCase(item)}APIService } from './${paramCase(
           item
         )}.service';`
       );
@@ -229,5 +260,19 @@ export { APIModule } from './api.module';
         '[ ERROR ] file: ' + this.out + '/models/enums/index.ts'
       );
     }
+  }
+  private getTemplate(type: string): string{
+    let template = '';
+    if(this._templateFolder && fs.existsSync(path.resolve(process.cwd(),this._templateFolder, `${type}.ejs`))) {
+      template = path.resolve(process.cwd(),this._templateFolder, `${type}.ejs`);
+    }else if(fs.existsSync(path.resolve(this._stdTemplateFolder,`${type}.ejs`))){
+      template = path.resolve(this._stdTemplateFolder,`${type}.ejs`);
+    }else if(fs.existsSync(path.resolve(this._singleFileTemplateFolrder,`${type}.ejs`))){
+      template = path.resolve(this._singleFileTemplateFolrder,`${type}.ejs`);
+    } else {
+      this._logger.err('[ ERROR ] template: not found!');
+      return '';
+    }
+    return template;
   }
 }
