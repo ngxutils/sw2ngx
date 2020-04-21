@@ -46,7 +46,7 @@ export class <%=`${fnpascalCase(name)}`%>APIService implements I<%=`${fnpascalCa
   <%_ const params = []-%> 
   <%_ for(const param of method.params.all) {-%>
     <%if(param.default){-%>
-      <%_ params.push(`${param.name}: ${param.type.typeName} = ${param.default}`)-%>
+      <%_ params.push(`${param.name}: ${param.type.typeName} = '${param.default}'`)-%>
       <%} else {-%>
       <%_ params.push(`${param.name}: ${param.type.typeName} ${param.required ? '' : '= null'}`)-%>
       <%}%>
