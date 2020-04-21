@@ -45,7 +45,11 @@ export class <%=`${fnpascalCase(name)}`%>APIService implements I<%=`${fnpascalCa
   <%-temp.join('\r\n')_%>
   <%_ const params = []-%> 
   <%_ for(const param of method.params.all) {-%>
-      <%_  params.push(`${param.name}${param.required ? '' : '?'}: ${param.type.typeName}`)-%>
+    <%if(param.default){-%>
+      <%_ params.push(`${param.name}: ${param.type.typeName} = ${param.default}`)-%>
+      <%} else {-%>
+      <%_ params.push(`${param.name}: ${param.type.typeName} ${param.required ? '' : '= null'}`)-%>
+      <%}%>
   <%_}-%>
 <%_params.push(...['customOptions: {[key:string]:string} = { }','customHeaders: {[key:string]:string} = { }'])-%>
 <%= `\tpublic ${method.name}(`-%>
