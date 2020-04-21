@@ -1,5 +1,5 @@
 <% if (model.imports.length>0) { -%>
-import { <%=model.imports.join(', ');-%> } from '../models';
+import { <%=model.imports.filter(x=>x!==model.name).join(', ');-%> } from '../models';
 <% } -%>
 
 export interface <%=`${model.name}`%> {
