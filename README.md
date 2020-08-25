@@ -1,3 +1,7 @@
+[![CI](https://github.com/YAZART/sw2ngx/workflows/CI/badge.svg?branch=master)](https://github.com/YAZART/sw2ngx/actions?query=workflow%3ACI)
+[![npm](https://img.shields.io/npm/v/sw2ngx)](https://www.npmjs.com/package/sw2ngx)
+[![npm](https://img.shields.io/npm/dm/sw2ngx)](https://www.npmjs.com/package/sw2ngx)
+
 # SW2NGX - Swagger to Angular
 
 ![sw2ngx logo](https://raw.githubusercontent.com/YAZART/sw2ngx/master/sw2ngx.png)
