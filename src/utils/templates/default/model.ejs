@@ -7,6 +7,6 @@ export interface <%=`${model.name}`%> {
 <%if (param.description) {-%>
 <%-`\t/* ${param.description} */\r\n`-%>
 <%}-%>
-<%-`\t${param.name} : ${param.type};\r\n`-%>
+<%-`\t readonly ${param.name} : ${param.type};\r\n`-%>
 <%}-%>
 }
