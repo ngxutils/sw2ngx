@@ -1,4 +1,4 @@
-<% if (model.imports.length>0) { -%>
+<% if (model.imports.filter(x=>x!==model.name).length>0) { -%>
 import { <%=model.imports.filter(x=>x!==model.name).join(', ');-%> } from './';
 <% } -%>
 
@@ -7,6 +7,6 @@ export interface <%=`${model.name}`%> {
 <%if (param.description) {-%>
 <%-`\t/* ${param.description} */\r\n`-%>
 <%}-%>
-<%-`\t readonly ${param.name} : ${param.type};\r\n`-%>
+<%-`\t${readOnly?'readonly':''} ${param.name} : ${param.type};\r\n`-%>
 <%}-%>
 }

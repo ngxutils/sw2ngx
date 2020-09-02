@@ -3,5 +3,7 @@ export interface IGeneratorConfig {
   config: string;
   out: string;
   templateFolder: string;
+  readonlyModels: boolean;
+  withoutModule: boolean;
   help: boolean;
 }

@@ -87,7 +87,7 @@ export default class Generator {
             //     models: res[1],
             //     services: res[2]
             // }));
-            this._printer.print(res[0], res[1], res[2], this.config.out, this.config.templateFolder).then(
+            this._printer.print(res[0], res[1], res[2], this.config.out, this.config.templateFolder,this.config.readonlyModels, this.config.withoutModule).then(
               () => {
                 this._logger.ok(
                   '[ SUCCESS ]: Generation API Module Successfull!'

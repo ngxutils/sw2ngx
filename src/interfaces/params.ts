@@ -18,6 +18,18 @@ export const GeneratorParams: IGeneratorParam[] = [
     description: 'Template Folder'
   },
   {
+    name: 'readonlyModels',
+    keys: ['-rlm', '--read-only-models'],
+    noValue: true,
+    description: 'Generation models with `redonly`'
+  },
+  {
+    name: 'withoutModule',
+    keys: ['-no-module', '--no-module'],
+    noValue: true,
+    description: 'No generate root module'
+  },
+  {
     name: 'help',
     keys: ['-h', '--h', 'help', '-help'],
     noValue: true,

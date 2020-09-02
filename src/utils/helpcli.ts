@@ -9,6 +9,8 @@ export class HelpCLI {
       config: '',
       out: '',
       templateFolder: '',
+      readonlyModels: false,
+      withoutModule: false,
       help: false
     };
     const args = process.argv;

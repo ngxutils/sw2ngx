@@ -37,7 +37,9 @@ export class TemplatePrinter {
     models: IParserModel[],
     services: IParserServiceList,
     out: string,
-    templateFolder: string
+    templateFolder: string,
+    readOnlyProperies = false,
+    noModule = false
   ): Promise<any> {
     this.out = out;
     this._templateFolder = templateFolder? templateFolder: '';
@@ -49,7 +51,7 @@ export class TemplatePrinter {
           }
           this.printEnumIndex(enums);
           for (const item of models) {
-            this.printModel(item);
+            this.printModel(item, readOnlyProperies);
           }
           this.printModelIndex(models);
           for (const name in services) {
@@ -58,8 +60,11 @@ export class TemplatePrinter {
             }
           }
           this.printServiceIndex();
-          this.printModule();
-          this.printIndex();
+          console.log(noModule);
+          if(!noModule) {
+            this.printModule();
+          }
+          this.printIndex(noModule);
           resolve();
         })
         .catch((err) => reject(err));
@@ -94,11 +99,12 @@ export class TemplatePrinter {
     });
     
   }
-  public printModel(model: IParserModel): void {
+  public printModel(model: IParserModel, readOnlyProperies = false): void {
     const template = this.getTemplate('model');
     if(template === ''){return}
     ejs.renderFile(template, {
-      model: model
+      model: model,
+      readOnly: readOnlyProperies
     }, {}, (err:any, str:any)=>{
       if(err){
         this._logger.err(`[ ERROR ] EJS print error: ${err}`);
@@ -191,10 +197,10 @@ export class TemplatePrinter {
       });
     });
   }
-  public printIndex(): void {
+  public printIndex(noModule = false): void {
     const imports = `export * from './services';
 export * from './models';
-export { APIModule } from './api.module';
+${noModule?"": "export { APIModule } from './api.module';"}
 `;
     try {
       fs.writeFileSync(path.resolve(this.out + '/index.ts'), imports);
