@@ -18,13 +18,13 @@
   },
   "author": "https://github.com/YAZART",
   "license": "WTFPL",
-  "homepage": "https://github.com/YAZART/sw2ngx#readme",
+  "homepage": "https://github.com/ngxutils/sw2ngx#readme",
   "bugs": {
-    "url": "https://github.com/YAZART/sw2ngx/issues"
+    "url": "https://github.com/ngxutils/sw2ngx/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/YAZART/sw2ngx.git"
+    "url": "git+https://github.com/ngxutils/sw2ngx.git"
   },
   "keywords": [
     "swagger",
