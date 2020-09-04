@@ -55,10 +55,11 @@ export class <%=`${fnpascalCase(name)}`%>APIService implements I<%=`${fnpascalCa
 <%= `\tpublic ${method.name}(`-%>
 <%- params.join(', ') -%>
   <%-`): Observable<${method.resp[0].typeName}> {`%>
-      const options = Object.assign({
+      const options = {
         headers: new HttpHeaders( customHeaders ),
         params: new HttpParams()
-      }, customOptions);
+        ...customOptions
+      };
   <% if (method.params.query.length > 0) { -%>
   const paramString = [
   <% for(const param of method.params.query) {-%>
@@ -110,7 +111,7 @@ options.headers = new HttpHeaders(Object.assign({'Content-Type': 'application/js
     <%}-%>
   <%}-%>
   <%if ((method.type === 'get') || (method.type === 'delete')) {-%>
-<%-`return this.http.${method.type}\<${method.resp[0].typeName}\>(this.uri + \`${method.uri}\`${method.params.query.length !== 0 ? ', options' : ''});\r\n`-%>
+<%-`return this.http.${method.type}\<${method.resp[0].typeName}\>(this.uri + \`${method.uri}\`, options);\r\n`-%>
   <%}-%>
   }
   <% } -%>
