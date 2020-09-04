@@ -30,6 +30,12 @@ export const GeneratorParams: IGeneratorParam[] = [
     description: 'No generate root module'
   },
   {
+    name: 'providedIn',
+    keys: ['-provided-in', '--provided-in', '-in'],
+    noValue: false,
+    description: 'provided in palace for all services'
+  },
+  {
     name: 'help',
     keys: ['-h', '--h', 'help', '-help'],
     noValue: true,

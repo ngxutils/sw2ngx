@@ -11,6 +11,7 @@ export class HelpCLI {
       templateFolder: '',
       readonlyModels: false,
       withoutModule: false,
+      providedIn: 'root',
       help: false
     };
     const args = process.argv;

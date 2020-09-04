@@ -38,8 +38,9 @@ export class TemplatePrinter {
     services: IParserServiceList,
     out: string,
     templateFolder: string,
-    readOnlyProperies = false,
-    noModule = false
+    readOnlyProperies: boolean,
+    noModule:boolean,
+    providedIn: 'root' | 'any' | 'none' | string
   ): Promise<any> {
     this.out = out;
     this._templateFolder = templateFolder? templateFolder: '';
@@ -56,11 +57,10 @@ export class TemplatePrinter {
           this.printModelIndex(models);
           for (const name in services) {
             if (services[name] && services[name].methods.length>0) {
-              this.printService(services[name], name);
+              this.printService(services[name], name, providedIn);
             }
           }
           this.printServiceIndex();
-          console.log(noModule);
           if(!noModule) {
             this.printModule();
           }
@@ -99,7 +99,7 @@ export class TemplatePrinter {
     });
     
   }
-  public printModel(model: IParserModel, readOnlyProperies = false): void {
+  public printModel(model: IParserModel, readOnlyProperies: boolean): void {
     const template = this.getTemplate('model');
     if(template === ''){return}
     ejs.renderFile(template, {
@@ -140,13 +140,14 @@ export class TemplatePrinter {
       );
     });
   }
-  public printService(service: IParserService, name: string): void {
+  public printService(service: IParserService, name: string, providedIn: 'root' | 'any' | 'none' | string): void {
     const template = this.getTemplate('service');
     if(template === ''){return}
     ejs.renderFile(template, {
       service: service,
       fnpascalCase: pascalCase,
-      name: name
+      name: name,
+      providedIn: providedIn
     }, {}, (err:any, str:any)=>{
       if(err){
         this._logger.err(`[ ERROR ] EJS print error: ${err}`);
@@ -197,7 +198,7 @@ export class TemplatePrinter {
       });
     });
   }
-  public printIndex(noModule = false): void {
+  public printIndex(noModule: boolean): void {
     const imports = `export * from './services';
 export * from './models';
 ${noModule?"": "export { APIModule } from './api.module';"}
