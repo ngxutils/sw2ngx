@@ -14,7 +14,7 @@ export interface I<%=`${fnpascalCase(name)}`%>APIService {
       <%_for (const param of method.params.all) {-%>
       <%_ temp.push(`\t* @param {${param.type.typeName}} ${param.name}`) -%>
       <%_}-%>
-      <%_temp.push(`\t*/`)-%>
+      <%_temp.push(`\t*/\r\n`)-%>
   <%-temp.join('\r\n')_%>
   <%_ const params = []-%>
   <%_ for(const param of method.params.all) {-%>
