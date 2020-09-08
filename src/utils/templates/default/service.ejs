@@ -65,7 +65,7 @@ export class <%=`${fnpascalCase(name)}`%>APIService implements I<%=`${fnpascalCa
   <% if (method.params.query.length > 0) { -%>
   const paramString = [
   <% for(const param of method.params.query) {-%>
-<%-`{ 'name': '${param.queryName}', 'value': ${param.name}!== undefined && ${param.name}!==null ?${param.name}${param.type.typeName === 'Date' ? '.toISOString()' : '.toString()'}:null },\r\n`_%>
+<%-`{ 'name': '${param.queryName}', 'value': ${param.name}?${param.name}${param.type.typeName === 'Date' ? '.toISOString()' : '.toString()'} },\r\n`_%>
   <%}-%>
   ].filter(x => x.name && x.value !== null)
     .map(x=>x.name+'='+encodeURIComponent(x.value))
