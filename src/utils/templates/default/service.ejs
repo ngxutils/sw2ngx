@@ -7,7 +7,7 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 
-export interface I<%=`${fnpascalCase(name)}`%>APIService {
+export interface I<%=`${fnpascalCase(name)}`%>ApiService {
 <%_ for(const method of service.methods) {-%>
   <%_ const temp = []-%>
     <%_ temp.push(...['\r\n\t/**','\t* @method',`\t* @name  ${method.name}`,`\t* @description: ${method.description ? method.description.replace('\r\n', '') : ''}`])-%>
@@ -28,12 +28,12 @@ export interface I<%=`${fnpascalCase(name)}`%>APIService {
 }
 
 @Injectable(<%-`${providedIn=== 'none'? '': '{providedIn:'}${providedIn!=='none'?'\''+providedIn+'\'}': ''} `%> )
-export class <%=`${fnpascalCase(name)}`%>APIService implements I<%=`${fnpascalCase(name)}`%>APIService {
+export class <%=`${fnpascalCase(name)}`%>ApiService implements I<%=`${fnpascalCase(name)}`%>ApiService {
   public serviceName: string;
   public uri: string;
   constructor(
     public http: HttpClient) {
-    this.serviceName = '<%=`${fnpascalCase(name)}`%>API';
+    this.serviceName = '<%=`${fnpascalCase(name)}`%>Api';
     this.uri = '<%-service.uri%>';
   }
 
