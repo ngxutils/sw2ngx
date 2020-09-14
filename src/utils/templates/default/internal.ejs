@@ -1,0 +1,10 @@
+export function createParamString(...params: [string, any | undefined][]): string{
+    const result: string[]=[];
+    for(const [name, value] of params){
+        const stringValue = value?.toString();
+        if(stringValue !== undefined){
+            result.push(`${name}=${encodeURIComponent(stringValue)}`);
+        }
+    }
+    return result.join('&');
+}

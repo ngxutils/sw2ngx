@@ -60,6 +60,7 @@ export class TemplatePrinter {
               this.printService(services[name], name, providedIn);
             }
           }
+          this.printInternals();
           this.printServiceIndex();
           if(!noModule) {
             this.printModule();
@@ -179,11 +180,30 @@ export class TemplatePrinter {
       );
   });
   }
+
+  public printInternals(): void{
+    const template = this.getTemplate('internal');
+    if(template === ''){return}
+    ejs.renderFile(template, {}, {}, (err:any, str:any)=>{
+      if(err){
+        this._logger.err(`[ ERROR ] EJS print INTERNALS error: ${err}`);
+        return;
+      }
+      fs.writeFile(path.resolve(this.out + '/internals.ts'), str, (err) => {
+        if (err) {
+          this._logger.err('[ ERROR ] file: ' + this.out + '/internals.ts');
+          return;
+        }
+        this._logger.ok('[ OK    ] file: ' + this.out + '/internals.ts');
+      });
+    });
+  }
+
   public printModule(): void {
     const template = this.getTemplate('module');
     if(template === ''){return}
     ejs.renderFile(template, {
-      servicesList: this._printedServices.map(x=> x+'APIService')
+      servicesList: this._printedServices.map(x=> x+'ApiService')
     }, {}, (err:any, str:any)=>{
       if(err){
         this._logger.err(`[ ERROR ] EJS print MODULE error: ${err}`);
@@ -213,7 +233,7 @@ ${noModule?"": "export { APIModule } from './api.module';"}
     const imports = [];
     for (const item of this._printedServices) {
       imports.push(
-        `export { ${pascalCase(item)}APIService, I${pascalCase(item)}APIService } from './${paramCase(
+        `export { ${pascalCase(item)}ApiService, I${pascalCase(item)}ApiService } from './${paramCase(
           item
         )}.service';`
       );

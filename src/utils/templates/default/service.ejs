@@ -3,6 +3,7 @@
 <% if (service.imports.length>0) { -%>
 import { <%=service.imports.join(', ');-%> } from '../models';
 <% } -%>
+import { createParamString } from '../internals';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
@@ -63,13 +64,11 @@ export class <%=`${fnpascalCase(name)}`%>ApiService implements I<%=`${fnpascalCa
         ...customOptions
       };
   <% if (method.params.query.length > 0) { -%>
-  const paramString = [
+  const paramString = createParamString(
   <% for(const param of method.params.query) {-%>
-<%-`{ 'name': '${param.queryName}', 'value': ${param.name}?${param.type.typeName === 'Date' ? '.toISOString()' : '.toString()'} },\r\n`_%>
+<%-`[ '${param.queryName}', ${param.name} ],\r\n`_%>
   <%}-%>
-  ].filter(x => x.name && x.value !== undefined)
-    .map(x=>x.name+'='+encodeURIComponent(x.value))
-    .join('&');
+  );
     options.params = new HttpParams({fromString: paramString});
   <%}-%>
   <%if((method.type === 'post') || (method.type === 'put')){-%>
@@ -88,13 +87,11 @@ export class <%=`${fnpascalCase(name)}`%>ApiService implements I<%=`${fnpascalCa
     <%}else{-%>
     <%if (method.params.urlencoded.length !== 0) {%>
     options.headers = new HttpHeaders(Object.assign({'Content-Type': 'application/x-www-form-urlencoded'}, customHeaders));
-    const payload = [
+    const payload = createParamString(
       <% for(const param of method.params.urlencoded) {-%>
-      <%-`{ 'name': '${param.queryName}', 'value': ${param.name}?${param.type.typeName === 'Date' ? '.toISOString()' : '.toString()'} },\r\n`_%>
+      <%-`[ '${param.queryName}', ${param.name}],\r\n`_%>
       <%}-%>
-      ].filter(x=>x.name&&x.value!== undefined)
-        .map(x=>x.name+'='+encodeURIComponent(x.value))
-        .join('&');
+      );
 <%-`return this.http.${method.type}<${method.resp[0].typeName}>(this.uri + \`${method.uri}\`, payload, options);`-%>
     <%} else {-%>
 options.headers = new HttpHeaders(Object.assign({'Content-Type': 'application/json; charset=utf-8'}, customHeaders));
