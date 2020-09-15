@@ -11,7 +11,7 @@ import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 export interface I<%=`${fnpascalCase(name)}`%>ApiService {
 <%_ for(const method of service.methods) {-%>
   <%_ const temp = []-%>
-    <%_ temp.push(...['\r\n\t/**','\t* @method',`\t* @name  ${method.name}`,`\t* @description: ${method.description ? method.description.replace('\r\n', '') : ''}`])-%>
+    <%_ temp.push(...['\r\n\t/**','\t* @method',`\t* @name  ${method.name}`,`\t* @description ${method.description ? method.description.replace('\r\n', '') : ''}`])-%>
       <%_for (const param of method.params.all) {-%>
       <%_ temp.push(`\t* @param {${param.type.typeName}} ${param.name}`) -%>
       <%_}-%>
