@@ -3,7 +3,10 @@
 <% if (service.imports.length>0) { -%>
 import { <%=service.imports.join(', ');-%> } from '../models';
 <% } -%>
+<%_ const hasParamString = service.methods.filter((x)=> x.params.urlencoded.length || x.params.query.length ).length>0; -%>
+<%if(hasParamString){-%>
 import { createParamString } from '../internals';
+<%_}-%>
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
@@ -15,13 +18,15 @@ export interface I<%=`${fnpascalCase(name)}`%>ApiService {
       <%_for (const param of method.params.all) {-%>
       <%_ temp.push(`\t* @param {${param.type.typeName}} ${param.name}`) -%>
       <%_}-%>
+      <%_ temp.push('\t* @param {Record<string, string>} customOptions') -%>
+      <%_ temp.push('\t* @param {Record<string, string>} customHeaders') -%>
       <%_temp.push(`\t*/\r\n`)-%>
   <%-temp.join('\r\n')_%>
   <%_ const params = []-%>
   <%_ for(const param of method.params.all) {-%>
-    <%_ params.push(`${param.name}${param.required ? '' : '?'}: ${param.type.typeName}`)-%>
+    <%_ params.push(`${param.name}${param.required ? '' : '?'}: ${param.type.typeName}`)_%>
   <%_}-%>
-<%_params.push(...['customOptions?: {[key:string]:string}','customHeaders?: {[key:string]:string}'])-%>
+<%_params.push(...['customOptions?: Record<string, string>','customHeaders?: Record<string, string>'])-%>
 <%=`\t${method.name}(`_%>
 <%- params.join(', ') -%>
   <%-`): Observable<${method.resp[0].typeName}>;`-%>
@@ -44,17 +49,19 @@ export class <%=`${fnpascalCase(name)}`%>ApiService implements I<%=`${fnpascalCa
       <%_for (const param of method.params.all) {-%>
       <%_ temp.push(`\t* @param {${param.type.typeName}} ${param.name}`) -%>
       <%_}-%>
-      <%_temp.push(`\t*/`)-%>
+      <%_ temp.push('\t* @param {Record<string, string>} customOptions') -%>
+      <%_ temp.push('\t* @param {Record<string, string>} customHeaders') -%>
+      <%_temp.push(`\t*/\r\n`)-%>
   <%-temp.join('\r\n')_%>
   <%_ const params = []-%>
   <%_ for(const param of method.params.all) {-%>
-    <%if(param.default){-%>
+    <%_if(param.default){-%>
       <%_ params.push(`${param.name}: ${param.type.typeName} = '${param.default}'`)-%>
-      <%} else {-%>
-      <%_ params.push(`${param.name}: ${param.type.typeName} ${param.required ? '' : '= null'}`)-%>
-      <%}%>
+      <%_ } else {-%>
+      <%_ params.push(`${param.name}${param.required ? '' : '?'}: ${param.type.typeName}`)-%>
+      <%_}-%>
   <%_}-%>
-<%_params.push(...['customOptions: {[key:string]:string} = { }','customHeaders: {[key:string]:string} = { }'])-%>
+<%_params.push(...['customOptions: Record<string, string> = { }','customHeaders: Record<string, string> = { }'])-%>
 <%= `\tpublic ${method.name}(`-%>
 <%- params.join(', ') -%>
   <%-`): Observable<${method.resp[0].typeName}> {`%>
