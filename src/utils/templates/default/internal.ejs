@@ -1,4 +1,5 @@
-export function createParamString(...params: [string, any | undefined][]): string{
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function createParamString(...params: [string, any][]): string{
     const result: string[]=[];
     for(const [name, value] of params){
         const stringValue = value?.toString();
