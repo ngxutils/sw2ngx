@@ -12,6 +12,12 @@ export const GeneratorParams: IGeneratorParam[] = [
     description: 'Output directory'
   },
   {
+    name: 'ext',
+    keys: ['-e', '--e','-ext'],
+    noValue: false,
+    description: 'Path from process dir to extend config'
+  },
+  {
     name: 'templateFolder',
     keys: ['-t', '--t', '-tmpl'],
     noValue: false,

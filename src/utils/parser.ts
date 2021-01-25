@@ -294,7 +294,7 @@ export class Parser {
         if (resolvedType.typeName === '') {
           return [
             {
-              typeName: 'any',
+              typeName: 'Record<string, unknown>',
               typeImport: null
             }
           ];
@@ -313,7 +313,7 @@ export class Parser {
       } else {
         return [
           {
-            typeName: 'any',
+            typeName: 'Record<string, unknown>',
             typeImport: null
           }
         ];
@@ -321,7 +321,7 @@ export class Parser {
     } else {
       return [
         {
-          typeName: 'any',
+          typeName: 'Record<string, unknown>',
           typeImport: null
         }
       ];
@@ -362,7 +362,7 @@ export class Parser {
     const curname = name.replace(/\.|-/gi, '_');
     if (prop === undefined) {
       return {
-        typeName: 'any',
+        typeName: 'Record<string, unknown>',
         typeImport: null
       };
     }
@@ -395,7 +395,7 @@ export class Parser {
       }
       if (prop.type === 'object') {
         return {
-          typeName: 'any',
+          typeName: 'Record<string, unknown>',
           typeImport: null
         };
       }
@@ -421,14 +421,14 @@ export class Parser {
             result.typeName = 'string';
             break;
           default:
-            result.typeName = 'any';
+            result.typeName = 'Record<string, unknown>';
             break;
         }
         return result;
       }
     }
     return {
-      typeName: 'any',
+      typeName: 'Record<string, unknown>',
       typeImport: null
     };
   }

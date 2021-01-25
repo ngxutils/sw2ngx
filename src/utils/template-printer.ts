@@ -7,6 +7,7 @@ import {
 } from './../interfaces/parser';
 import * as fs from 'fs';
 import * as path from 'path';
+import * as process from 'process'
 import { paramCase, pascalCase } from 'change-case';
 import * as ejs from 'ejs';
 export class TemplatePrinter {
@@ -14,20 +15,20 @@ export class TemplatePrinter {
   private _printedServices: string[] = [];
   private _logger: Logger = new Logger();
   private _templateFolder = '';
-  private _stdTemplateFolder = path.resolve( __dirname, '../../templates/default/');;
-  private _singleFileTemplateFolrder= path.resolve( __dirname, './templates/default/');;
+  private _stdTemplateFolder = path.resolve( __dirname, '../../templates/default/');
+  private _singleFileTemplateFolrder= path.resolve( __dirname, './templates/default/');
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public createFolders(): Promise<any> {
     return new Promise((resolve, reject) => {
       try {
-        fs.mkdirSync(path.resolve(this.out));
-        fs.mkdirSync(path.resolve(this.out + '/models'));
-        fs.mkdirSync(path.resolve(this.out + '/models/enums'));
-        fs.mkdirSync(path.resolve(this.out + '/services'));
+        fs.mkdirSync(path.resolve(process.cwd(), this.out));
+        fs.mkdirSync(path.resolve(process.cwd(), this.out + '/models'));
+        fs.mkdirSync(path.resolve(process.cwd(), this.out + '/models/enums'));
+        fs.mkdirSync(path.resolve(process.cwd(), this.out + '/services'));
         resolve();
         return;
       } catch (error) {
-        reject();
+        reject(error);
       }
     });
   }
@@ -84,7 +85,7 @@ export class TemplatePrinter {
       try {
         fs.writeFileSync(
           path.resolve(
-            this.out + '/models/enums/' + paramCase(value.name) + '.enum.ts'
+            process.cwd(),this.out + '/models/enums/' + paramCase(value.name) + '.enum.ts'
           ),
           str
         );
@@ -113,7 +114,7 @@ export class TemplatePrinter {
       }
       fs.writeFile(
         path.resolve(
-          this.out +
+          process.cwd(),this.out +
             '/models/' +
             paramCase(model.name).replace(/^i-/gi, '') +
             '.model.ts'
@@ -156,7 +157,7 @@ export class TemplatePrinter {
       }
       this._printedServices.push(pascalCase(name));
       fs.writeFile(
-        path.resolve(this.out + '/services/' + paramCase(name) + '.service.ts'),
+        path.resolve(process.cwd(),this.out + '/services/' + paramCase(name) + '.service.ts'),
         str,
         (err) => {
           if (err) {
@@ -189,7 +190,7 @@ export class TemplatePrinter {
         this._logger.err(`[ ERROR ] EJS print INTERNALS error: ${err}`);
         return;
       }
-      fs.writeFile(path.resolve(this.out + '/internals.ts'), str, (err) => {
+      fs.writeFile(path.resolve(process.cwd(),this.out + '/internals.ts'), str, (err) => {
         if (err) {
           this._logger.err('[ ERROR ] file: ' + this.out + '/internals.ts');
           return;
@@ -209,7 +210,7 @@ export class TemplatePrinter {
         this._logger.err(`[ ERROR ] EJS print MODULE error: ${err}`);
         return;
       }
-      fs.writeFile(path.resolve(this.out + '/api.module.ts'), str, (err) => {
+      fs.writeFile(path.resolve(process.cwd(),this.out + '/api.module.ts'), str, (err) => {
         if (err) {
           this._logger.err('[ ERROR ] file: ' + this.out + '/api.module.ts');
           return;
@@ -224,7 +225,7 @@ export * from './models';
 ${noModule?"": "export { APIModule } from './api.module';"}
 `;
     try {
-      fs.writeFileSync(path.resolve(this.out + '/index.ts'), imports);
+      fs.writeFileSync(path.resolve(process.cwd(),this.out + '/index.ts'), imports);
     } catch (e) {
       this._logger.err('[ ERROR ] file: ' + this.out + '/index.ts');
     }
@@ -241,7 +242,7 @@ ${noModule?"": "export { APIModule } from './api.module';"}
     imports.push('');
     try {
       fs.writeFileSync(
-        path.resolve(this.out + '/services/index.ts'),
+        path.resolve(process.cwd(),this.out + '/services/index.ts'),
         imports.join('\r\n')
       );
     } catch (e) {
@@ -262,7 +263,7 @@ ${noModule?"": "export { APIModule } from './api.module';"}
     imports.push('');
     try {
       fs.writeFileSync(
-        path.resolve(this.out + '/models/index.ts'),
+        path.resolve(process.cwd(),this.out + '/models/index.ts'),
         imports.join('\r\n')
       );
     } catch (e) {
@@ -279,7 +280,7 @@ ${noModule?"": "export { APIModule } from './api.module';"}
     imports.push('');
     try {
       fs.writeFileSync(
-        path.resolve(this.out + '/models/enums/index.ts'),
+        path.resolve(process.cwd(),this.out + '/models/enums/index.ts'),
         imports.join('\r\n')
       );
     } catch (e) {

@@ -40,18 +40,28 @@ export default class Generator {
   public start() {
     this.getConfig(this.config.config).then(
       (res) => {
+        console.log(JSON.stringify(this.config))
         this._logger.info('<Parsing Processed...>');
         this._logger.ok(JSON.stringify(res));
         this.parser.parse(res).then(
           (res: [IParserEnum[], IParserModel[], IParserServiceList]) => {
-            this._logger.ok('[ SUCCESS ]: Swagger JSON Parsed Successfull!');
+            this._logger.ok('[ SUCCESS ]: Swagger JSON Parsed Successful!');
             this._logger.info('<Files Saving>');
             let extend = null;
+            console.log(this.config.ext)
             try {
-              extend = JSON.parse(
-                fs.readFileSync('./sw2ngx-extend.json', 'utf-8')
-              );
+              console.log(this.config.ext)
+              if(this.config.ext){
+                extend = JSON.parse(
+                  fs.readFileSync(this.config.ext, 'utf-8')
+                );
+              }else{
+                extend = JSON.parse(
+                  fs.readFileSync('./sw2ngx-extend.json', 'utf-8')
+                );
+              }
             } catch (e) {
+              console.log(e);
               this._logger.info('Not have extends');
             }
             if (extend) {
@@ -82,11 +92,6 @@ export default class Generator {
                 }
               }
             }
-            // fs.writeFileSync(path.resolve('./result.json'), JSON.stringify({
-            //     enums: res[0],
-            //     models: res[1],
-            //     services: res[2]
-            // }));
             this._printer.print(
               res[0], 
               res[1], 
@@ -99,11 +104,10 @@ export default class Generator {
               ).then(
               () => {
                 this._logger.ok(
-                  '[ SUCCESS ]: Generation API Module Successfull!'
+                  '[ SUCCESS ]: Generation API Module Successful!'
                 );
               },
               (reject) => {
-                console.log('end here');
                 this._logger.err(JSON.stringify(reject));
               }
             );

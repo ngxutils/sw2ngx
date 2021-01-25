@@ -8,6 +8,7 @@ export class HelpCLI {
     const params: IGeneratorConfig = {
       config: '',
       out: '',
+      ext: '',
       templateFolder: '',
       readonlyModels: false,
       withoutModule: false,
