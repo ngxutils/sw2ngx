@@ -395,7 +395,7 @@ export class Parser {
       }
       if (prop.type === 'object') {
         return {
-          typeName: 'Record<string, unknown>',
+          typeName: 'Record<string, unknown> | unknown',
           typeImport: null
         };
       }
