@@ -8,4 +8,5 @@ export interface IGeneratorConfig {
   withoutModule: boolean;
   providedIn: 'root' | 'any' | 'none' | string;
   help: boolean;
+  customMethodNameParser: string;
 }

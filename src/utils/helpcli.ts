@@ -10,6 +10,7 @@ export class HelpCLI {
       out: '',
       ext: '',
       templateFolder: '',
+      customMethodNameParser: '',
       readonlyModels: false,
       withoutModule: false,
       providedIn: 'root',

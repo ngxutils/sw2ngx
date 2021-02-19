@@ -43,7 +43,7 @@ export default class Generator {
         console.log(JSON.stringify(this.config))
         this._logger.info('<Parsing Processed...>');
         this._logger.ok(JSON.stringify(res));
-        this.parser.parse(res).then(
+        this.parser.parse(res, this.config.customMethodNameParser).then(
           (res: [IParserEnum[], IParserModel[], IParserServiceList]) => {
             this._logger.ok('[ SUCCESS ]: Swagger JSON Parsed Successful!');
             this._logger.info('<Files Saving>');

@@ -24,6 +24,12 @@ export const GeneratorParams: IGeneratorParam[] = [
     description: 'Template Folder'
   },
   {
+    name: 'customMethodNameParser',
+    keys: ['-parser-method-name'],
+    noValue: false,
+    description: 'Function for parsing custom service method name'
+  },
+  {
     name: 'readonlyModels',
     keys: ['-rlm', '--read-only-models'],
     noValue: true,

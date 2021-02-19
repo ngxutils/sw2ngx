@@ -14,6 +14,7 @@ import {
 } from '../interfaces/parser';
 import { SimHash } from './simhash/simhash';
 import { paramCase, camelCase, pascalCase } from 'change-case';
+import * as path from 'path';
 
 export class Parser {
   private _enums: IParserEnum[] = [];
@@ -22,13 +23,13 @@ export class Parser {
   private _logger: Logger = new Logger();
   private _simHash: SimHash = new SimHash();
 
-  public parse(config: ISwaggerConfig): Promise<any> {
+  public parse(config: ISwaggerConfig, serviceMethodNameParser= ''): Promise<any> {
     return new Promise<any>((resolve, reject) => {
       this._logger.info('start parsing');
       this.parseModels(config).then(
         () => {
           this._logger.info('models parsed');
-          this.parseServices(config).then(
+          this.parseServices(config, serviceMethodNameParser).then(
             () => {
               this._logger.info('services parsed');
               resolve([this._enums, this._models, this._servicesList]);
@@ -93,7 +94,15 @@ export class Parser {
     }
   }
 
-  public parseServices(config: ISwaggerConfig): Promise<IParserServiceList> {
+  public parseServices(config: ISwaggerConfig, serviceMethodNameParser: string): Promise<IParserServiceList> {
+    let methodNameParser= (uri:string, type: string)=>this.genMethodName(uri,type)
+    if(serviceMethodNameParser!=='') {
+      try {
+        methodNameParser = require(path.resolve(process.cwd(), serviceMethodNameParser));
+      }catch (e) {
+        console.log(e);
+      }
+    }
     return new Promise<IParserServiceList>((resolve) => {
       const result: IParserServiceList = {
         __common: {
@@ -110,7 +119,8 @@ export class Parser {
               const parsedMethod = this.parseMethod(
                 path,
                 method,
-                config.paths[path][method]
+                config.paths[path][method],
+                methodNameParser
               );
               if (result[parsedMethod.tag]) {
                 const duplicates = result[parsedMethod.tag].methods.filter(
@@ -135,7 +145,10 @@ export class Parser {
       resolve(this._servicesList);
     });
   }
-  public genMethodName(uri: string, type: string): string {
+  public genMethodName(uri: string, type: string, id =  ''): string {
+    if(id!==''){
+      return id;
+    }
     const tmp = pascalCase(uri.replace(/\//gi, '-').replace(/\{|\}|\$/gi, ''));
     switch (type.toLocaleLowerCase()) {
       case 'post':
@@ -149,10 +162,8 @@ export class Parser {
         return 'get' + tmp;
     }
   }
-  public parseMethod(uri: string, type: string, method: any): IParserMethod {
-    const name = method.operationId
-      ? method.operationId
-      : this.genMethodName(uri, type);
+  public parseMethod(uri: string, type: string, method: any, methodNameParser: (uri:string, type: string, id: string) => string): IParserMethod {
+    const name = methodNameParser(uri, type, method.operationId);
     const tag = this.parseTags(method.tags);
     const params = this.parseParams(method.parameters, camelCase(name));
     const resp = this.parseResponse(method.responses, camelCase(name));
