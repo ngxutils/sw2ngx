@@ -95,7 +95,7 @@ export class Parser {
   }
 
   public parseServices(config: ISwaggerConfig, serviceMethodNameParser: string): Promise<IParserServiceList> {
-    let methodNameParser= (uri:string, type: string)=>this.genMethodName(uri,type)
+    let methodNameParser= (uri:string, type: string, id: string)=>this.genMethodName(uri,type, id)
     if(serviceMethodNameParser!=='') {
       try {
         methodNameParser = require(path.resolve(process.cwd(), serviceMethodNameParser));
