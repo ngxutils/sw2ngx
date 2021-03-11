@@ -454,12 +454,12 @@ export class Parser {
     curname: string,
     parent: string
   ): IParserResolvedType {
-    const hashName = this._simHash.hash(evalue.join('|'));
+
     // this._logger.ok(`${parent}_${curname}Set: ${hashName.toString(16)}`);
     // this._logger.err(hashName);
     const extact = this.extractEnumDescription(description ? description : '');
     //  this._logger.err(JSON.stringify({description, evalue, curname, parent}))
-
+    const hashName = this._simHash.hash(evalue.join('|'));
     if (extact === null) {
       const numbers = '1234567890'.split('');
       if (
@@ -495,7 +495,13 @@ export class Parser {
       (x) => x.name.replace(/\d+$/gi, '') === withParentName
     );
     if (duplicate.length > 0) {
-      const equals = duplicate.filter((x) => x.hash === propEnum.hash);
+      const equals = duplicate.filter((x) => {if(x.hash === propEnum.hash){
+        const p = x.value.map(x=> x.key).sort().join('|')
+        const f = propEnum.value.map(x=> x.key).sort().join('|')
+        return p === f
+      }
+      return false
+      });
       if (equals.length > 0) {
         return {
           typeName: equals[0].name,
