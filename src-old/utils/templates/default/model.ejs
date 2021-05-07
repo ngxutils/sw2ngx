@@ -1,0 +1,14 @@
+// Automatically generated - do not modify!
+
+<% if (model.imports.filter(x=>x!==model.name).length>0) { -%>
+import { <%=model.imports.filter(x=>x!==model.name).join(', ');-%> } from './';
+<% } -%>
+
+export interface <%=`${model.name}`%> {
+<%for (const param of model.props) {-%>
+<%if (param.description) {-%>
+<%-`\t/* ${param.description} */\r\n`-%>
+<%}-%>
+<%-`\t${readOnly?'readonly':''} ${param.name} : ${param.type};\r\n`-%>
+<%}-%>
+}

@@ -1,26 +1,33 @@
 {
-    "env": {
-		"browser": true,
-		"es6": true,
-		"es2017": true
-	},
-    "extends": [
-		"eslint:recommended",
-		"plugin:@typescript-eslint/eslint-recommended",
-		"plugin:@typescript-eslint/recommended",
-		"plugin:@typescript-eslint/recommended-requiring-type-checking",
-		"prettier",
-    	"prettier/@typescript-eslint"
-	],
-	"parser": "@typescript-eslint/parser",
-	"parserOptions": {
-		"project": "tsconfig.json",
-		"tsconfigRootDir": "."
-	},
-	"plugins": ["@typescript-eslint"],
-	"rules": {
-		"@typescript-eslint/no-explicit-any": 0,
-		"@typescript-eslint/interface-name-prefix": 0,
-		"@typescript-eslint/explicit-function-return-type":0
-    }
+  "root": true,
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": { "project": "./tsconfig.json" },
+  "env": { "es6": true },
+  "ignorePatterns": ["node_modules", "build", "coverage"],
+  "plugins": ["import", "eslint-comments"],
+  "extends": [
+    "eslint:recommended",
+    "plugin:eslint-comments/recommended",
+    "plugin:@typescript-eslint/recommended",
+    "plugin:import/typescript",
+    "prettier",
+    "prettier/@typescript-eslint"
+  ],
+  "globals": { "BigInt": true, "console": true, "WebAssembly": true },
+  "rules": {
+    "@typescript-eslint/explicit-module-boundary-types": "off",
+    "eslint-comments/disable-enable-pair": [
+      "error",
+      { "allowWholeFile": true }
+    ],
+    "eslint-comments/no-unused-disable": "error",
+    "import/order": [
+      "error",
+      { "newlines-between": "always", "alphabetize": { "order": "asc" } }
+    ],
+    "sort-imports": [
+      "error",
+      { "ignoreDeclarationSort": true, "ignoreCase": true }
+    ]
+  }
 }

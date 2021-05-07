@@ -1,0 +1,19 @@
+// Automatically generated - do not modify!
+
+import { NgModule } from '@angular/core';
+import { HttpClientModule } from '@angular/common/http';
+import {
+    <%-servicesList.join(',\r\n\t')%>
+} from './services';
+
+@NgModule({
+  imports: [
+    HttpClientModule
+  ],
+  exports: [],
+  declarations: [],
+  providers: [
+    <%-servicesList.join(',\r\n\t')%>
+  ],
+})
+export class APIModule { }

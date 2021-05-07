@@ -1,12 +1,9 @@
-.eslintcache
-node_modules
-.DS_Store
-.rpt2_cache
-dist
-docs
-api
-package-lock.json
-
-# IDEA ignore list
 .idea/*
-*.iml
+.nyc_output
+build
+node_modules
+test
+src/**.js
+coverage
+*.log
+yarn.lock

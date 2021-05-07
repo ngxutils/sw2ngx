@@ -1,0 +1,11 @@
+{
+  "$scheme": "./src/config.scheme.json",
+  "config": "https://petstore.swagger.io/v2/swagger.json",
+  "outputPath": "./api",
+  "baseHref": "/my/awesome/api",
+  "extendConfigPath": "./sw2ngx.extend.json",
+  "templates": "./src/templates/default",
+  "readOnlyModels": true,
+  "noModule": true,
+  "provideIn": "root"
+}

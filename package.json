@@ -1,69 +1,111 @@
 {
   "name": "sw2ngx",
-  "version": "5.2.0",
-  "description": "Generate Angular API module form swagger.json",
-  "main": "dist/sw2ngx.umd.js",
-  "module": "dist/sw2ngx.es5.js",
-  "typings": "dist/types/sw2ngx.d.ts",
-  "scripts": {
-    "lint": "eslint --cache --ext .ts src",
-    "lint:fix": "npm run lint -- --fix",
-    "prebuild": "rimraf dist",
-    "build": "tsc --module commonjs && rollup -c rollup.config.ts",
-    "start": "rollup -c rollup.config.ts -w"
-  },
-  "preferGlobal": true,
-  "bin": {
-    "sw2ngx": "./bin/sw2ngx"
-  },
-  "author": "https://github.com/YAZART",
+  "version": "6.0.0-alpha-01",
+  "description": "auto-generation of angular services by Swagger / OpenAPI declaration",
+  "main": "build/main/index.js",
+  "typings": "build/main/index.d.ts",
+  "module": "build/module/index.js",
+  "repository": "https://github.com/ngxutils/sw2ngx",
   "license": "WTFPL",
-  "homepage": "https://github.com/ngxutils/sw2ngx#readme",
-  "bugs": {
-    "url": "https://github.com/ngxutils/sw2ngx/issues"
+  "keywords": [],
+  "scripts": {
+    "build": "run-p build:*",
+    "build:main": "tsc -p tsconfig.json",
+    "build:module": "tsc -p tsconfig.module.json",
+    "fix": "run-s fix:*",
+    "fix:prettier": "prettier \"src/**/*.ts\" --write",
+    "fix:lint": "eslint src --ext .ts --fix",
+    "test": "run-s build test:*",
+    "test:lint": "eslint src --ext .ts",
+    "test:prettier": "prettier \"src/**/*.ts\" --list-different",
+    "test:spelling": "cspell \"{README.md,.github/*.md,src/**/*.ts}\"",
+    "test:unit": "nyc --silent ava",
+    "check-cli": "run-s test diff-integration-tests check-integration-tests",
+    "check-integration-tests": "run-s check-integration-test:*",
+    "diff-integration-tests": "mkdir -p diff && rm -rf diff/test && cp -r test diff/test && rm -rf diff/test/test-*/.git && cd diff && git init --quiet && git add -A && git commit --quiet --no-verify --allow-empty -m 'WIP' && echo '\\n\\nCommitted most recent integration test output in the \"diff\" directory. Review the changes with \"cd diff && git diff HEAD\" or your preferred git diff viewer.'",
+    "watch:build": "tsc -p tsconfig.json -w",
+    "watch:test": "nyc --silent ava --watch",
+    "cov": "run-s build test:unit cov:html cov:lcov && open-cli coverage/index.html",
+    "cov:html": "nyc report --reporter=html",
+    "cov:lcov": "nyc report --reporter=lcov",
+    "cov:send": "run-s cov:lcov && codecov",
+    "cov:check": "nyc report && nyc check-coverage --lines 100 --functions 100 --branches 100",
+    "doc": "run-s doc:html && open-cli build/docs/index.html",
+    "doc:html": "typedoc src --exclude **/*.spec.ts --target ES6 --mode file --out build/docs",
+    "doc:json": "typedoc src --exclude **/*.spec.ts --target ES6 --mode file --json build/docs/typedoc.json",
+    "doc:publish": "gh-pages -m \"[ci skip] Updates\" -d build/docs",
+    "version": "standard-version",
+    "reset-hard": "git clean -dfx && git reset --hard && npm i",
+    "prepare-release": "run-s reset-hard test cov:check doc:html version doc:publish"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/ngxutils/sw2ngx.git"
-  },
-  "keywords": [
-    "swagger",
-    "angular",
-    "javascript",
-    "generator",
-    "ngx",
-    "openapi",
-    "ng2",
-    "angular2",
-    "angularX"
-  ],
-  "devDependencies": {
-    "@rollup/plugin-commonjs": "^11.1.0",
-    "@rollup/plugin-json": "^4.0.2",
-    "@rollup/plugin-node-resolve": "^7.1.3",
-    "@types/node": "^13.11.1",
-    "@types/request": "^2.48.4",
-    "@types/rimraf": "^3.0.0",
-    "@typescript-eslint/eslint-plugin": "^2.28.0",
-    "@typescript-eslint/parser": "^2.28.0",
-    "eslint": "^6.8.0",
-    "eslint-config-prettier": "^6.10.1",
-    "eslint-plugin-prettier": "^3.1.3",
-    "prettier": "^2.0.4",
-    "rollup": "^2.6.1",
-    "rollup-plugin-copy": "^3.3.0",
-    "rollup-plugin-node-builtins": "^2.1.2",
-    "rollup-plugin-node-globals": "^1.4.0",
-    "rollup-plugin-sourcemaps": "^0.5.0",
-    "rollup-plugin-typescript2": "^0.27.0",
-    "typescript": "^3.8.3"
+  "engines": {
+    "node": ">=10"
   },
   "dependencies": {
-    "@types/ejs": "^3.0.2",
-    "@types/node-fetch": "^2.5.6",
-    "change-case": "^4.1.1",
-    "ejs": "^3.0.2",
+    "@bitauth/libauth": "^1.17.1",
+    "@types/node": "^14.14.37",
+    "@types/node-fetch": "^2.5.10",
     "node-fetch": "^2.6.1",
-    "rimraf": "^3.0.2"
+    "reflect-metadata": "^0.1.13",
+    "rxjs": "^6.6.7",
+    "tsyringe": "^4.5.0"
+  },
+  "devDependencies": {
+    "@ava/typescript": "^1.1.1",
+    "@istanbuljs/nyc-config-typescript": "^1.0.1",
+    "@typescript-eslint/eslint-plugin": "^4.0.1",
+    "@typescript-eslint/parser": "^4.0.1",
+    "ava": "^3.12.1",
+    "codecov": "^3.5.0",
+    "cspell": "^4.1.0",
+    "cz-conventional-changelog": "^3.3.0",
+    "eslint": "^7.8.0",
+    "eslint-config-prettier": "^6.11.0",
+    "eslint-plugin-eslint-comments": "^3.2.0",
+    "eslint-plugin-import": "^2.22.0",
+    "gh-pages": "^3.1.0",
+    "npm-run-all": "^4.1.5",
+    "nyc": "^15.1.0",
+    "open-cli": "^6.0.1",
+    "prettier": "^2.1.1",
+    "standard-version": "^9.0.0",
+    "ts-node": "^9.0.0",
+    "typedoc": "^0.20.34",
+    "typescript": "^4.0.2"
+  },
+  "files": [
+    "build/main",
+    "build/module",
+    "!**/*.spec.*",
+    "!**/*.json",
+    "CHANGELOG.md",
+    "LICENSE",
+    "sw2ngx/README.md"
+  ],
+  "ava": {
+    "failFast": true,
+    "timeout": "60s",
+    "typescript": {
+      "rewritePaths": {
+        "src/": "build/main/"
+      }
+    },
+    "files": [
+      "!build/module/**"
+    ]
+  },
+  "config": {
+    "commitizen": {
+      "path": "cz-conventional-changelog"
+    }
+  },
+  "prettier": {
+    "singleQuote": true
+  },
+  "nyc": {
+    "extends": "@istanbuljs/nyc-config-typescript",
+    "exclude": [
+      "**/*.spec.js"
+    ]
   }
 }
