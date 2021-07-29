@@ -17,7 +17,7 @@ export class SimHash {
                 this.kshingles = options.kshingles;
             }
             /**
-             * By default, this many number of minimum shingles will 
+             * By default, this many number of minimum shingles will
              * be combined to create the final hash.
              */
             if (options.maxFeatures) {
@@ -37,7 +37,6 @@ export class SimHash {
         const tokens = this.tokenize(input);
         const shingles = [];
         const jenkins = new Jenkins();
-        // eslint-disable-next-line @typescript-eslint/no-for-in-array
         for (const i in tokens) {
             shingles.push(jenkins.hash32(tokens[i]));
         }
@@ -66,7 +65,6 @@ export class SimHash {
 
         if (shingles.length === 1) return shingles[0];
 
-        // eslint-disable-next-line @typescript-eslint/unbound-method
         shingles.sort(this.hashComparator);
         if (shingles.length > this.maxFeatures) shingles = shingles.splice(this.maxFeatures);
 
@@ -74,7 +72,6 @@ export class SimHash {
         let mask = 0x1;
         for (let pos = 0; pos < 32; pos++) {
             let weight = 0;
-            // eslint-disable-next-line @typescript-eslint/no-for-in-array
             for (const i in shingles) {
                 const shingle = parseInt(shingles[i], 16);
                 weight += !(~shingle & mask) === true ? 1 : -1;
@@ -86,23 +83,8 @@ export class SimHash {
         return simhash;
     }
 
-
-
     /**
-     * Calculates binary hamming distance of two base 16 integers.
-     */
-    private hammingDistanceSlow(x: string, y: string) {
-        let distance = 0;
-        let val = parseInt(x, 16) ^ parseInt(y, 16);
-        while (val) {
-            ++distance;
-            val &= val - 1;
-        }
-        return distance;
-    }
-
-    /**
-     * TODO: Use a priority queue. Till then this comparator is 
+     * TODO: Use a priority queue. Till then this comparator is
      * used to find the least 'maxFeatures' shingles.
      */
     public hashComparator(a: number, b: number) {

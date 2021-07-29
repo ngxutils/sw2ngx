@@ -1,6 +1,6 @@
 {
   "$scheme": "./src/config.scheme.json",
-  "config": "https://petstore.swagger.io/v2/swagger.json",
+  "config": "https://retail-tst.payment.ru/api/swagger/docs/v1",
   "outputPath": "./api",
   "baseHref": "/my/awesome/api",
   "extendConfigPath": "./sw2ngx.extend.json",

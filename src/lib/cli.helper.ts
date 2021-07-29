@@ -1,6 +1,5 @@
 import { injectable, injectAll, registry } from 'tsyringe';
 
-import { Sw2NgxConfigNormalizer } from './config-normalizer';
 import { Logger } from './logger';
 
 @injectable()
@@ -18,7 +17,7 @@ import { Logger } from './logger';
   }
 ])
 export class CliHelper{
-  constructor(@injectAll('CLI_PARAM')private params: CliParam[] = [],private configNormalize?: Sw2NgxConfigNormalizer, private logger?: Logger) {
+  constructor(@injectAll('CLI_PARAM')private params: CliParam[] = [], private logger?: Logger) {
   }
   public readCliParams(): Sw2NgxConfig {
     return  this.getCliParams()
@@ -77,7 +76,7 @@ export class CliHelper{
       return prev
     }, {} as Sw2NgxConfig)
 
-    return this.configNormalize?.normalize(parsedParams as Sw2NgxConfig, false)|| {} as Sw2NgxConfig
+    return parsedParams as Sw2NgxConfig
   }
 
 }

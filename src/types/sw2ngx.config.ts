@@ -4,7 +4,7 @@ declare type Sw2NgxConfig = {
   baseHref: string,
   extendConfigPath: string,
   templates: string,
-  readOnlyModels: string,
+  readOnlyModels: boolean,
   noModule: boolean,
   provideIn: string,
   help: boolean,

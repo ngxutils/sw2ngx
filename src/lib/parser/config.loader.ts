@@ -10,7 +10,6 @@ import { singleton } from 'tsyringe';
 export class SwaggerConfigLoader {
   loadConfig(configPath:string){
     if (/http(s?):\/\/\S/gi.test(configPath)) {
-      console.log('here')
       return this.getByUrl(configPath)
     } else {
       return this.getByFilePath(configPath)

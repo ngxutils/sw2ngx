@@ -9,6 +9,7 @@ export class Sw2NgxConfigNormalizer {
     let configurationIsValid = true
     this.params?.forEach((param)=>{
       if(!parsedParams[param.name]){
+        console.log(param.name)
         if(param.defaultValueFunction || param.default) {
           if (param.defaultValueFunction) {
             parsedParams[param.name] = param.defaultValueFunction()

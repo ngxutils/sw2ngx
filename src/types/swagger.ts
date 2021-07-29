@@ -219,8 +219,9 @@ export interface License {
 /**
  * Relative paths to the individual endpoints. They must be relative to the 'basePath'.
  */
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface Paths {}
+export interface Paths {
+  [key:string]: PathItem
+}
 /**
  * This interface was referenced by `Paths`'s JSON-Schema definition
  * via the `patternProperty` "^/".

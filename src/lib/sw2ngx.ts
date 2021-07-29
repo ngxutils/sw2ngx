@@ -1,7 +1,7 @@
 import { EMPTY, Observable, of, throwError } from 'rxjs';
 import {
   filter,
-  map, switchMap, tap
+  switchMap, tap
 } from 'rxjs/operators';
 import { autoInjectable, injectAll, registry } from 'tsyringe';
 
@@ -13,12 +13,14 @@ import { OpenApiV2 } from '../types/swagger';
 import { CliHelper } from './cli.helper';
 import { Sw2NgxConfigNormalizer } from './config-normalizer';
 import { configuration } from './configuration';
+import { ConfigurationRepository } from './configuration.repository';
 import { JsonConfigHelper } from './json-config.helper';
 import { Logger } from './logger';
 import { logotype } from './logo';
 import { SwaggerConfigLoader } from './parser/config.loader';
 import { IOpenApiParserPlugin } from './parser/open-api-parser.plugin';
 import { parserConfiguration } from './parser/parser.configuration';
+import { TemplatePrinterService } from './printer/template-printer.service';
 
 @autoInjectable()
 @registry([
@@ -32,7 +34,9 @@ export class SwaggerToAngularCodeGen {
     private configNormalize?: Sw2NgxConfigNormalizer,
     private logger?: Logger,
     private configLoader?: SwaggerConfigLoader,
-    @injectAll('PARSER') private parsers?: IOpenApiParserPlugin[]
+    @injectAll('PARSER') private parsers?: IOpenApiParserPlugin[],
+    private sw2ngxConfiguration?: ConfigurationRepository,
+    private templatePrinter?: TemplatePrinterService
     ) {
     this.logger?.ok(logotype)
     this.run()
@@ -40,18 +44,24 @@ export class SwaggerToAngularCodeGen {
   private run(){
     this.parseInput()
       .pipe(
-        filter((x)=>!!x),
-        tap((x)=> console.log(x)),
-        switchMap((config)=>this.getConfig(config)),
-        tap((x)=> console.log(x)),
-        map((value)=>{
+        filter((x): x is Sw2NgxConfig=>!!x),
+        tap((config)=> this.sw2ngxConfiguration?.config.next(config)),
+        switchMap((config: Sw2NgxConfig)=>this.getConfig(config)),
+        switchMap((value: OpenApiV2 | OpenApiV3): Observable<Sw2NgxApiDefinition> => {
           const availableParser = this.parsers?.find((parser)=> parser.supports(value))
-          console.log(availableParser)
-          return availableParser?.parse(value)
+          if(availableParser){
+            return availableParser?.parse(value)
+          }else {
+            return  throwError('NOT available parser for swagger/openapi config')
+          }
         })
     )
       .subscribe(
-        ()=> this.logger?.ok('[ OK ] Generation successfully!'),
+        (resp)=> {
+          this.logger?.ok('[ OK ] Generation successfully!')
+          this.templatePrinter?.print(resp).subscribe(()=>console.log('printed'))
+        }
+        ,
         (err)=>this.logger?.err(`[ ERROR ]: Generation cancel with error (Stack Trace: ${JSON.stringify(err)} )`))
   }
   private parseInput(): Observable<Sw2NgxConfig | undefined>{
@@ -62,7 +72,6 @@ export class SwaggerToAngularCodeGen {
     if(configParams?.preset){
       fromFilePresetConfig = (this.jsonConfigHelper?.getConfig(configParams.preset) || {}) as Sw2NgxConfig
     }
-
     const resultConfig = this.configNormalize?.normalize(Object.assign<Sw2NgxConfig, Sw2NgxConfig>(fromFilePresetConfig, configParams), true)
 
     if(resultConfig?.parsingError && !configParams.help){

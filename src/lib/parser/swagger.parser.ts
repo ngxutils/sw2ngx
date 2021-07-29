@@ -1,9 +1,14 @@
+import { Observable, of } from 'rxjs';
+import { switchMap, tap } from 'rxjs/operators';
 import { singleton } from 'tsyringe';
 
 import { OpenApiV3 } from '../../types/openapi';
-import { OpenApiV2 } from '../../types/swagger';
+import { OpenApiV2, Operation, Schema } from '../../types/swagger';
 
 import { IOpenApiParserPlugin } from './open-api-parser.plugin';
+import { resolveImportsFn } from './utils/resolve-imports.fn';
+import { MethodType, resolveMethodFn } from './utils/resolve-method.fn';
+import { exportEnumRegistry, resolveTypeFn } from './utils/resolve-type.fn';
 
 @singleton()
 export class OpenApiV2Parser implements IOpenApiParserPlugin{
@@ -13,7 +18,127 @@ export class OpenApiV2Parser implements IOpenApiParserPlugin{
   supports(config: OpenApiV2 | OpenApiV3) {
     return this.isV2(config)
   }
-  parse(config: OpenApiV2) {
-    return config?true:true
+  parse(config: OpenApiV2): Observable<Sw2NgxApiDefinition> {
+    return this.parseModels(config)
+      .pipe(
+        switchMap(
+          (models)=>this.parseServices(config, models)
+        ),
+        tap((err)=>console.log(err))
+      );
+  }
+  parseModels(config: OpenApiV2): Observable<{models: Sw2NgxModel[], enums: Sw2NgxEnum[]}> {
+    const modelsDefs: {models: Sw2NgxModel[], enums: Sw2NgxEnum[]} = {
+      models: [],
+      enums:[]
+    }
+
+    if(config?.definitions) {
+      modelsDefs.models =  Object.entries(config.definitions).map(([name, definition])=>{
+        const modelName = `I${name}`
+        const modelProperties  = definition?.properties ? Object.entries(definition.properties):[]
+        const parsedProperties = modelProperties
+          .map(
+            ([propName, propDef])=>this.parseModelProp(modelName, propName, propDef)
+          )
+
+        const resolvedModel: Sw2NgxModel = {
+          name: modelName,
+          description: definition.description || `Swagger model: ${modelName}`,
+          imports: resolveImportsFn(parsedProperties.reduce((acc: string[], parsedProperty)=>{
+            acc.push(...parsedProperty.propertyImport)
+            return acc
+          }, [])),
+          properties: parsedProperties
+        }
+        return resolvedModel
+      })
+      modelsDefs.enums = exportEnumRegistry()
+    }
+    return of(modelsDefs);
+  }
+  parseModelProp(modelName: string, propName: string, prop: Schema): Sw2NgxProperty {
+    const resolvedProperty = resolveTypeFn(prop, propName, modelName)
+    return {
+      propertyDescription: `${prop.description}`,
+      propertyName: propName,
+      propertyImport: resolvedProperty.typeImport,
+      propertyType: resolvedProperty.type
+    }
+  }
+
+
+  parseServices(config: OpenApiV2, modelsAndEnums: {enums: Sw2NgxEnum[], models: Sw2NgxModel[]}): Observable<Sw2NgxApiDefinition> {
+    let services: Sw2NgxService[] = []
+
+    if(config.paths){
+      const servicesList = Object.entries(config.paths).map(([servicePath, serviceDef])=>{
+        return ['get', 'post', 'put', 'delete', 'head', 'options']
+          .map(
+            (servicePathMethod) => {
+              return serviceDef[servicePathMethod]
+            ? resolveMethodFn(servicePath, servicePathMethod as MethodType, serviceDef[servicePathMethod] as Operation)
+            : null}
+          )
+      })
+        .reduce((acc, cur)=>{
+          acc.push(...cur)
+          return acc
+        }, [])
+        .filter((item): item is Sw2NgxServiceMethod=>!!item)
+        .reduce((acc: {[key:string]: Sw2NgxService}, cur)=>{
+        if(acc[cur.tag]){
+          acc[cur.tag].methods.push(cur)
+        }else {
+          acc[cur.tag] = {
+            name: cur.tag,
+            uri: `${config.basePath}`,
+            methods: [cur],
+            imports: []
+          }
+        }
+        return acc
+      }, {
+          __common: {
+            name: '__common',
+            uri: `${config.basePath}`,
+            imports: [],
+            methods: []
+          }
+        })
+      services = Object.values(servicesList)
+        .map((service)=>{
+          const methodsNames: string[] = []
+          service.methods = service.methods.map((method)=>{
+            const duplicates = methodsNames.filter((name)=> name === method.name).length
+            methodsNames.push(method.name)
+            if(duplicates>0){
+              method.name+=duplicates
+            }
+            return method
+          })
+          return service
+        })
+        .map((service)=>{
+        const allServiceImports = service.methods
+          .map((method)=>{
+            return [...method.params.all.map((param)=>param.type.typeImport),
+              ...method.resp.map((response)=>response.typeImport)].reduce((acc, cur)=>{
+                acc.push(...cur)
+              return acc
+            }, [])
+          }
+          ).reduce((acc, cur)=>{
+            acc.push(...cur)
+          return acc
+        }, [])
+          .filter((item): item is string =>!!item)
+        service.imports = resolveImportsFn(allServiceImports)
+        return service
+      })
+    }
+
+
+    return of({models: [...modelsAndEnums.models], enums:[...modelsAndEnums.enums], services: Object.values(services)})
   }
 }

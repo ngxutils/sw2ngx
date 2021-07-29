@@ -1,3 +1,4 @@
+import { Observable, of } from 'rxjs';
 import { singleton } from 'tsyringe';
 
 import { OpenApiV3 } from '../../types/openapi';
@@ -13,7 +14,12 @@ export class OpenApiV3Parser implements IOpenApiParserPlugin{
   supports(config: OpenApiV2 | OpenApiV3) {
     return this.isV3(config)
   }
-  parse(config: OpenApiV3) {
-    return config?true:true
+  parse(config: OpenApiV3): Observable<Sw2NgxApiDefinition> {
+    console.log('config', !!config)
+    return of({
+      models: [],
+      enums:[],
+      services: []
+    })
   }
 }
