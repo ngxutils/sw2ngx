@@ -73,6 +73,17 @@ export const configuration = [
   {
     token: 'CLI_PARAM',
     useValue: {
+      key: "-srv-interface",
+      name: "genServiceInterfaces",
+      description: "add interfaces to service generation",
+      withoutValue: true,
+      required: false,
+      default: false
+    }
+  },
+  {
+    token: 'CLI_PARAM',
+    useValue: {
       key: "-no-module",
       name: "noModule",
       description: "create api services without module file",
