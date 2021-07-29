@@ -2,7 +2,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as process from 'process';
 
-import { paramCase } from 'change-case';
+import { paramCase, pascalCase } from 'change-case';
 import * as ejs from 'ejs';
 import {
   combineLatest,
@@ -44,7 +44,7 @@ export class TemplatePrinterService {
           apiDefinition.enums.length>0,
           this.sw2ngxConfiguration?.config?.value?.readOnlyModels|| false),
             this.printEnumsStream(apiDefinition.enums, outPath),
-            this.printServiceStream(apiDefinition.services)
+            this.printServiceStream(apiDefinition.services, outPath)
         ])
       }),
       map((res)=>{ console.log(res)
@@ -53,10 +53,8 @@ export class TemplatePrinterService {
   }
   private createGeneratorFolder(apiDefinition: Sw2NgxApiDefinition): Observable<string | boolean>{
    return this.config.pipe(map(config=> {
-     console.log('getConfig')
       return path.resolve(process.cwd(), config.outputPath)
     }), map(outPath=>{
-      console.log('createPath')
       try {
         if(!fs.existsSync(outPath)){
           fs.mkdirSync(outPath)
@@ -86,11 +84,11 @@ export class TemplatePrinterService {
 
   private printModelsStream(models: Sw2NgxModel[],out: string, hasEnums:boolean, readOnlyProperties: boolean): Observable<boolean>{
     const indexTemplate = [
-      (hasEnums?"import * from './enums'": '')
+      (hasEnums?"export * from './enums'": '')
       ,... models
         .map((model)=> model.name)
-        .map((modelName)=>`import * from './${paramCase(modelName).replace(/^i-/gi, '')+'.model.ts'}';`)
-    ].join('/r/n');
+        .map((modelName)=>`export { ${modelName} } from './${paramCase(modelName).replace(/^i-/gi, '')+'.model'}';`)
+    ].join('\r\n');
 
     return  this.getTemplate('model').pipe(
       switchMap((template)=>{
@@ -153,41 +151,21 @@ export class TemplatePrinterService {
   }
   private printEnumsStream(enums: Sw2NgxEnum[], out: string): Observable<boolean>{
     if(enums.length>0){
-      console.log()
+      const enumsIndexTemplate = enums.filter(x=>!x.isPremitive).map((enumItem)=>enumItem.name).map((name)=>`export { ${name} } from './${paramCase(name)}.enum';`)
+        .join('\r\n')
       return this.getTemplate('enum').pipe(
         switchMap((template): Observable<[string, Sw2NgxEnum]> =>{
         const enumsTemplated: [string, Sw2NgxEnum][] = enums.filter((x)=>!x.isPremitive).map((value)=>[template,value])
           return fromArray(enumsTemplated)
       }),
-        mergeMap(([template, value]: [string, Sw2NgxEnum])=>{
-          return new Observable<[string, string]>((rendered$)=>{
-            ejs.renderFile(template, {value: value}, (err, render)=>{
-              if(err){
-                rendered$.next([value.name, 'error'])
-              }else{
-                rendered$.next([value.name, render])
-              }
-              rendered$.complete()
-            })
-          })
-        }),
-        mergeMap(([enumName, rendered])=>{
-          return new Observable<[string, boolean]>((written$)=>{
-            if(rendered!=='error'){
-              fs.writeFile(path.resolve(out, 'models/enums', paramCase(enumName)+'.enum.ts'), rendered, (err)=>{
-                if(err){
-                  written$.next([enumName, false])
-                }else{
-                  written$.next([enumName, true])
-                }
-                written$.complete()
-              })
-            }else{
-              written$.next([enumName, false])
-              written$.complete()
-            }
-          })
-        }),
+        mergeMap(([template, value]: [string, Sw2NgxEnum])=>
+        this.renderEjsTemplate(template, {
+          value: value
+        }, value.name)
+        ),
+        mergeMap(([enumName, rendered])=>
+        this.writeFileType(out, paramCase(enumName), rendered, 'enum')
+        ),
         tap(([modelName, isPrinted])=>{
           if(isPrinted){
             this.logger?.ok(`OK: ${modelName}`)
@@ -198,14 +176,64 @@ export class TemplatePrinterService {
         take(enums.length),
         reduce((acc: boolean, [, success]: [string, boolean])=> {
           return acc && success
-        }, true)
+        }, true),
+        tap(()=>{
+          fs.writeFile(path.resolve(out, 'models/enums','index.ts'), enumsIndexTemplate, (err)=>{
+            if(err){
+              this.logger?.err('ERROR: write models index')
+            }
+          })
+        })
       )
     }
     return of(true)
   }
-  private printServiceStream(services: Sw2NgxService[]): Observable<boolean>{
-    console.log(!!services)
-    return of(true)
+  private printServiceStream(services: Sw2NgxService[], outPath:string): Observable<boolean>{
+    const parserConfigValue = this.sw2ngxConfiguration?.config.value
+    const servicesIndexTemplate = services
+      .filter((service)=> service.methods.length>0)
+      .map((service)=>`export { ${pascalCase(service.name)}ApiService ${parserConfigValue?.genServiceInterfaces? ', I'+pascalCase(service.name)+'ApiService': ''} } from './${paramCase(
+      service.name
+    )}.service';`).join('\r\n');
+    return this.getTemplate('service')
+      .pipe(
+        switchMap((template): Observable<[string,Sw2NgxService]>=>{
+                      return fromArray(services
+                        .filter((service)=> service.methods.length>0)
+                        .map((service)=>[template, service])
+                      )
+                    }),
+        mergeMap(([template, service]: [string, Sw2NgxService]) =>
+          this.renderEjsTemplate(
+            template,
+            {
+            service: service,
+            fnPascalCase: pascalCase,
+            providedIn: parserConfigValue?.provideIn|| 'root'
+            },
+            service.name
+          )),
+        mergeMap(([serviceName, rendered])=>this.writeFileType(outPath,paramCase(serviceName), rendered, 'service')),
+        tap(([serviceName, isPrinted])=>{
+          if(isPrinted){
+            this.logger?.ok(`OK: ${serviceName}`)
+          }else{
+            this.logger?.err(`ERROR: ${serviceName} file write`)
+          }
+        }),
+        take(services.length),
+        reduce((acc: boolean, [, success]: [string, boolean])=> {
+          return acc && success
+        }, true),
+        tap(()=>{
+          fs.writeFile(path.resolve(outPath, 'services','index.ts'), servicesIndexTemplate, (err)=>{
+            if(err){
+              this.logger?.err('ERROR: write models index')
+            }
+          })
+        })
+
+    )
   }
 
   private getTemplate(type: 'model'| 'service'| 'enum'| 'module'):Observable<string>{
@@ -214,7 +242,44 @@ export class TemplatePrinterService {
       console.log('templateFolder', templatePath)
       return fs.existsSync(templatePath)? of(templatePath) : throwError('ERROR: failed to get the template')
     }))
+  }
 
+  private renderEjsTemplate(template: string, templateData: Record<string, unknown>, entityName: string): Observable<[string, 'error' | string]>{
+    return new Observable<[string, string]>((rendered$)=>{
+      ejs.renderFile(template, templateData, (err, render)=>{
+        if(err){
+          console.log(err)
+          rendered$.next([entityName,'error'])
+        }else{
+          rendered$.next([entityName, render])
+        }
+        rendered$.complete()
+      })
+    })
+  }
+
+  private writeFileType(outPath: string,fileName: string, fileBody: string, fileType:'model'|'service'| 'enum'): Observable<[string, boolean]>{
+    const filesFolderByType = {
+      'model': 'models',
+      'enum': 'models/enums',
+      'service': 'services'
+    }
+    return new Observable<[string, boolean]>((written$)=>{
+      if(fileBody!=='error'){
+        fs.writeFile(path.resolve(outPath, filesFolderByType[fileType], `${fileName}.${fileType}.ts`), fileBody, (err)=>{
+          if(err){
+            console.log(err)
+            written$.next([fileName, false])
+          }else{
+            written$.next([fileName, true])
+          }
+          written$.complete()
+        })
+      }else{
+        written$.next([fileName, false])
+        written$.complete()
+      }
+    })
   }
 }
 

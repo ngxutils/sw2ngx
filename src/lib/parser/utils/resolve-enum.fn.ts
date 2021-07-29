@@ -4,7 +4,15 @@ import { Description } from '../../../types/swagger';
 
 import { SimHash } from './simhash/simhash';
 
-const simHash = new SimHash()
+let simHash = new SimHash()
+
+function getSimHash(){
+  if(!simHash){
+    console.log('new simhash')
+    simHash = new SimHash()
+  }
+  return simHash
+}
 
 const extractEnumDescription = (description: string) => {
   const result = [];
@@ -25,25 +33,27 @@ const extractEnumDescription = (description: string) => {
   }
 }
 
-export function mergeDuplicateEnums(enumsMap: Sw2NgxEnum[], insertEnum: Sw2NgxEnum): string {
+export function mergeDuplicateEnums(enumsMap: Map<string,Sw2NgxEnum>, insertEnum: Sw2NgxEnum): string {
   const withParentName = `${pascalCase(
-    paramCase(insertEnum.modelName).replace(/^i-/gi, '') + '-' + paramCase(insertEnum.name + 'Set')
+    paramCase(insertEnum.modelName).replace(/^i-/gi, '') + '-' + paramCase(insertEnum.name)
   )}`;
-  const duplicate = enumsMap.filter(
-    (x) => x.name.replace(/\d+$/gi, '') === insertEnum.name
-  );
-  const extDuplicate = enumsMap.filter(
-    (x) => x.name.replace(/\d+$/gi, '') === withParentName
-  );
+  const duplicate = enumsMap.has(insertEnum.name) ? [...enumsMap.keys()].filter((x)=>x.replace(/\d+$/gi, '') === insertEnum.name): [];
+  const extDuplicate = [...enumsMap.keys()].filter((x)=>x.replace(/\d+$/gi, '') === withParentName);
   if (duplicate.length > 0) {
-    const equals = duplicate.filter((x) => {if(x.hash === insertEnum.hash){
-      const p = x.value.map(x=> x.key).sort().join('|')
-      const f = insertEnum.value.map(x=> x.key).sort().join('|')
-      return p === f
-    }
-      return false
-    });
-    if (equals.length === 0)  {
+    const equals = duplicate.map((x)=> enumsMap.get(x))
+      .filter((x): x is Sw2NgxEnum=>!!x)
+      .filter((x) => {
+      if(x.hash === insertEnum.hash){
+        const p = x.value.map(x=> x.key).sort().join('|')
+        const f = insertEnum.value.map(x=> x.key).sort().join('|')
+        return p === f
+      }
+      return  false
+    })
+    if (equals.length > 0)  {
+      console.log('eq',insertEnum.name, insertEnum.hash,JSON.stringify(equals))
+      return insertEnum.name
+    } else {
       if (extDuplicate.length > 0) {
         insertEnum.name = `${withParentName}${duplicate.length}`;
       } else {
@@ -51,7 +61,7 @@ export function mergeDuplicateEnums(enumsMap: Sw2NgxEnum[], insertEnum: Sw2NgxEn
       }
     }
   }
-  enumsMap.push(insertEnum)
+  enumsMap.set(insertEnum.name, insertEnum)
   return insertEnum.name
 }
 
@@ -63,21 +73,20 @@ export function resolveEnumFn(
 ): Sw2NgxEnum  {
 
   const extractedEnum = extractEnumDescription(description ? description : '');
-  const hashName = simHash.hash(enumValue.join('|'));
+  const hashName = getSimHash().hash(enumValue.join('|'))
 
   if (extractedEnum === null) {
-    const numbers = '1234567890'.split('');
     if (
       enumValue
         .join('')
         .split('')
-        .filter((x) => !numbers.includes(x)).length > 0
+        .some((x)=> isNaN(Number(x)))
     ) {
       return {
         name: '( ' + enumValue.map((x) => `'${x}'`).join(' | ') + ' )',
         value: [],
         modelName: modelName,
-        hash: hashName,
+        hash: '999999',
         isPremitive: true
       };
     }
@@ -85,7 +94,7 @@ export function resolveEnumFn(
       name: '( ' + enumValue.join(' | ') + ' )',
       value: [],
       modelName: modelName,
-      hash: hashName,
+      hash: '9999999',
       isPremitive: true
     };
   }
@@ -94,7 +103,7 @@ export function resolveEnumFn(
     name: `${pascalCase(currentName)}Set`,
     modelName: modelName,
     value: extractedEnum,
-    hash: hashName.toString(),
+    hash: hashName.toString(16),
     isPremitive: false
   };
 }

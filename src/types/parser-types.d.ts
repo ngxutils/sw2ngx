@@ -22,7 +22,7 @@ declare type Sw2NgxEnum = {
 }
 declare type Sw2NgxModel = {
   name: string;
-  description: string;
+  description?: string;
   imports: string[];
   properties: Sw2NgxProperty[];
 }
@@ -33,7 +33,7 @@ declare type Sw2NgxService = {
   methods: Sw2NgxServiceMethod[];
 }
 declare type Sw2NgxProperty = {
-  propertyDescription:string,
+  propertyDescription?:string,
   propertyName: string,
   propertyImport: string[],
   propertyType: string
@@ -59,7 +59,7 @@ declare type Sw2NgxServiceMethod = {
 declare type Sw2NgxMethodParam = {
   name: string;
   queryName: string;
-  description: string;
+  description?: string;
   required: boolean;
   type: Sw2NgxResolvedType;
   default?: string;

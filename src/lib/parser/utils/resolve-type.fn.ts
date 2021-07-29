@@ -5,10 +5,10 @@ import {
 
 import { mergeDuplicateEnums, resolveEnumFn } from './resolve-enum.fn';
 
-const enumRegistry: Sw2NgxEnum[] = []
+const enumRegistry= new Map<string,Sw2NgxEnum>();
 
 export function exportEnumRegistry(): Sw2NgxEnum[]{
-  return enumRegistry
+  return [...enumRegistry.values()]
 }
 
 export function resolveTypeFn(prop: Schema | NonBodyParameter, name: string, parentName:string): Sw2NgxResolvedType {
@@ -74,7 +74,7 @@ export function resolveTypeFn(prop: Schema | NonBodyParameter, name: string, par
         type: 'number',
         typeImport: []
       }
-    } else  if(prop.type === 'array'){
+    } else if(prop.type === 'array'){
         if(Array.isArray(prop.items)){
           const parsedTypes = prop.items.map((item)=> resolveTypeFn(item, name, parentName))
           return {
@@ -87,7 +87,7 @@ export function resolveTypeFn(prop: Schema | NonBodyParameter, name: string, par
         } else if(prop.items) {
           const parsedType = resolveTypeFn(prop.items, name, parentName)
           return {
-            type: parsedType.type,
+            type: parsedType.type + '[]',
             typeImport: parsedType.typeImport
           }
         }

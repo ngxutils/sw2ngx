@@ -7,6 +7,7 @@ declare type Sw2NgxConfig = {
   readOnlyModels: boolean,
   noModule: boolean,
   provideIn: string,
+  genServiceInterfaces: boolean,
   help: boolean,
   parsingError: boolean,
   preset: string,

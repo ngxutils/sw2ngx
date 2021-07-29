@@ -1,7 +1,7 @@
 {
   "$scheme": "./src/config.scheme.json",
   "config": "https://retail-tst.payment.ru/api/swagger/docs/v1",
-  "outputPath": "./api",
+  "outputPath": "../test/api",
   "baseHref": "/my/awesome/api",
   "extendConfigPath": "./sw2ngx.extend.json",
   "templates": "./src/templates/default",

@@ -4,6 +4,7 @@ import { singleton } from 'tsyringe';
 
 import { OpenApiV3 } from '../../types/openapi';
 import { OpenApiV2, Operation, Schema } from '../../types/swagger';
+import { ConfigurationRepository } from '../configuration.repository';
 
 import { IOpenApiParserPlugin } from './open-api-parser.plugin';
 import { resolveImportsFn } from './utils/resolve-imports.fn';
@@ -12,6 +13,9 @@ import { exportEnumRegistry, resolveTypeFn } from './utils/resolve-type.fn';
 
 @singleton()
 export class OpenApiV2Parser implements IOpenApiParserPlugin{
+  constructor(private parserConfig?: ConfigurationRepository) {
+  }
+
   isV2(config: OpenApiV3 | OpenApiV2): config is OpenApiV2{
     return (config as OpenApiV2).swagger !== undefined && (config as OpenApiV2).swagger === '2.0'
   }
@@ -60,7 +64,7 @@ export class OpenApiV2Parser implements IOpenApiParserPlugin{
   parseModelProp(modelName: string, propName: string, prop: Schema): Sw2NgxProperty {
     const resolvedProperty = resolveTypeFn(prop, propName, modelName)
     return {
-      propertyDescription: `${prop.description}`,
+      propertyDescription: prop.description,
       propertyName: propName,
       propertyImport: resolvedProperty.typeImport,
       propertyType: resolvedProperty.type
@@ -92,7 +96,7 @@ export class OpenApiV2Parser implements IOpenApiParserPlugin{
         }else {
           acc[cur.tag] = {
             name: cur.tag,
-            uri: `${config.basePath}`,
+            uri: `${this.parserConfig?.config?.value?.baseHref || config.basePath}`,
             methods: [cur],
             imports: []
           }
@@ -101,7 +105,7 @@ export class OpenApiV2Parser implements IOpenApiParserPlugin{
       }, {
           __common: {
             name: '__common',
-            uri: `${config.basePath}`,
+            uri: `${this.parserConfig?.config?.value?.baseHref || config.basePath}`,
             imports: [],
             methods: []
           }

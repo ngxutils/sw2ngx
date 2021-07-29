@@ -3,7 +3,7 @@
 <% if (service.imports.length>0) { -%>
 import { <%=service.imports.join(', ');-%> } from '../models';
 <% } -%>
-<%_ const hasParamString = service.methods.filter((x)=> x.params.urlencoded.length || x.params.query.length ).length>0; -%>
+<%_ const hasParamString = service.methods.filter((x)=> x.isFormDataUrlencoded || x.params.query.length ).length>0; -%>
 <%if(hasParamString){-%>
 import { createParamString } from '../internals';
 <%_}-%>
@@ -11,12 +11,12 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 
-export interface I<%=`${fnpascalCase(name)}`%>ApiService {
+export interface I<%=`${fnPascalCase(service.name)}`%>ApiService {
 <%_ for(const method of service.methods) {-%>
   <%_ const temp = []-%>
     <%_ temp.push(...['\r\n\t/**','\t* @method',`\t* @name  ${method.name}`,`\t* @description ${method.description ? method.description.replace('\r\n', '') : ''}`])-%>
       <%_for (const param of method.params.all) {-%>
-      <%_ temp.push(`\t* @param {${param.type.typeName}} ${param.name}`) -%>
+      <%_ temp.push(`\t* @param {${param.type.type}} ${param.name}`) -%>
       <%_}-%>
       <%_ temp.push('\t* @param {Record<string, string>} customOptions') -%>
       <%_ temp.push('\t* @param {Record<string, string>} customHeaders') -%>
@@ -24,22 +24,22 @@ export interface I<%=`${fnpascalCase(name)}`%>ApiService {
   <%-temp.join('\r\n')_%>
   <%_ const params = []-%>
   <%_ for(const param of method.params.all) {-%>
-    <%_ params.push(`${param.name}${param.required ? '' : '?'}: ${param.type.typeName}`)_%>
+    <%_ params.push(`${param.name}${param.required ? '' : '?'}: ${param.type.type}`)_%>
   <%_}-%>
 <%_params.push(...['customOptions?: Record<string, string>','customHeaders?: Record<string, string>'])-%>
 <%=`\t${method.name}(`_%>
 <%- params.join(', ') -%>
-  <%-`): Observable<${method.resp[0].typeName}>;`-%>
+  <%-`): Observable<${method.resp[0]?.type}>;`-%>
 <% } -%>
 }
 
 @Injectable(<%-`${providedIn=== 'none'? '': '{providedIn:'}${providedIn!=='none'?'\''+providedIn+'\'}': ''} `%> )
-export class <%=`${fnpascalCase(name)}`%>ApiService implements I<%=`${fnpascalCase(name)}`%>ApiService {
+export class <%=`${fnPascalCase(service.name)}`%>ApiService implements I<%=`${fnPascalCase(service.name)}`%>ApiService {
   public serviceName: string;
   public uri: string;
   constructor(
     public http: HttpClient) {
-    this.serviceName = '<%=`${fnpascalCase(name)}`%>Api';
+    this.serviceName = '<%=`${fnPascalCase(service.name)}`%>Api';
     this.uri = '<%-service.uri%>';
   }
 
@@ -47,7 +47,7 @@ export class <%=`${fnpascalCase(name)}`%>ApiService implements I<%=`${fnpascalCa
   <%_ const temp = []-%>
     <%_ temp.push(...['\r\n\t/**','\t* @method',`\t* @name  ${method.name}`,`\t* @description ${method.description ? method.description.replace('\r\n', '') : ''}`])-%>
       <%_for (const param of method.params.all) {-%>
-      <%_ temp.push(`\t* @param {${param.type.typeName}} ${param.name}`) -%>
+      <%_ temp.push(`\t* @param {${param.type.type}} ${param.name}`) -%>
       <%_}-%>
       <%_ temp.push('\t* @param {Record<string, string>} customOptions') -%>
       <%_ temp.push('\t* @param {Record<string, string>} customHeaders') -%>
@@ -56,15 +56,15 @@ export class <%=`${fnpascalCase(name)}`%>ApiService implements I<%=`${fnpascalCa
   <%_ const params = []-%>
   <%_ for(const param of method.params.all) {-%>
     <%_if(param.default){-%>
-      <%_ params.push(`${param.name}: ${param.type.typeName} = '${param.default}'`)-%>
+      <%_ params.push(`${param.name}: ${param.type.type} = '${param.default}'`)-%>
       <%_ } else {-%>
-      <%_ params.push(`${param.name}${param.required ? '' : '?'}: ${param.type.typeName}`)-%>
+      <%_ params.push(`${param.name}${param.required ? '' : '?'}: ${param.type.type}`)-%>
       <%_}-%>
   <%_}-%>
 <%_params.push(...['customOptions: Record<string, string> = { }','customHeaders: Record<string, string> = { }'])-%>
 <%= `\tpublic ${method.name}(`-%>
 <%- params.join(', ') -%>
-  <%-`): Observable<${method.resp[0].typeName}> {`%>
+  <%-`): Observable<${method.resp[0]?.type}> {`%>
       const options = {
         headers: new HttpHeaders( customHeaders ),
         params: new HttpParams(),
@@ -79,27 +79,27 @@ export class <%=`${fnpascalCase(name)}`%>ApiService implements I<%=`${fnpascalCa
     options.params = new HttpParams({fromString: paramString});
   <%}-%>
   <%if((method.type === 'post') || (method.type === 'put')){-%>
-    <%if(method.params.form.length !== 0) {-%>
+    <%if(method.params.formData.length !== 0) {-%>
       options.headers = new HttpHeaders( customHeaders );
       options.headers.delete('Content-Type');
       const form = new FormData();
-      <%for (const param of method.params.form) {-%>
-        <%if (param.type.typeName === 'any') {-%>
+      <%for (const param of method.params.formData) {-%>
+        <%if (param.type.type === 'any') {-%>
 <%-`form.append('${param.queryName}', ${param.name});\r\n`-%>
         <%} else {-%>
 <%-`form.append('${param.queryName}', JSON.stringify(${param.name}));\r\n`-%>
         <%}-%>
       <%}-%>
-<%-`return this.http.${method.type}<${method.resp[0].typeName}>(this.uri + \`${method.uri}\`, form, options);`-%>
+<%-`return this.http.${method.type}<${method.resp[0]?.type}>(this.uri + \`${method.uri}\`, form, options);`-%>
     <%}else{-%>
-    <%if (method.params.urlencoded.length !== 0) {%>
+    <%if (method.isFormDataUrlencoded) {%>
     options.headers = new HttpHeaders(Object.assign({'Content-Type': 'application/x-www-form-urlencoded'}, customHeaders));
     const payload = createParamString(
-      <% for(const param of method.params.urlencoded) {-%>
+      <% for(const param of method.params.formData) {-%>
       <%-`[ '${param.queryName}', ${param.name}],\r\n`_%>
       <%}-%>
       );
-<%-`return this.http.${method.type}<${method.resp[0].typeName}>(this.uri + \`${method.uri}\`, payload, options);`-%>
+<%-`return this.http.${method.type}<${method.resp[0]?.type}>(this.uri + \`${method.uri}\`, payload, options);`-%>
     <%} else {-%>
 options.headers = new HttpHeaders(Object.assign({'Content-Type': 'application/json; charset=utf-8'}, customHeaders));
       let payload = {};
@@ -112,12 +112,12 @@ options.headers = new HttpHeaders(Object.assign({'Content-Type': 'application/js
 <%-`payload = ${method.params.payload[0].name};\r\n`-%>
         <%}-%>
       <%}-%>
-<%-`return this.http.${method.type}<${method.resp[0].typeName}>(this.uri + \`${method.uri}\`, JSON.stringify(payload), options);`-%>
+<%-`return this.http.${method.type}<${method.resp[0]?.type}>(this.uri + \`${method.uri}\`, JSON.stringify(payload), options);`-%>
     <%}%>
     <%}-%>
   <%}-%>
   <%if ((method.type === 'get') || (method.type === 'delete')) {-%>
-<%-`return this.http.${method.type}\<${method.resp[0].typeName}\>(this.uri + \`${method.uri}\`, options);\r\n`-%>
+<%-`return this.http.${method.type}\<${method.resp[0]?.type}\>(this.uri + \`${method.uri}\`, options);\r\n`-%>
   <%}-%>
   }
   <% } -%>
