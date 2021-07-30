@@ -103,13 +103,13 @@ export class <%=`${fnPascalCase(service.name)}`%>ApiService implements I<%=`${fn
     <%} else {-%>
 options.headers = new HttpHeaders(Object.assign({'Content-Type': 'application/json; charset=utf-8'}, customHeaders));
       let payload = {};
-      <%if (method.params.payload.length > 1) {-%>
-        <%for (const param of method.params.payload) {-%>
+      <%if (method.params.body.length > 1) {-%>
+        <%for (const param of method.params.body) {-%>
 <%-`payload['${param.queryName}'] = ${param.name};\r\n`-%>
         <%}-%>
       <%} else {-%>
-        <%if (method.params.payload.length > 0) {-%>
-<%-`payload = ${method.params.payload[0].name};\r\n`-%>
+        <%if (method.params.body.length > 0) {-%>
+<%-`payload = ${method.params.body[0].name};\r\n`-%>
         <%}-%>
       <%}-%>
 <%-`return this.http.${method.type}<${method.resp[0]?.type}>(this.uri + \`${method.uri}\`, JSON.stringify(payload), options);`-%>
