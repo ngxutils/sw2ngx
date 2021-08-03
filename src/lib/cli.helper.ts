@@ -7,23 +7,24 @@ import { Logger } from './logger';
   {
     token: 'CLI_PARAM',
     useValue: {
-      key: "-h",
+      key: '-h',
       name: 'help',
-      description: "show all commands and params",
+      description: 'show all commands and params',
       withoutValue: true,
       required: false,
-      default: false
-    }
-  }
+      default: false,
+    },
+  },
 ])
-export class CliHelper{
-  constructor(@injectAll('CLI_PARAM')private params: CliParam[] = [], private logger?: Logger) {
-  }
+export class CliHelper {
+  constructor(
+    @injectAll('CLI_PARAM') private params: CliParam[] = [],
+    private logger?: Logger
+  ) {}
   public readCliParams(): Sw2NgxConfig {
-    return  this.getCliParams()
+    return this.getCliParams();
   }
   public printHelp() {
-
     for (const param of this.params) {
       let line = `${param.name}               `;
       line = line.substr(0, 18);
@@ -41,7 +42,7 @@ export class CliHelper{
       this.logger?.write(line);
       this.logger?.writeln('');
     }
-    this.logger?.writeln('').writeln('').reset()
+    this.logger?.writeln('').writeln('').reset();
   }
 
   getCliParams(): Sw2NgxConfig {
@@ -53,27 +54,32 @@ export class CliHelper{
      *   '-h': ICliParam
      * }
      * **/
-    const paramsParserMap: Record<string, CliParam> = (this.params || []).reduce((prev,cur)=>{
+    const paramsParserMap: Record<string, CliParam> = (
+      this.params || []
+    ).reduce((prev, cur) => {
       return {
         ...prev,
         [cur.key]: cur,
-      }
-    },{})
+      };
+    }, {});
 
     /**
      * map cli args to Sw2NgxConfig
      * map may be not correct, need validation before use param
      * **/
-    return args.reduce((prev: Sw2NgxConfig , cur, index)=>{
-      const mappedConfigurationParam = paramsParserMap[cur as keyof typeof paramsParserMap]
-      const mappedConfigurationParamValue =  mappedConfigurationParam?.withoutValue ? true: args[index+1]
-      if(mappedConfigurationParam && mappedConfigurationParamValue){
+    return args.reduce((prev: Sw2NgxConfig, cur, index) => {
+      const mappedConfigurationParam =
+        paramsParserMap[cur as keyof typeof paramsParserMap];
+      const mappedConfigurationParamValue = mappedConfigurationParam?.withoutValue
+        ? true
+        : args[index + 1];
+      if (mappedConfigurationParam && mappedConfigurationParamValue) {
         return {
           ...prev,
-          [mappedConfigurationParam.name]:mappedConfigurationParamValue
-        }
+          [mappedConfigurationParam.name]: mappedConfigurationParamValue,
+        };
       }
-      return prev
-    }, {} as Sw2NgxConfig)
+      return prev;
+    }, {} as Sw2NgxConfig);
   }
 }

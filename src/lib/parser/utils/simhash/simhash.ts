@@ -1,4 +1,4 @@
-import {Jenkins} from './jenkins';
+import { Jenkins } from './jenkins';
 
 export interface ISimHashOptions {
   kshingles?: number;
@@ -55,7 +55,11 @@ export class SimHash {
 
     const shingles = [];
     for (let i = 0; i < size; i = i + this.kshingles) {
-      shingles.push(i + this.kshingles < size ? original.slice(i, i + this.kshingles) : original.slice(i));
+      shingles.push(
+        i + this.kshingles < size
+          ? original.slice(i, i + this.kshingles)
+          : original.slice(i)
+      );
     }
     return shingles;
   }
@@ -67,7 +71,8 @@ export class SimHash {
 
     // eslint-disable-next-line @typescript-eslint/unbound-method
     shingles.sort(this.hashComparator);
-    if (shingles.length > this.maxFeatures) shingles = shingles.splice(this.maxFeatures);
+    if (shingles.length > this.maxFeatures)
+      shingles = shingles.splice(this.maxFeatures);
 
     let simhash = 0x0;
     let mask = 0x1;
@@ -90,9 +95,6 @@ export class SimHash {
    * used to find the least 'maxFeatures' shingles.
    */
   public hashComparator(a: number, b: number) {
-    return a < b ? -1 : (a > b ? 1 : 0);
+    return a < b ? -1 : a > b ? 1 : 0;
   }
 }
-
-
-

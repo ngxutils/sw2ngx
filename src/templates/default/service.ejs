@@ -10,7 +10,7 @@ import { createParamString } from '../internals';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
-
+<%_ if(genSrvInterface){%>
 export interface I<%=`${fnPascalCase(service.name)}`%>ApiService {
 <%_ for(const method of service.methods) {-%>
   <%_ const temp = []-%>
@@ -32,9 +32,10 @@ export interface I<%=`${fnPascalCase(service.name)}`%>ApiService {
   <%-`): Observable<${method.resp[0]?.type}>;`-%>
 <% } -%>
 }
+<% } -%>
 
 @Injectable(<%-`${providedIn=== 'none'? '': '{providedIn:'}${providedIn!=='none'?'\''+providedIn+'\'}': ''} `%> )
-export class <%=`${fnPascalCase(service.name)}`%>ApiService implements I<%=`${fnPascalCase(service.name)}`%>ApiService {
+export class <%=`${fnPascalCase(service.name)}`%>ApiService <%_ if(genSrvInterface){%> implements I<%=`${fnPascalCase(service.name)}`%>ApiService <% } -%> {
   public serviceName: string;
   public uri: string;
   constructor(

@@ -8,7 +8,7 @@
 /**
  * The transfer protocol of the API.
  */
-export type SchemesList = ("http" | "https" | "ws" | "wss")[];
+export type SchemesList = ('http' | 'https' | 'ws' | 'wss')[];
 /**
  * The MIME type of the HTTP message.
  */
@@ -33,8 +33,13 @@ export type NonBodyParameter =
   | FormDataParameterSubSchema
   | QueryParameterSubSchema
   | PathParameterSubSchema;
-export type CollectionFormat = "csv" | "ssv" | "tsv" | "pipes";
-export type CollectionFormatWithMulti = "csv" | "ssv" | "tsv" | "pipes" | "multi";
+export type CollectionFormat = 'csv' | 'ssv' | 'tsv' | 'pipes';
+export type CollectionFormatWithMulti =
+  | 'csv'
+  | 'ssv'
+  | 'tsv'
+  | 'pipes'
+  | 'multi';
 /**
  * The parameters needed to send a valid API call.
  */
@@ -50,7 +55,7 @@ export interface OpenApiV2 {
   /**
    * The Swagger version of this document.
    */
-  swagger: "2.0";
+  swagger: '2.0';
   info: Info;
   /**
    * The host (name or ip) of the API. Example: 'swagger.io'
@@ -77,7 +82,7 @@ export interface OpenApiV2 {
   securityDefinitions?: SecurityDefinitions;
   tags?: Tag[];
   externalDocs?: ExternalDocs;
-  [k: string]: Record<string, unknown>  | unknown
+  [k: string]: Record<string, unknown> | unknown;
 }
 /**
  * General information about the API.
@@ -101,7 +106,7 @@ export interface Info {
   termsOfService?: string;
   contact?: Contact;
   license?: License;
-  [k: string]: Record<string, unknown>  | unknown;
+  [k: string]: Record<string, unknown> | unknown;
 }
 /**
  * Contact information for the owners of the API.
@@ -119,7 +124,7 @@ export interface Contact {
    * The email address of the contact person/organization.
    */
   email?: string;
-  [k: string]: Record<string, unknown>  | unknown;
+  [k: string]: Record<string, unknown> | unknown;
 }
 /**
  * Any property starting with x- is valid.
@@ -214,13 +219,13 @@ export interface License {
    * The URL pointing to the license.
    */
   url?: string;
-  [k: string]: Record<string, unknown>  | unknown;
+  [k: string]: Record<string, unknown> | unknown;
 }
 /**
  * Relative paths to the individual endpoints. They must be relative to the 'basePath'.
  */
 export interface Paths {
-  [key:string]: PathItem
+  [key: string]: PathItem;
 }
 /**
  * This interface was referenced by `Paths`'s JSON-Schema definition
@@ -236,7 +241,7 @@ export interface PathItem {
   head?: Operation;
   patch?: Operation;
   parameters?: ParametersList;
-  [k: string]: Record<string, unknown>  | unknown;
+  [k: string]: Record<string, unknown> | unknown;
 }
 export interface Operation {
   tags?: string[];
@@ -266,7 +271,7 @@ export interface Operation {
   schemes?: SchemesList;
   deprecated?: boolean;
   security?: Security;
-  [k: string]: Record<string, unknown>  | unknown;
+  [k: string]: Record<string, unknown> | unknown;
 }
 /**
  * information about external documentation
@@ -274,7 +279,7 @@ export interface Operation {
 export interface ExternalDocs {
   description?: string;
   url: string;
-  [k: string]: Record<string, unknown>  | unknown;
+  [k: string]: Record<string, unknown> | unknown;
 }
 export interface BodyParameter {
   /**
@@ -288,13 +293,13 @@ export interface BodyParameter {
   /**
    * Determines the location of the parameter.
    */
-  in: "body";
+  in: 'body';
   /**
    * Determines whether or not this parameter is required or optional.
    */
   required?: boolean;
   schema: Schema;
-  [k: string]: Record<string, unknown>  | unknown;
+  [k: string]: Record<string, unknown> | unknown;
 }
 /**
  * A deterministic version of a JSON Schema object.
@@ -322,11 +327,35 @@ export interface Schema {
   enum?: Enum;
   additionalProperties?: Schema | boolean;
   type?:
-    | ("array" | "boolean" | "integer" | "null" | "number" | "object" | "string")
+    | (
+        | 'array'
+        | 'boolean'
+        | 'integer'
+        | 'null'
+        | 'number'
+        | 'object'
+        | 'string'
+      )
     | [
-      "array" | "boolean" | "integer" | "null" | "number" | "object" | "string",
-    ...("array" | "boolean" | "integer" | "null" | "number" | "object" | "string")[]
-  ];
+        (
+          | 'array'
+          | 'boolean'
+          | 'integer'
+          | 'null'
+          | 'number'
+          | 'object'
+          | 'string'
+        ),
+        ...(
+          | 'array'
+          | 'boolean'
+          | 'integer'
+          | 'null'
+          | 'number'
+          | 'object'
+          | 'string'
+        )[]
+      ];
   items?: Schema | [Schema, ...Schema[]];
   allOf?: [Schema, ...Schema[]];
   properties?: {
@@ -337,7 +366,7 @@ export interface Schema {
   xml?: Xml;
   externalDocs?: ExternalDocs;
   example?: unknown;
-  [k: string]: Record<string, unknown>  | unknown;
+  [k: string]: Record<string, unknown> | unknown;
 }
 export interface Xml {
   name?: string;
@@ -345,7 +374,7 @@ export interface Xml {
   prefix?: string;
   attribute?: boolean;
   wrapped?: boolean;
-  [k: string]: Record<string, unknown>  | unknown;
+  [k: string]: Record<string, unknown> | unknown;
 }
 export interface HeaderParameterSubSchema {
   /**
@@ -355,7 +384,7 @@ export interface HeaderParameterSubSchema {
   /**
    * Determines the location of the parameter.
    */
-  in?: "header";
+  in?: 'header';
   /**
    * A brief description of the parameter. This could contain examples of use.  GitHub Flavored Markdown is allowed.
    */
@@ -364,7 +393,7 @@ export interface HeaderParameterSubSchema {
    * The name of the parameter.
    */
   name?: string;
-  type?: "string" | "number" | "boolean" | "integer" | "array";
+  type?: 'string' | 'number' | 'boolean' | 'integer' | 'array';
   format?: string;
   items?: PrimitivesItems;
   collectionFormat?: CollectionFormat;
@@ -381,10 +410,10 @@ export interface HeaderParameterSubSchema {
   uniqueItems?: UniqueItems;
   enum?: Enum;
   multipleOf?: MultipleOf;
-  [k: string]: Record<string, unknown>  | unknown;
+  [k: string]: Record<string, unknown> | unknown;
 }
 export interface PrimitivesItems {
-  type?: "string" | "number" | "integer" | "boolean" | "array";
+  type?: 'string' | 'number' | 'integer' | 'boolean' | 'array';
   format?: string;
   items?: PrimitivesItems;
   collectionFormat?: CollectionFormat;
@@ -401,7 +430,7 @@ export interface PrimitivesItems {
   uniqueItems?: UniqueItems;
   enum?: Enum;
   multipleOf?: MultipleOf;
-  [k: string]: Record<string, unknown>  | unknown;
+  [k: string]: Record<string, unknown> | unknown;
 }
 export interface FormDataParameterSubSchema {
   /**
@@ -411,7 +440,7 @@ export interface FormDataParameterSubSchema {
   /**
    * Determines the location of the parameter.
    */
-  in?: "formData";
+  in?: 'formData';
   /**
    * A brief description of the parameter. This could contain examples of use.  GitHub Flavored Markdown is allowed.
    */
@@ -424,7 +453,7 @@ export interface FormDataParameterSubSchema {
    * allows sending a parameter by name only or with an empty value.
    */
   allowEmptyValue?: boolean;
-  type?: "string" | "number" | "boolean" | "integer" | "array" | "file";
+  type?: 'string' | 'number' | 'boolean' | 'integer' | 'array' | 'file';
   format?: string;
   items?: PrimitivesItems;
   collectionFormat?: CollectionFormatWithMulti;
@@ -441,7 +470,7 @@ export interface FormDataParameterSubSchema {
   uniqueItems?: UniqueItems;
   enum?: Enum;
   multipleOf?: MultipleOf;
-  [k: string]: Record<string, unknown>  | unknown;
+  [k: string]: Record<string, unknown> | unknown;
 }
 export interface QueryParameterSubSchema {
   /**
@@ -451,7 +480,7 @@ export interface QueryParameterSubSchema {
   /**
    * Determines the location of the parameter.
    */
-  in?: "query";
+  in?: 'query';
   /**
    * A brief description of the parameter. This could contain examples of use.  GitHub Flavored Markdown is allowed.
    */
@@ -464,7 +493,7 @@ export interface QueryParameterSubSchema {
    * allows sending a parameter by name only or with an empty value.
    */
   allowEmptyValue?: boolean;
-  type?: "string" | "number" | "boolean" | "integer" | "array";
+  type?: 'string' | 'number' | 'boolean' | 'integer' | 'array';
   format?: string;
   items?: PrimitivesItems;
   collectionFormat?: CollectionFormatWithMulti;
@@ -481,7 +510,7 @@ export interface QueryParameterSubSchema {
   uniqueItems?: UniqueItems;
   enum?: Enum;
   multipleOf?: MultipleOf;
-  [k: string]: Record<string, unknown>  | unknown;
+  [k: string]: Record<string, unknown> | unknown;
 }
 export interface PathParameterSubSchema {
   /**
@@ -491,7 +520,7 @@ export interface PathParameterSubSchema {
   /**
    * Determines the location of the parameter.
    */
-  in?: "path";
+  in?: 'path';
   /**
    * A brief description of the parameter. This could contain examples of use.  GitHub Flavored Markdown is allowed.
    */
@@ -500,7 +529,7 @@ export interface PathParameterSubSchema {
    * The name of the parameter.
    */
   name?: string;
-  type?: "string" | "number" | "boolean" | "integer" | "array";
+  type?: 'string' | 'number' | 'boolean' | 'integer' | 'array';
   format?: string;
   items?: PrimitivesItems;
   collectionFormat?: CollectionFormat;
@@ -517,7 +546,7 @@ export interface PathParameterSubSchema {
   uniqueItems?: UniqueItems;
   enum?: Enum;
   multipleOf?: MultipleOf;
-  [k: string]: Record<string, unknown>  | unknown;
+  [k: string]: Record<string, unknown> | unknown;
 }
 export interface JsonReference {
   $ref: string;
@@ -525,16 +554,15 @@ export interface JsonReference {
 /**
  * Response objects names can either be any valid HTTP status code or 'default'.
  */
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface Responses {
-  [key:string]: Response
+  [key: string]: Response;
 }
 export interface Response {
   description: string;
   schema?: Schema | FileSchema;
   headers?: Headers;
   examples?: Examples;
-  [k: string]: Record<string, unknown>  | unknown;
+  [k: string]: Record<string, unknown> | unknown;
 }
 /**
  * A deterministic version of a JSON Schema object.
@@ -545,17 +573,17 @@ export interface FileSchema {
   description?: Description;
   default?: Default;
   required?: [string, ...string[]];
-  type: "file";
+  type: 'file';
   readOnly?: boolean;
   externalDocs?: ExternalDocs;
   example?: unknown;
-  [k: string]: Record<string, unknown>  | unknown;
+  [k: string]: Record<string, unknown> | unknown;
 }
 export interface Headers {
   [k: string]: Header;
 }
 export interface Header {
-  type: "string" | "number" | "integer" | "boolean" | "array";
+  type: 'string' | 'number' | 'integer' | 'boolean' | 'array';
   format?: string;
   items?: PrimitivesItems;
   collectionFormat?: CollectionFormat;
@@ -573,7 +601,7 @@ export interface Header {
   enum?: Enum;
   multipleOf?: MultipleOf;
   description?: string;
-  [k: string]: Record<string, unknown>  | unknown;
+  [k: string]: Record<string, unknown> | unknown;
 }
 export interface Examples {
   [k: string]: unknown;
@@ -609,56 +637,56 @@ export interface SecurityDefinitions {
     | Oauth2AccessCodeSecurity;
 }
 export interface BasicAuthenticationSecurity {
-  type: "basic";
+  type: 'basic';
   description?: string;
-  [k: string]: Record<string, unknown>  | unknown;
+  [k: string]: Record<string, unknown> | unknown;
 }
 export interface ApiKeySecurity {
-  type: "apiKey";
+  type: 'apiKey';
   name: string;
-  in: "header" | "query";
+  in: 'header' | 'query';
   description?: string;
-  [k: string]: Record<string, unknown>  | unknown;
+  [k: string]: Record<string, unknown> | unknown;
 }
 export interface Oauth2ImplicitSecurity {
-  type: "oauth2";
-  flow: "implicit";
+  type: 'oauth2';
+  flow: 'implicit';
   scopes?: Oauth2Scopes;
   authorizationUrl: string;
   description?: string;
-  [k: string]: Record<string, unknown>  | unknown;
+  [k: string]: Record<string, unknown> | unknown;
 }
 export interface Oauth2Scopes {
   [k: string]: string;
 }
 export interface Oauth2PasswordSecurity {
-  type: "oauth2";
-  flow: "password";
+  type: 'oauth2';
+  flow: 'password';
   scopes?: Oauth2Scopes;
   tokenUrl: string;
   description?: string;
-  [k: string]: Record<string, unknown>  | unknown;
+  [k: string]: Record<string, unknown> | unknown;
 }
 export interface Oauth2ApplicationSecurity {
-  type: "oauth2";
-  flow: "application";
+  type: 'oauth2';
+  flow: 'application';
   scopes?: Oauth2Scopes;
   tokenUrl: string;
   description?: string;
-  [k: string]: Record<string, unknown>  | unknown;
+  [k: string]: Record<string, unknown> | unknown;
 }
 export interface Oauth2AccessCodeSecurity {
-  type: "oauth2";
-  flow: "accessCode";
+  type: 'oauth2';
+  flow: 'accessCode';
   scopes?: Oauth2Scopes;
   authorizationUrl: string;
   tokenUrl: string;
   description?: string;
-  [k: string]: Record<string, unknown>  | unknown;
+  [k: string]: Record<string, unknown> | unknown;
 }
 export interface Tag {
   name: string;
   description?: string;
   externalDocs?: ExternalDocs;
-  [k: string]: Record<string, unknown>  | unknown;
+  [k: string]: Record<string, unknown> | unknown;
 }

@@ -9,10 +9,11 @@
   "license": "WTFPL",
   "keywords": [],
   "scripts": {
-    "build": "run-p build:*",
+    "build": "rm -rf ./build && run-p build:* && npm run mkdir:templates && npm run copy",
     "build:main": "tsc -p tsconfig.json",
     "build:module": "tsc -p tsconfig.module.json",
-    "build:mcopy": "cp -R ./src/templates/* ./build/main/templates/default && cp -R ./src/templates/* ./build/module/templates/default",
+    "mkdir:templates": "mkdir ./build/main/templates && mkdir ./build/module/templates",
+    "copy": "cp -R ./src/templates/* ./build/main/templates/default && cp -R ./src/templates/* ./build/module/templates/default",
     "fix": "run-s fix:*",
     "fix:prettier": "prettier \"src/**/*.ts\" --write",
     "fix:lint": "eslint src --ext .ts --fix",

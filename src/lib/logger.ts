@@ -1,15 +1,15 @@
 import { injectAll, singleton } from 'tsyringe';
 
 @singleton()
-export class Logger{
-  private colorsMap: Record<LoggerColorTypeSet, ILoggerColor>
-  constructor(@injectAll('LOGGER_COLORS')private colors: ILoggerColorToken[]) {
-    this.colorsMap = this.colors.reduce((x,y)=>{
+export class Logger {
+  private colorsMap: Record<LoggerColorTypeSet, ILoggerColor>;
+  constructor(@injectAll('LOGGER_COLORS') private colors: ILoggerColorToken[]) {
+    this.colorsMap = this.colors.reduce((x, y) => {
       return {
         ...x,
-        [y.type]: y.color
-      }
-    },{}) as Record<LoggerColorTypeSet, ILoggerColor>
+        [y.type]: y.color,
+      };
+    }, {}) as Record<LoggerColorTypeSet, ILoggerColor>;
   }
   public reset(): Logger {
     process.stdout.write(this.colorsMap.Help.reset);

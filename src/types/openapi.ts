@@ -5,42 +5,44 @@
  * and run json-schema-to-typescript to regenerate this file.
  */
 
-export type Parameter = ExampleXORExamples & SchemaXORContent & ParameterLocation;
+export type Parameter = ExampleXORExamples &
+  SchemaXORContent &
+  ParameterLocation;
 /**
  * Schema and content are mutually exclusive, at least one is required
  */
 export type SchemaXORContent =
   | {
-  [k: string]: unknown;
-}
+      [k: string]: unknown;
+    }
   | {
-  [k: string]: unknown;
-};
+      [k: string]: unknown;
+    };
 /**
  * Parameter location
  */
 export type ParameterLocation =
   | {
-  in?: "path";
-  style?: "matrix" | "label" | "simple";
-  required: true;
-  [k: string]: unknown;
-}
+      in?: 'path';
+      style?: 'matrix' | 'label' | 'simple';
+      required: true;
+      [k: string]: unknown;
+    }
   | {
-  in?: "query";
-  style?: "form" | "spaceDelimited" | "pipeDelimited" | "deepObject";
-  [k: string]: unknown;
-}
+      in?: 'query';
+      style?: 'form' | 'spaceDelimited' | 'pipeDelimited' | 'deepObject';
+      [k: string]: unknown;
+    }
   | {
-  in?: "header";
-  style?: "simple";
-  [k: string]: unknown;
-}
+      in?: 'header';
+      style?: 'simple';
+      [k: string]: unknown;
+    }
   | {
-  in?: "cookie";
-  style?: "form";
-  [k: string]: unknown;
-};
+      in?: 'cookie';
+      style?: 'form';
+      [k: string]: unknown;
+    };
 export type MediaType = ExampleXORExamples;
 export type Header = ExampleXORExamples & SchemaXORContent;
 export type SecurityScheme =
@@ -50,15 +52,15 @@ export type SecurityScheme =
   | OpenIdConnectSecurityScheme;
 export type HTTPSecurityScheme =
   | {
-  scheme?: "bearer";
-  [k: string]: unknown;
-}
+      scheme?: 'bearer';
+      [k: string]: unknown;
+    }
   | {
-  scheme?: {
-    [k: string]: unknown;
-  };
-  [k: string]: unknown;
-};
+      scheme?: {
+        [k: string]: unknown;
+      };
+      [k: string]: unknown;
+    };
 
 /**
  * Validation schema for OpenAPI Specification 3.0.X.
@@ -154,9 +156,8 @@ export interface Tag {
    */
   [k: string]: unknown;
 }
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface Paths {
-  [key:string]: PathItem
+  [key: string]: PathItem;
 }
 /**
  * This interface was referenced by `Paths`'s JSON-Schema definition
@@ -175,7 +176,7 @@ export interface PathItem {
   head?: Operation;
   patch?: Operation;
   parameters?: (Parameter | Reference)[];
-  [key:string]: unknown
+  [key: string]: unknown;
 }
 /**
  * Example and examples are mutually exclusive
@@ -229,7 +230,7 @@ export interface RequestBody {
 }
 export interface Responses {
   default?: Response | Reference;
-  [key:string]: Response | Reference | undefined;
+  [key: string]: Response | Reference | undefined;
 }
 export interface Response {
   description: string;
@@ -353,7 +354,7 @@ export interface Schema {
   minProperties?: number;
   required?: [string, ...string[]];
   enum?: [unknown, ...unknown[]];
-  type?: "array" | "boolean" | "integer" | "number" | "object" | "string";
+  type?: 'array' | 'boolean' | 'integer' | 'number' | 'object' | 'string';
   not?: Schema | Reference;
   allOf?: (Schema | Reference)[];
   oneOf?: (Schema | Reference)[];
@@ -411,9 +412,9 @@ export interface Example {
   [k: string]: unknown;
 }
 export interface APIKeySecurityScheme {
-  type: "apiKey";
+  type: 'apiKey';
   name: string;
-  in: "header" | "query" | "cookie";
+  in: 'header' | 'query' | 'cookie';
   description?: string;
   /**
    * This interface was referenced by `APIKeySecurityScheme`'s JSON-Schema definition
@@ -422,7 +423,7 @@ export interface APIKeySecurityScheme {
   [k: string]: unknown;
 }
 export interface OAuth2SecurityScheme {
-  type: "oauth2";
+  type: 'oauth2';
   flows: OAuthFlows;
   description?: string;
   /**
@@ -492,7 +493,7 @@ export interface AuthorizationCodeOAuthFlow {
   [k: string]: unknown;
 }
 export interface OpenIdConnectSecurityScheme {
-  type: "openIdConnect";
+  type: 'openIdConnect';
   openIdConnectUrl: string;
   description?: string;
   /**

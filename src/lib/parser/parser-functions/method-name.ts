@@ -1,7 +1,7 @@
 import { pascalCase } from 'change-case';
 
-export function methodNameParser(uri: string, type: string, id =  ''): string {
-  if(id!==''){
+export function methodNameParser(uri: string, type: string, id = ''): string {
+  if (id !== '') {
     return id;
   }
   const tmp = pascalCase(uri.replace(/\//gi, '-').replace(/\{|\}|\$/gi, ''));

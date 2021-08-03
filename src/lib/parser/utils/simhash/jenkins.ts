@@ -22,7 +22,7 @@ export class Jenkins {
    */
   public hash32(msg: string) {
     const h = this.lookup3(msg, this.pc, this.pb);
-    return (h.c).toString(16);
+    return h.c.toString(16);
   }
 
   /**
@@ -30,7 +30,7 @@ export class Jenkins {
    */
   public hash64(msg: string) {
     const h = this.lookup3(msg, this.pc, this.pb);
-    return (h.b).toString(16) + (h.c).toString(16);
+    return h.b.toString(16) + h.c.toString(16);
   }
   private lookup3(k: string, pc: number, pb: number) {
     let length = k.length;
@@ -115,7 +115,7 @@ export class Jenkins {
     }
 
     // Final mixing of three 32-bit values in to c
-    mixed = this.finalMix(a, b, c)
+    mixed = this.finalMix(a, b, c);
     a = mixed.a;
     b = mixed.b;
     c = mixed.c;
@@ -172,19 +172,10 @@ export class Jenkins {
    * Rotate x by k distance.
    */
   private rot(x: number, k: number) {
-    return (((x) << (k)) | ((x) >> (32 - (k))));
+    return (x << k) | (x >> (32 - k));
   }
-
 }
-
 
 // --------------------------------------------------
 // Private methods
 // --------------------------------------------------
-
-
-
-
-
-
-

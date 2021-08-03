@@ -5,5 +5,5 @@ declare type CliParam = {
   description: string;
   required: boolean;
   default?: string;
-  defaultValueFunction?: ()=>string;
-}
+  defaultValueFunction?: () => string;
+};

@@ -7,4 +7,4 @@ export const logotype = `
       ╚══════╝ ╚══╝╚══╝ ╚══════╝╚═╝  ╚═══╝ ╚═════╝ ╚═╝  ╚═╝
 
       simple generator api from Swagger or OpenApi definitions
-`
+`;
