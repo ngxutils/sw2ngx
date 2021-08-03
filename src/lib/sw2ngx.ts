@@ -95,5 +95,4 @@ export class SwaggerToAngularCodeGen {
     }
     return throwError("[ ERROR ]: swagger config loader service not found")
   }
-
 }

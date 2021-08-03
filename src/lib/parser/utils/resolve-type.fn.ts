@@ -11,9 +11,9 @@ export function exportEnumRegistry(): Sw2NgxEnum[]{
   return [...enumRegistry.values()]
 }
 
-export function resolveTypeFn(prop: Schema | NonBodyParameter, name: string, parentName:string): Sw2NgxResolvedType {
+export function resolveTypeFn(prop: Schema | NonBodyParameter, name: string, parentName:string, swConfig: Sw2NgxConfig): Sw2NgxResolvedType {
   if(prop.$ref && typeof prop.$ref === 'string'){
-    const typeName = prop.$ref.split('/').pop()
+    const typeName = swConfig.parserModelName(prop.$ref)
     return {
       type: `I${typeName}`,
       typeImport: [`I${typeName}`]
@@ -76,7 +76,7 @@ export function resolveTypeFn(prop: Schema | NonBodyParameter, name: string, par
       }
     } else if(prop.type === 'array'){
         if(Array.isArray(prop.items)){
-          const parsedTypes = prop.items.map((item)=> resolveTypeFn(item, name, parentName))
+          const parsedTypes = prop.items.map((item)=> resolveTypeFn(item, name, parentName, swConfig))
           return {
             type: '('+parsedTypes.map((t)=> t.type).join('|')+')[]',
             typeImport: parsedTypes.reduce((acc: string[],cur)=> {
@@ -85,7 +85,7 @@ export function resolveTypeFn(prop: Schema | NonBodyParameter, name: string, par
             }, [])
           }
         } else if(prop.items) {
-          const parsedType = resolveTypeFn(prop.items, name, parentName)
+          const parsedType = resolveTypeFn(prop.items, name, parentName, swConfig)
           return {
             type: parsedType.type + '[]',
             typeImport: parsedType.typeImport
@@ -104,7 +104,7 @@ export function resolveTypeFn(prop: Schema | NonBodyParameter, name: string, par
   }
 
   return {
-    type: 'Record<string|unknown> | unknown',
+    type: 'Record<string, unknown> | unknown',
     typeImport: []
   }
 }

@@ -64,7 +64,7 @@ export class CliHelper{
      * map cli args to Sw2NgxConfig
      * map may be not correct, need validation before use param
      * **/
-    const parsedParams = args.reduce((prev: Sw2NgxConfig , cur, index)=>{
+    return args.reduce((prev: Sw2NgxConfig , cur, index)=>{
       const mappedConfigurationParam = paramsParserMap[cur as keyof typeof paramsParserMap]
       const mappedConfigurationParamValue =  mappedConfigurationParam?.withoutValue ? true: args[index+1]
       if(mappedConfigurationParam && mappedConfigurationParamValue){
@@ -75,8 +75,5 @@ export class CliHelper{
       }
       return prev
     }, {} as Sw2NgxConfig)
-
-    return parsedParams as Sw2NgxConfig
   }
-
 }

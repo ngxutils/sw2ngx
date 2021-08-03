@@ -15,68 +15,31 @@ export const parserConfiguration = [
   {
     token: 'CLI_PARAM',
     useValue: {
-      key: "-parser-custom-service-name",
-      name: "parserServiceName",
-      description: "file for parsing service name function",
-      withoutValue: false,
-      required: false,
-      defaultValueFunction: () => {
-        return path.resolve(__dirname, `./parser-functions/service-name.js`)
-      }
-    }
-  },
-  {
-    token: 'CLI_PARAM',
-    useValue: {
       key: "-parser-custom-method-name",
       name: "parserMethodName",
       description: "file for parsing method name function",
       withoutValue: false,
-      required: false,
+      required: true,
       defaultValueFunction: () => {
-        return path.resolve(__dirname, `./parser-functions/method-name.js`)
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const { methodNameParser } = require(path.resolve(__dirname, `./parser-functions/method-name.js`))
+        return methodNameParser
       }
     }
   },
   {
     token: 'CLI_PARAM',
     useValue: {
-      key: "-parser-custom-param-name",
-      name: "parserParamName",
-      description: "file for parsing param name function",
+      key: "-parser-custom-model-name",
+      name: "parserModelName",
+      description: "file for parsing model name function",
       withoutValue: false,
-      required: false,
+      required: true,
       defaultValueFunction: () => {
-        return path.resolve(__dirname, `./parser-functions/param-name.js`)
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const { modelNameParser } = require(path.resolve(__dirname, `./parser-functions/model-name.js`))
+        return modelNameParser
       }
     }
-  },
-  {
-    token: 'CLI_PARAM',
-    useValue: {
-      key: "-parser-custom-enum-compare",
-      name: "parserEnumCompare",
-      description: "file for parsing enum compare function",
-      withoutValue: false,
-      required: false,
-      default: '',
-      defaultValueFunction: () => {
-        return path.resolve(__dirname, `./parser-functions/enum-compare.js`)
-      }
-    }
-  },
-  {
-    token: 'CLI_PARAM',
-    useValue: {
-      key: "-parser-custom-type-mapper",
-      name: "parserTypeWrapper",
-      description: "file for parsing type map function",
-      withoutValue: false,
-      required: false,
-      default: '',
-      defaultValueFunction: () => {
-        return path.resolve(__dirname, `./parser-functions/type-map.js`)
-      }
-    }
-  },
+  }
 ]

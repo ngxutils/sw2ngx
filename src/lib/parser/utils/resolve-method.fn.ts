@@ -1,16 +1,20 @@
 import { camelCase, pascalCase } from 'change-case';
 
 import {
-  BodyParameter,
+  Operation as OperationV3
+} from  '../../../types/openapi';
+import {
+  BodyParameter, FileSchema,
   JsonReference,
   Operation,
-  Parameter
+  Parameter, Schema
 } from '../../../types/swagger';
 
+
+import { resolveResponseFn } from './resolve-response.fn';
 import { resolveTypeFn } from './resolve-type.fn';
 export type MethodType = 'post'| 'put'| 'get'| 'delete' | 'head' | 'options'
 
-export type Sw2NgxMethodNameParser = (uri: string, type: MethodType, id: string) => string
 
 
 function clearName(name: string): string {
@@ -22,23 +26,7 @@ function clearName(name: string): string {
   return result;
 }
 
-function genMethodName(uri: string, type: string, id =  ''): string {
-  if(id!==''){
-    return id;
-  }
-  const tmp = pascalCase(uri.replace(/\//gi, '-').replace(/\{|\}|\$/gi, ''));
-  switch (type.toLocaleLowerCase()) {
-    case 'post':
-      return 'send' + tmp;
-    case 'delete':
-      return 'delete' + tmp;
-    case 'put':
-      return 'update' + tmp;
-    case 'get':
-    default:
-      return 'get' + tmp;
-  }
-}
+
 
 function isParameter(param: Parameter | JsonReference): param is BodyParameter{
   return (param as Parameter)?.schema!==undefined
@@ -48,20 +36,22 @@ function isJsonRef(param: Parameter | JsonReference): param is JsonReference{
 }
 
 
-function resolveMethodParams(methodName: string, param:JsonReference| Parameter ): Sw2NgxMethodParam {
-  const parsedParamName = pascalCase(((param as Parameter).name! as string).split('.').pop()|| '')
+function resolveMethodParams(methodName: string, param:JsonReference| Parameter , swConfig: Sw2NgxConfig): Sw2NgxMethodParam {
+  const paramNameArr = ((param as Parameter).name! as string).split('.')
+  const parsedParamName = paramNameArr.length>1? pascalCase(paramNameArr.pop()|| ''): paramNameArr.pop() || ''
   const paramName = parsedParamName === ''?'parsingErrorUnknownParam': parsedParamName
+
   let paramType
   if(isJsonRef(param)) {
-    const typeName = param.$ref.split('/').pop()
+    const typeName = swConfig.parserModelName(param.$ref)
     paramType =  {
       type: `I${typeName}`,
       typeImport: [`I${typeName}`]
     }
   }else if(isParameter(param)){
-    paramType = resolveTypeFn(param.schema, paramName, methodName)
+    paramType = resolveTypeFn(param.schema, paramName, methodName, swConfig)
   } else {
-    paramType = resolveTypeFn(param, paramName, methodName)
+    paramType = resolveTypeFn(param, paramName, methodName, swConfig)
   }
   return {
     name: clearName((param as Parameter).name!),
@@ -74,13 +64,12 @@ function resolveMethodParams(methodName: string, param:JsonReference| Parameter 
 }
 
 
-export function resolveMethodFn(path: string, methodType: MethodType, method: Operation, methodNameParser?: Sw2NgxMethodNameParser): Sw2NgxServiceMethod {
-  const nameParser = methodNameParser? methodNameParser: genMethodName
+export function resolveMethodFn(path: string, methodType: MethodType, method: Operation, methodResponse: Schema | FileSchema | undefined, swConfig: Sw2NgxConfig): Sw2NgxServiceMethod {
+  const nameParser = swConfig.parserMethodName
   const name = camelCase(nameParser(path, methodType, method?.operationId?method.operationId: ''))
-
   const params = method.parameters?.map((param)=>{
-  return resolveMethodParams(name, param)
-  })
+    return resolveMethodParams(name, param, swConfig)
+    })
     .filter((x):x is Sw2NgxMethodParam=>!!x)
     .reduce((
       acc:{
@@ -109,6 +98,22 @@ export function resolveMethodFn(path: string, methodType: MethodType, method: Op
     path: [],
     header: [],
   }
+  //TODO: decompose method for V3 parser
+  const methodV3 = method as OperationV3
+  const bodyRequest: Schema = (methodV3.requestBody?.['content'] as {[key:string]: Schema})?.['application/json']['schema'] as Schema
+  if(bodyRequest) {
+    //TODO: has properties  -  multipart/formdata
+    const bodyParam: Sw2NgxMethodParam = {
+      name: 'methodBody',
+        queryName: 'methodBody',
+      description: bodyRequest.description,
+      required: true,
+      type: resolveTypeFn(bodyRequest, 'methodBody', name, swConfig),
+      in: "body"
+    }
+    params.all.push(bodyParam)
+    params.body.push(bodyParam)
+  }
   return {
     uri: path.replace(/{/gi, '${'),
     type: methodType,
@@ -117,6 +122,6 @@ export function resolveMethodFn(path: string, methodType: MethodType, method: Op
     isFormDataUrlencoded: !!method.consumes?.find((contentType)=> contentType ==='application/x-www-form-urlencoded'),
     description: method.summary,
     params: params,
-    resp: []
+    resp: resolveResponseFn(methodResponse,camelCase(name), swConfig)
   }
 }

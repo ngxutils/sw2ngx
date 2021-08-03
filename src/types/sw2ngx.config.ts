@@ -11,5 +11,7 @@ declare type Sw2NgxConfig = {
   help: boolean,
   parsingError: boolean,
   preset: string,
-  [key:string]: string | boolean,
+  parserMethodName: (uri: string, type: string, id: string) => string,
+  parserModelName: (name: string)=> string
+  [key:string]: string | boolean | unknown,
 }

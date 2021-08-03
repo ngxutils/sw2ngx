@@ -155,7 +155,9 @@ export interface Tag {
   [k: string]: unknown;
 }
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface Paths {}
+export interface Paths {
+  [key:string]: PathItem
+}
 /**
  * This interface was referenced by `Paths`'s JSON-Schema definition
  * via the `patternProperty` "^\/".
@@ -165,7 +167,15 @@ export interface PathItem {
   summary?: string;
   description?: string;
   servers?: Server[];
+  get?: Operation;
+  put?: Operation;
+  post?: Operation;
+  delete?: Operation;
+  options?: Operation;
+  head?: Operation;
+  patch?: Operation;
   parameters?: (Parameter | Reference)[];
+  [key:string]: unknown
 }
 /**
  * Example and examples are mutually exclusive
@@ -219,6 +229,7 @@ export interface RequestBody {
 }
 export interface Responses {
   default?: Response | Reference;
+  [key:string]: Response | Reference | undefined;
 }
 export interface Response {
   description: string;
@@ -226,7 +237,7 @@ export interface Response {
     [k: string]: Header | Reference;
   };
   content?: {
-    [k: string]: MediaType;
+    [k: string]: Schema;
   };
   links?: {
     [k: string]: Link | Reference;

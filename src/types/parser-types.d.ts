@@ -36,7 +36,8 @@ declare type Sw2NgxProperty = {
   propertyDescription?:string,
   propertyName: string,
   propertyImport: string[],
-  propertyType: string
+  propertyType: string,
+  propertyRequired: boolean
 }
 
 declare type Sw2NgxServiceMethod = {

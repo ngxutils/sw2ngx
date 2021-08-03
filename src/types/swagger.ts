@@ -526,7 +526,9 @@ export interface JsonReference {
  * Response objects names can either be any valid HTTP status code or 'default'.
  */
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface Responses {}
+export interface Responses {
+  [key:string]: Response
+}
 export interface Response {
   description: string;
   schema?: Schema | FileSchema;

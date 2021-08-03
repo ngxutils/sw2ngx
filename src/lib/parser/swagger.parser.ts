@@ -1,5 +1,5 @@
 import { Observable, of } from 'rxjs';
-import { switchMap, tap } from 'rxjs/operators';
+import { switchMap } from 'rxjs/operators';
 import { singleton } from 'tsyringe';
 
 import { OpenApiV3 } from '../../types/openapi';
@@ -13,6 +13,7 @@ import { exportEnumRegistry, resolveTypeFn } from './utils/resolve-type.fn';
 
 @singleton()
 export class OpenApiV2Parser implements IOpenApiParserPlugin{
+
   constructor(private parserConfig?: ConfigurationRepository) {
   }
 
@@ -27,8 +28,7 @@ export class OpenApiV2Parser implements IOpenApiParserPlugin{
       .pipe(
         switchMap(
           (models)=>this.parseServices(config, models)
-        ),
-        tap((err)=>console.log(err))
+        )
       );
   }
   parseModels(config: OpenApiV2): Observable<{models: Sw2NgxModel[], enums: Sw2NgxEnum[]}> {
@@ -43,7 +43,10 @@ export class OpenApiV2Parser implements IOpenApiParserPlugin{
         const modelProperties  = definition?.properties ? Object.entries(definition.properties):[]
         const parsedProperties = modelProperties
           .map(
-            ([propName, propDef])=>this.parseModelProp(modelName, propName, propDef)
+            ([propName, propDef]) => {
+              const isRequired = (definition?.required?.filter(name=> name === propName)|| []).length>0 || false
+              return this.parseModelProp(modelName, propName, propDef, isRequired)
+            }
           )
 
         const resolvedModel: Sw2NgxModel = {
@@ -61,13 +64,14 @@ export class OpenApiV2Parser implements IOpenApiParserPlugin{
     }
     return of(modelsDefs);
   }
-  parseModelProp(modelName: string, propName: string, prop: Schema): Sw2NgxProperty {
-    const resolvedProperty = resolveTypeFn(prop, propName, modelName)
+  parseModelProp(modelName: string, propName: string, prop: Schema, isRequired: boolean): Sw2NgxProperty {
+    const resolvedProperty = resolveTypeFn(prop, propName, modelName, this.parserConfig?.config.value as Sw2NgxConfig)
     return {
       propertyDescription: prop.description,
       propertyName: propName,
       propertyImport: resolvedProperty.typeImport,
-      propertyType: resolvedProperty.type
+      propertyType: resolvedProperty.type,
+      propertyRequired: isRequired
     }
   }
 
@@ -80,8 +84,10 @@ export class OpenApiV2Parser implements IOpenApiParserPlugin{
         return ['get', 'post', 'put', 'delete', 'head', 'options']
           .map(
             (servicePathMethod) => {
-              return serviceDef[servicePathMethod]
-            ? resolveMethodFn(servicePath, servicePathMethod as MethodType, serviceDef[servicePathMethod] as Operation)
+              const serviceMethodDef: Operation = serviceDef[servicePathMethod] as Operation
+              const response = serviceMethodDef.responses?.['200']?.['schema']
+              return serviceMethodDef
+            ? resolveMethodFn(servicePath, servicePathMethod as MethodType, serviceMethodDef, response, this.parserConfig?.config.value  as Sw2NgxConfig)
             : null}
           )
       })
@@ -141,8 +147,6 @@ export class OpenApiV2Parser implements IOpenApiParserPlugin{
         return service
       })
     }
-
-
     return of({models: [...modelsAndEnums.models], enums:[...modelsAndEnums.enums], services: Object.values(services)})
   }
 }

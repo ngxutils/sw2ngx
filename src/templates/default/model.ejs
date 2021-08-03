@@ -9,6 +9,6 @@ export interface <%=`${model.name}`%> {
 <%if (param.propertyDescription) {-%>
 <%-`\t/* ${param.propertyDescription} */\r\n`-%>
 <%}-%>
-<%-`\t${readOnly?'readonly':''} ${param.propertyName} : ${param.propertyType};\r\n`-%>
+<%-`\t${readOnly?'readonly':''} ${param.propertyName}${param.propertyRequired?'':'?'}: ${param.propertyType};\r\n`-%>
 <%}-%>
 }

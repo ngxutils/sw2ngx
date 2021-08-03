@@ -33,7 +33,6 @@ export class TemplatePrinterService {
   }
   print(apiDefinition: Sw2NgxApiDefinition): Observable<boolean>{
     this.logger?.info("Start Printing templates")
-
     return this.createGeneratorFolder(apiDefinition).pipe(
       filter((x): x is string=>!!x),
       switchMap((outPath)=> {
@@ -44,12 +43,14 @@ export class TemplatePrinterService {
           apiDefinition.enums.length>0,
           this.sw2ngxConfiguration?.config?.value?.readOnlyModels|| false),
             this.printEnumsStream(apiDefinition.enums, outPath),
-            this.printServiceStream(apiDefinition.services, outPath)
+            this.printServiceStream(apiDefinition.services, outPath),
+            this.printInternals(outPath),
+            this.printIndex(outPath, ['models', 'services', 'internals'])
         ])
       }),
-      map((res)=>{ console.log(res)
-      return true})
-      )
+      map((res)=>{
+        return res.reduce((acc, result)=>acc&& result)
+      }))
   }
   private createGeneratorFolder(apiDefinition: Sw2NgxApiDefinition): Observable<string | boolean>{
    return this.config.pipe(map(config=> {
@@ -76,7 +77,6 @@ export class TemplatePrinterService {
         }
         return outPath;
       } catch (error) {
-        console.log('error',error)
         return false
       }
     }))
@@ -189,17 +189,18 @@ export class TemplatePrinterService {
     return of(true)
   }
   private printServiceStream(services: Sw2NgxService[], outPath:string): Observable<boolean>{
-    const parserConfigValue = this.sw2ngxConfiguration?.config.value
-    const servicesIndexTemplate = services
+    const activeServices = services
       .filter((service)=> service.methods.length>0)
+
+    const parserConfigValue = this.sw2ngxConfiguration?.config.value
+    const servicesIndexTemplate = activeServices
       .map((service)=>`export { ${pascalCase(service.name)}ApiService ${parserConfigValue?.genServiceInterfaces? ', I'+pascalCase(service.name)+'ApiService': ''} } from './${paramCase(
       service.name
     )}.service';`).join('\r\n');
     return this.getTemplate('service')
       .pipe(
         switchMap((template): Observable<[string,Sw2NgxService]>=>{
-                      return fromArray(services
-                        .filter((service)=> service.methods.length>0)
+                      return fromArray(activeServices
                         .map((service)=>[template, service])
                       )
                     }),
@@ -207,9 +208,10 @@ export class TemplatePrinterService {
           this.renderEjsTemplate(
             template,
             {
-            service: service,
-            fnPascalCase: pascalCase,
-            providedIn: parserConfigValue?.provideIn|| 'root'
+              service: service,
+              fnPascalCase: pascalCase,
+              providedIn: parserConfigValue?.provideIn|| 'root',
+              genSrvInterface: parserConfigValue?.genServiceInterfaces || false
             },
             service.name
           )),
@@ -221,7 +223,7 @@ export class TemplatePrinterService {
             this.logger?.err(`ERROR: ${serviceName} file write`)
           }
         }),
-        take(services.length),
+        take(activeServices.length),
         reduce((acc: boolean, [, success]: [string, boolean])=> {
           return acc && success
         }, true),
@@ -236,10 +238,33 @@ export class TemplatePrinterService {
     )
   }
 
-  private getTemplate(type: 'model'| 'service'| 'enum'| 'module'):Observable<string>{
+  private printInternals(outPath: string): Observable<boolean>{
+    return this.getTemplate('internals').pipe(
+      switchMap((template)=>this.renderEjsTemplate(template, {}, 'internals')),
+      mergeMap(([, render])=> this.writeFileType(outPath,'internals', render, 'internals')),
+      take(1),
+      reduce((acc: boolean, [, success]: [string, boolean])=> {
+        return acc && success
+      }, true))
+  }
+
+  private printIndex(outPath: string, indexPaths = ['models','services']): Observable<boolean> {
+    const fileBody = indexPaths.map((exportPath)=>`export * from './${exportPath}';`).join('\r\n');
+    return new Observable<boolean>((indexPrinted$)=>{
+      fs.writeFile(path.resolve(outPath, `index.ts`), fileBody, (err)=>{
+        if(err){
+          indexPrinted$.next(false)
+        }else{
+          indexPrinted$.next(true)
+        }
+        indexPrinted$.complete()
+      })
+    })
+  }
+
+  private getTemplate(type: 'model'| 'service'| 'enum'| 'module' | 'internals'):Observable<string>{
     return this.config.pipe(switchMap((config)=>{
       const templatePath = path.resolve(process.cwd(), config.templates, `${type}.ejs`)
-      console.log('templateFolder', templatePath)
       return fs.existsSync(templatePath)? of(templatePath) : throwError('ERROR: failed to get the template')
     }))
   }
@@ -248,7 +273,6 @@ export class TemplatePrinterService {
     return new Observable<[string, string]>((rendered$)=>{
       ejs.renderFile(template, templateData, (err, render)=>{
         if(err){
-          console.log(err)
           rendered$.next([entityName,'error'])
         }else{
           rendered$.next([entityName, render])
@@ -258,17 +282,25 @@ export class TemplatePrinterService {
     })
   }
 
-  private writeFileType(outPath: string,fileName: string, fileBody: string, fileType:'model'|'service'| 'enum'): Observable<[string, boolean]>{
+  private writeFileType(outPath: string,fileName: string, fileBody: string, fileType:'model'|'service'| 'enum'| 'internals'): Observable<[string, boolean]>{
     const filesFolderByType = {
       'model': 'models',
       'enum': 'models/enums',
-      'service': 'services'
+      'service': 'services',
+      'internals': '',
     }
+
+    const fileSuffix = {
+      'model': '.model',
+      'enum': '.enum',
+      'service': '.service',
+      'internals': '',
+    }
+
     return new Observable<[string, boolean]>((written$)=>{
       if(fileBody!=='error'){
-        fs.writeFile(path.resolve(outPath, filesFolderByType[fileType], `${fileName}.${fileType}.ts`), fileBody, (err)=>{
+        fs.writeFile(path.resolve(outPath, filesFolderByType[fileType], `${fileName}${fileSuffix[fileType]}.ts`), fileBody, (err)=>{
           if(err){
-            console.log(err)
             written$.next([fileName, false])
           }else{
             written$.next([fileName, true])

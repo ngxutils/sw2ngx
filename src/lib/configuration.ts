@@ -84,7 +84,7 @@ export const configuration = [
   {
     token: 'CLI_PARAM',
     useValue: {
-      key: "-no-module",
+      key: "-normalize-model-name",
       name: "noModule",
       description: "create api services without module file",
       withoutValue: true,

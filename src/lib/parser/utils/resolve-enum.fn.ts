@@ -8,7 +8,6 @@ let simHash = new SimHash()
 
 function getSimHash(){
   if(!simHash){
-    console.log('new simhash')
     simHash = new SimHash()
   }
   return simHash
@@ -51,7 +50,6 @@ export function mergeDuplicateEnums(enumsMap: Map<string,Sw2NgxEnum>, insertEnum
       return  false
     })
     if (equals.length > 0)  {
-      console.log('eq',insertEnum.name, insertEnum.hash,JSON.stringify(equals))
       return insertEnum.name
     } else {
       if (extDuplicate.length > 0) {

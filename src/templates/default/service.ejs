@@ -3,7 +3,7 @@
 <% if (service.imports.length>0) { -%>
 import { <%=service.imports.join(', ');-%> } from '../models';
 <% } -%>
-<%_ const hasParamString = service.methods.filter((x)=> x.isFormDataUrlencoded || x.params.query.length ).length>0; -%>
+<%_ const hasParamString = service.methods.filter((x)=> (x.isFormDataUrlencoded&& x.params.formData.length>0) || x.params.query.length ).length>0; -%>
 <%if(hasParamString){-%>
 import { createParamString } from '../internals';
 <%_}-%>
@@ -92,7 +92,7 @@ export class <%=`${fnPascalCase(service.name)}`%>ApiService implements I<%=`${fn
       <%}-%>
 <%-`return this.http.${method.type}<${method.resp[0]?.type}>(this.uri + \`${method.uri}\`, form, options);`-%>
     <%}else{-%>
-    <%if (method.isFormDataUrlencoded) {%>
+    <%if (method.isFormDataUrlencoded && method.params.formData.length>0) {%>
     options.headers = new HttpHeaders(Object.assign({'Content-Type': 'application/x-www-form-urlencoded'}, customHeaders));
     const payload = createParamString(
       <% for(const param of method.params.formData) {-%>

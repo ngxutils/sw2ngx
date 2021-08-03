@@ -20,9 +20,6 @@
     "readOnlyModels": {
       "type": "boolean"
     },
-    "noModule": {
-      "type": "boolean"
-    },
     "provideIn": {
       "type": "string"
     }
