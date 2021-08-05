@@ -7,6 +7,7 @@ import { OpenApiV2, Operation, Schema } from '../../types/swagger';
 import { ConfigurationRepository } from '../configuration.repository';
 
 import { IOpenApiParserPlugin } from './open-api-parser.plugin';
+import { resolveEnumFn } from './utils/resolve-enum.fn';
 import { resolveImportsFn } from './utils/resolve-imports.fn';
 import { MethodType, resolveMethodFn } from './utils/resolve-method.fn';
 import { exportEnumRegistry, resolveTypeFn } from './utils/resolve-type.fn';
@@ -39,14 +40,17 @@ export class OpenApiV3Parser implements IOpenApiParserPlugin {
     console.log(this.parserConfig?.config.value);
     // console.log('here')
     if (config?.components?.schemas) {
-      // console.log('cfg', config.components.schemas)
       modelsDefs.models = Object.entries(config.components.schemas).map(
         ([name, definition]) => {
           const parserFn = this.parserConfig?.config.value?.parserModelName as (
             name: string
           ) => string;
-          console.log('here', parserFn(name));
           const modelName = `I${parserFn(name) || name}`;
+          if(definition.enum){
+            resolveEnumFn(definition.description, definition.enum as [unknown, ...unknown[]], modelName, '')
+            return null
+          }
+
           const modelProperties = definition?.properties
             ? Object.entries(definition.properties)
             : [];
@@ -86,11 +90,9 @@ export class OpenApiV3Parser implements IOpenApiParserPlugin {
           };
           return resolvedModel;
         }
-      );
+      ).filter((model): model is Sw2NgxModel=> !!model)
       modelsDefs.enums = exportEnumRegistry();
     }
-    console.log('here');
-
     return of(modelsDefs);
   }
   parseModelProp(
