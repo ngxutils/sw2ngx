@@ -91,6 +91,7 @@ export function resolveEnumFn(
   const hashName = getSimHash().hash(enumValue.join('|'));
 
   if (extractedEnum === null) {
+
     if (
       enumValue
         .join('')
@@ -98,11 +99,16 @@ export function resolveEnumFn(
         .some((x) => isNaN(Number(x)))
     ) {
       return {
-        name: '( ' + enumValue.map((x) => `'${x}'`).join(' | ') + ' )',
-        value: [],
+        name: currentName,
+        value: enumValue.map((val, index)=> {
+          return {
+            key: String(val),
+            val: index
+          }
+        }),
         modelName: modelName,
-        hash: '999999',
-        isPremitive: true,
+        hash: hashName.toString(16),
+        isPremitive: false,
       };
     }
     return {
