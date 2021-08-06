@@ -7,17 +7,12 @@ import { OpenApiV2, Operation, Schema } from '../../types/swagger';
 import { ConfigurationRepository } from '../configuration.repository';
 
 import { IOpenApiParserPlugin } from './open-api-parser.plugin';
-import { mergeDuplicateEnums, resolveEnumFn } from './utils/resolve-enum.fn';
 import { resolveImportsFn } from './utils/resolve-imports.fn';
 import { MethodType, resolveMethodFn } from './utils/resolve-method.fn';
 import { exportEnumRegistry, resolveTypeFn } from './utils/resolve-type.fn';
 
 @singleton()
 export class OpenApiV3Parser implements IOpenApiParserPlugin {
-  private models = new Map<string, Sw2NgxModel>()
-  private enums = new Map<string, Sw2NgxEnum>()
-
-
   constructor(private parserConfig?: ConfigurationRepository) {}
   isV3(config: OpenApiV3 | OpenApiV2): config is OpenApiV3 {
     return (
