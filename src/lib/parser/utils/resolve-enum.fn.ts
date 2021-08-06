@@ -37,7 +37,7 @@ export function mergeDuplicateEnums(
   insertEnum: Sw2NgxEnum
 ): string {
   const withParentName = `${pascalCase(
-    paramCase(insertEnum.modelName).replace(/^i-/gi, '') +
+    paramCase(insertEnum.modelName) +
       '-' +
       paramCase(insertEnum.name)
   )}`;

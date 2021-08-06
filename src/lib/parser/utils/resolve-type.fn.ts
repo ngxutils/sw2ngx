@@ -17,8 +17,8 @@ export function resolveTypeFn(
   if (prop.$ref && typeof prop.$ref === 'string') {
     const typeName = swConfig.parserModelName(prop.$ref);
     return {
-      type: `I${typeName}`,
-      typeImport: [`I${typeName}`],
+      type: `${typeName}`,
+      typeImport: [`${typeName}`],
     };
   }
   if (prop.enum) {

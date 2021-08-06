@@ -47,8 +47,8 @@ function resolveMethodParams(
   if (isJsonRef(param)) {
     const typeName = swConfig.parserModelName(param.$ref);
     paramType = {
-      type: `I${typeName}`,
-      typeImport: [`I${typeName}`],
+      type: `${typeName}`,
+      typeImport: [`${typeName}`],
     };
   } else if (isParameter(param)) {
     paramType = resolveTypeFn(param.schema, paramName, methodName, swConfig);

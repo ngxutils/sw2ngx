@@ -40,7 +40,7 @@ export class OpenApiV2Parser implements IOpenApiParserPlugin {
     if (config?.definitions) {
       modelsDefs.models = Object.entries(config.definitions).map(
         ([name, definition]) => {
-          const modelName = `I${name}`;
+          const modelName = `${name}`;
           const modelProperties = definition?.properties
             ? Object.entries(definition.properties)
             : [];

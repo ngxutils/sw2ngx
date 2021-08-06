@@ -7,13 +7,17 @@ import { OpenApiV2, Operation, Schema } from '../../types/swagger';
 import { ConfigurationRepository } from '../configuration.repository';
 
 import { IOpenApiParserPlugin } from './open-api-parser.plugin';
-import { resolveEnumFn } from './utils/resolve-enum.fn';
+import { mergeDuplicateEnums, resolveEnumFn } from './utils/resolve-enum.fn';
 import { resolveImportsFn } from './utils/resolve-imports.fn';
 import { MethodType, resolveMethodFn } from './utils/resolve-method.fn';
 import { exportEnumRegistry, resolveTypeFn } from './utils/resolve-type.fn';
 
 @singleton()
 export class OpenApiV3Parser implements IOpenApiParserPlugin {
+  private models = new Map<string, Sw2NgxModel>()
+  private enums = new Map<string, Sw2NgxEnum>()
+
+
   constructor(private parserConfig?: ConfigurationRepository) {}
   isV3(config: OpenApiV3 | OpenApiV2): config is OpenApiV3 {
     return (
@@ -25,7 +29,6 @@ export class OpenApiV3Parser implements IOpenApiParserPlugin {
     return this.isV3(config);
   }
   parse(config: OpenApiV3): Observable<Sw2NgxApiDefinition> {
-    console.log('config', !!config);
     return this.parseModels(config).pipe(
       switchMap((models) => this.parseServices(config, models))
     );
@@ -37,20 +40,20 @@ export class OpenApiV3Parser implements IOpenApiParserPlugin {
       models: [],
       enums: [],
     };
-    console.log(this.parserConfig?.config.value);
-    // console.log('here')
+
+
+
     if (config?.components?.schemas) {
       modelsDefs.models = Object.entries(config.components.schemas).map(
         ([name, definition]) => {
           const parserFn = this.parserConfig?.config.value?.parserModelName as (
             name: string
           ) => string;
-          const modelName = `I${parserFn(name) || name}`;
-          if(definition.enum){
-            resolveEnumFn(definition.description, definition.enum as [unknown, ...unknown[]], modelName, '')
+          const modelName = `${parserFn(name) || name}`;
+          if(definition.enum) {
+            resolveTypeFn(definition as unknown as Schema, modelName, '', this.parserConfig?.config.value as Sw2NgxConfig)
             return null
           }
-
           const modelProperties = definition?.properties
             ? Object.entries(definition.properties)
             : [];

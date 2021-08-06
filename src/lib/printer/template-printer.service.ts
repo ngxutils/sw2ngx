@@ -105,7 +105,7 @@ export class TemplatePrinterService {
         .map(
           (modelName) =>
             `export { ${modelName} } from './${
-              paramCase(modelName).replace(/^i-/gi, '') + '.model'
+              paramCase(modelName) + '.model'
             }';`
         ),
     ].join('\r\n');
@@ -145,7 +145,7 @@ export class TemplatePrinterService {
               path.resolve(
                 out,
                 'models',
-                paramCase(templateName).replace(/^i-/gi, '') + '.model.ts'
+                paramCase(templateName)+ '.model.ts'
               ),
               rendered,
               (err) => {
