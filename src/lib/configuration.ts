@@ -56,7 +56,7 @@ export const configuration = [
       withoutValue: false,
       required: false,
       defaultValueFunction: () => {
-        return path.resolve(__dirname, `../templates/default`);
+        return path.resolve(__dirname, `../../templates/default`);
       },
     },
   },

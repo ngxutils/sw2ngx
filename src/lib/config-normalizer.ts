@@ -18,7 +18,6 @@ export class Sw2NgxConfigNormalizer {
         if (param.defaultValueFunction || param.default) {
           if (param.defaultValueFunction) {
             parsedParams[param.name] = param.defaultValueFunction();
-            console.log(param.name, parsedParams[param.name]);
           } else {
             parsedParams[param.name] = param.default as string;
           }

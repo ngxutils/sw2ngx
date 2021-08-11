@@ -165,7 +165,7 @@ export class TemplatePrinterService {
       }),
       tap(([modelName, isPrinted]) => {
         if (isPrinted) {
-          this.logger?.ok(`OK: ${modelName}`);
+          this.logger?.ok(`[ OK ] model: ${pascalCase(modelName)}`);
         } else {
           this.logger?.err(`ERROR: ${modelName} file write`);
         }
@@ -220,7 +220,7 @@ export class TemplatePrinterService {
         ),
         tap(([modelName, isPrinted]) => {
           if (isPrinted) {
-            this.logger?.ok(`OK: ${modelName}`);
+            this.logger?.ok(`[ OK ] enum: ${pascalCase(modelName)}`);
           } else {
             this.logger?.err(`ERROR: ${modelName} file write`);
           }
@@ -288,7 +288,7 @@ export class TemplatePrinterService {
       ),
       tap(([serviceName, isPrinted]) => {
         if (isPrinted) {
-          this.logger?.ok(`OK: ${serviceName}`);
+          this.logger?.ok(`[ OK ] service: ${pascalCase(serviceName)}`);
         } else {
           this.logger?.err(`ERROR: ${serviceName} file write`);
         }

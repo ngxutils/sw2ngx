@@ -114,7 +114,7 @@ export class OpenApiV2Parser implements IOpenApiParserPlugin {
               const serviceMethodDef: Operation = serviceDef[
                 servicePathMethod
               ] as Operation;
-              const response = serviceMethodDef.responses?.['200']?.['schema'];
+              const response = serviceMethodDef?.responses?.['200']?.['schema'];
               return serviceMethodDef
                 ? resolveMethodFn(
                     servicePath,
