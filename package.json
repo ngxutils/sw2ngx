@@ -1,13 +1,28 @@
 {
   "name": "sw2ngx",
-  "version": "6.0.0-alpha-10",
+  "version": "6.0.2-beta-01",
   "description": "auto-generation of angular services by Swagger / OpenAPI declaration",
   "main": "build/main/index.js",
   "typings": "build/main/index.d.ts",
   "module": "build/module/index.js",
-  "repository": "https://github.com/ngxutils/sw2ngx",
+  "author": "https://github.com/YAZART",
   "license": "WTFPL",
-  "keywords": [],
+  "homepage": "https://github.com/ngxutils/sw2ngx#readme",
+  "bugs": {
+    "url": "https://github.com/ngxutils/sw2ngx/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ngxutils/sw2ngx.git"
+  },
+  "keywords": [
+    "swagger",
+    "openapi",
+    "angular",
+    "javascript",
+    "generator",
+    "ngx"
+  ],
   "scripts": {
     "build": "rm -rf ./build && run-p build:* && npm run mkdir:templates && npm run copy",
     "build:main": "tsc -p tsconfig.json",

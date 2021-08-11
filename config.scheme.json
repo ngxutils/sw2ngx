@@ -11,9 +11,6 @@
     "baseHref": {
       "type": "string"
     },
-    "extendConfigPath": {
-      "type": "string"
-    },
     "templates": {
       "type": "string"
     },
@@ -21,6 +18,15 @@
       "type": "boolean"
     },
     "provideIn": {
+      "type": "string"
+    },
+    "genServiceInterfaces": {
+      "type": "boolean"
+    },
+    "parserMethodName": {
+      "type": "string"
+    },
+    "parserModelName": {
       "type": "string"
     }
   },

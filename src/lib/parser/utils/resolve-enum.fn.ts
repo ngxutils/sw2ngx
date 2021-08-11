@@ -99,7 +99,7 @@ export function resolveEnumFn(
         .some((x) => isNaN(Number(x)))
     ) {
       return {
-        name: currentName,
+        name: `${pascalCase(currentName)}`,
         value: enumValue.map((val, index)=> {
           return {
             key: String(val),
@@ -121,7 +121,7 @@ export function resolveEnumFn(
   }
 
   return {
-    name: `${pascalCase(currentName)}Set`,
+    name: `${pascalCase(currentName)}`,
     modelName: modelName,
     value: extractedEnum,
     hash: hashName.toString(16),

@@ -85,17 +85,6 @@ export const configuration = [
   {
     token: 'CLI_PARAM',
     useValue: {
-      key: '-normalize-model-name',
-      name: 'noModule',
-      description: 'create api services without module file',
-      withoutValue: true,
-      required: false,
-      default: true,
-    },
-  },
-  {
-    token: 'CLI_PARAM',
-    useValue: {
       key: '-readonly',
       name: 'readOnlyModels',
       description: 'make readonly properties in data models interfaces',
@@ -104,18 +93,6 @@ export const configuration = [
       default: true,
     },
   },
-  {
-    token: 'CLI_PARAM',
-    useValue: {
-      key: '-ext',
-      name: 'extendConfigPath',
-      description: 'path to extend swagger definition only static json file',
-      withoutValue: false,
-      required: false,
-      default: './sw2ngx.extend.json',
-    },
-  },
-
   {
     token: 'LOGGER_COLORS',
     useValue: {
