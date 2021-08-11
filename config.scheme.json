@@ -1,0 +1,36 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "config": {
+      "type": "string"
+    },
+    "outputPath": {
+      "type": "string"
+    },
+    "baseHref": {
+      "type": "string"
+    },
+    "templates": {
+      "type": "string"
+    },
+    "readOnlyModels": {
+      "type": "boolean"
+    },
+    "provideIn": {
+      "type": "string"
+    },
+    "genServiceInterfaces": {
+      "type": "boolean"
+    },
+    "parserMethodName": {
+      "type": "string"
+    },
+    "parserModelName": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "config"
+  ]
+}

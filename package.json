@@ -1,21 +1,10 @@
 {
   "name": "sw2ngx",
-  "version": "5.2.0",
-  "description": "Generate Angular API module form swagger.json",
-  "main": "dist/sw2ngx.umd.js",
-  "module": "dist/sw2ngx.es5.js",
-  "typings": "dist/types/sw2ngx.d.ts",
-  "scripts": {
-    "lint": "eslint --cache --ext .ts src",
-    "lint:fix": "npm run lint -- --fix",
-    "prebuild": "rimraf dist",
-    "build": "tsc --module commonjs && rollup -c rollup.config.ts",
-    "start": "rollup -c rollup.config.ts -w"
-  },
-  "preferGlobal": true,
-  "bin": {
-    "sw2ngx": "./bin/sw2ngx"
-  },
+  "version": "6.0.2-beta-02",
+  "description": "auto-generation of angular services by Swagger / OpenAPI declaration",
+  "main": "build/main/index.js",
+  "typings": "build/main/index.d.ts",
+  "module": "build/module/index.js",
   "author": "https://github.com/YAZART",
   "license": "WTFPL",
   "homepage": "https://github.com/ngxutils/sw2ngx#readme",
@@ -28,42 +17,65 @@
   },
   "keywords": [
     "swagger",
+    "openapi",
     "angular",
     "javascript",
     "generator",
-    "ngx",
-    "openapi",
-    "ng2",
-    "angular2",
-    "angularX"
+    "ngx"
   ],
-  "devDependencies": {
-    "@rollup/plugin-commonjs": "^11.1.0",
-    "@rollup/plugin-json": "^4.0.2",
-    "@rollup/plugin-node-resolve": "^7.1.3",
-    "@types/node": "^13.11.1",
-    "@types/request": "^2.48.4",
-    "@types/rimraf": "^3.0.0",
-    "@typescript-eslint/eslint-plugin": "^2.28.0",
-    "@typescript-eslint/parser": "^2.28.0",
-    "eslint": "^6.8.0",
-    "eslint-config-prettier": "^6.10.1",
-    "eslint-plugin-prettier": "^3.1.3",
-    "prettier": "^2.0.4",
-    "rollup": "^2.6.1",
-    "rollup-plugin-copy": "^3.3.0",
-    "rollup-plugin-node-builtins": "^2.1.2",
-    "rollup-plugin-node-globals": "^1.4.0",
-    "rollup-plugin-sourcemaps": "^0.5.0",
-    "rollup-plugin-typescript2": "^0.27.0",
-    "typescript": "^3.8.3"
+  "scripts": {
+    "build": "rm -rf ./build && run-p build:* && npm run mkdir:templates && npm run copy",
+    "build:main": "tsc -p tsconfig.json",
+    "build:module": "tsc -p tsconfig.module.json",
+    "mkdir:templates": "mkdir ./build/templates",
+    "copy": "cp -R ./src/templates/* ./build/templates/default",
+    "fix": "run-s fix:*",
+    "fix:prettier": "prettier \"src/**/*.ts\" --write",
+    "fix:lint": "eslint src --ext .ts --fix",
+    "test": "run-s build test:*",
+    "test:lint": "eslint src --ext .ts"
+  },
+  "engines": {
+    "node": ">=10"
   },
   "dependencies": {
-    "@types/ejs": "^3.0.2",
-    "@types/node-fetch": "^2.5.6",
-    "change-case": "^4.1.1",
-    "ejs": "^3.0.2",
+    "change-case": "^4.1.2",
+    "ejs": "^3.1.6",
     "node-fetch": "^2.6.1",
-    "rimraf": "^3.0.2"
+    "reflect-metadata": "^0.1.13",
+    "rxjs": "^6.6.7",
+    "tsyringe": "^4.5.0"
+  },
+  "devDependencies": {
+    "@types/ejs": "^3.0.7",
+    "@types/node": "^14.14.37",
+    "@types/node-fetch": "^2.5.10",
+    "@typescript-eslint/eslint-plugin": "^4.0.1",
+    "@typescript-eslint/parser": "^4.0.1",
+    "eslint": "^7.8.0",
+    "eslint-config-prettier": "^6.11.0",
+    "eslint-plugin-eslint-comments": "^3.2.0",
+    "eslint-plugin-import": "^2.22.0",
+    "npm-run-all": "^4.1.5",
+    "prettier": "^2.1.1",
+    "ts-node": "^9.0.0",
+    "typescript": "^4.0.2"
+  },
+  "files": [
+    "bin",
+    "build/main",
+    "build/module",
+    "!**/*.spec.*",
+    "!**/*.json",
+    "CHANGELOG.md",
+    "LICENSE",
+    "sw2ngx/README.md",
+    "config.scheme.json"
+  ],
+  "prettier": {
+    "singleQuote": true
+  },
+  "bin": {
+    "sw2ngx": "./bin/sw2ngx"
   }
 }

@@ -1,5 +1,6 @@
-import Generator from './sw2ngx';
+import 'reflect-metadata';
+import { SwaggerToAngularCodeGen } from './lib/sw2ngx';
 
-export default Generator;
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const app = new Generator();
+export * from './lib/sw2ngx';
+
+new SwaggerToAngularCodeGen();
