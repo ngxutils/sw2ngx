@@ -24,6 +24,7 @@ declare type Sw2NgxModel = {
   description?: string;
   imports: string[];
   properties: Sw2NgxProperty[];
+  isArray?:boolean
 };
 declare type Sw2NgxService = {
   name: string;

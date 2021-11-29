@@ -4,7 +4,7 @@
 import { <%=model.imports.filter(x=>x!==model.name).join(', ');-%> } from './';
 <% } -%>
 
-export interface <%=`${model.name}`%> {
+export interface <%=`${model.name}${model.isArray?'Item':''}`%> {
 <%for (const param of model.properties) {-%>
 <%if (param.propertyDescription) {-%>
 <%-`\t/* ${param.propertyDescription} */\r\n`-%>
@@ -12,3 +12,6 @@ export interface <%=`${model.name}`%> {
 <%-`\t${readOnly?'readonly':''} ${param.propertyName}${param.propertyRequired?'':'?'}: ${param.propertyType};\r\n`-%>
 <%}-%>
 }
+<%if (model.isArray) {-%>
+export type <%=`${model.name}`%> = Array<<%=`${model.name}${model.isArray?'Item':''}`%>>
+<%}-%>

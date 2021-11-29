@@ -41,6 +41,7 @@ export class OpenApiV3Parser implements IOpenApiParserPlugin {
     if (config?.components?.schemas) {
       modelsDefs.models = Object.entries(config.components.schemas).map(
         ([name, definition]) => {
+          let isArray = false;
           const parserFn = this.parserConfig?.config.value?.parserModelName as (
             name: string
           ) => string;
@@ -49,9 +50,15 @@ export class OpenApiV3Parser implements IOpenApiParserPlugin {
             resolveTypeFn(definition as unknown as Schema, modelName, '', this.parserConfig?.config.value as Sw2NgxConfig)
             return null
           }
-          const modelProperties = definition?.properties
+          let modelProperties = definition?.properties
             ? Object.entries(definition.properties)
             : [];
+          if(definition.type ==="array"){
+            modelProperties = ((definition?.items) as Schema)?.properties
+            ? Object.entries(((definition?.items) as Schema)?.properties || {})
+            : [];
+            isArray = true
+          }
           const parsedProperties = modelProperties.map(
             ([propName, propDef]) => {
               let isRequired = false;
@@ -85,6 +92,7 @@ export class OpenApiV3Parser implements IOpenApiParserPlugin {
               }, [])
             ),
             properties: parsedProperties,
+            isArray: isArray
           };
           return resolvedModel;
         }
