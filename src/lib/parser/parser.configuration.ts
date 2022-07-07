@@ -20,7 +20,7 @@ export const parserConfiguration = [
       description: 'file for parsing method name function',
       withoutValue: false,
       required: true,
-      valueParser: (value:string)=>{
+      valueParser: (value: string) => {
         // eslint-disable-next-line @typescript-eslint/no-var-requires
         const { methodNameParser } = require(path.resolve(
           process.cwd(),
@@ -46,12 +46,9 @@ export const parserConfiguration = [
       description: 'file for parsing model name function',
       withoutValue: false,
       required: true,
-      valueParser: (value:string)=>{
+      valueParser: (value: string) => {
         // eslint-disable-next-line @typescript-eslint/no-var-requires
-        const { modelNameParser } = require(path.resolve(
-         process.cwd(),
-          value
-        ));
+        const { modelNameParser } = require(path.resolve(process.cwd(), value));
         return modelNameParser;
       },
       defaultValueFunction: () => {

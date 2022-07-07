@@ -36,28 +36,31 @@ export class OpenApiV3Parser implements IOpenApiParserPlugin {
       enums: [],
     };
 
-
-
     if (config?.components?.schemas) {
-      modelsDefs.models = Object.entries(config.components.schemas).map(
-        ([name, definition]) => {
+      modelsDefs.models = Object.entries(config.components.schemas)
+        .map(([name, definition]) => {
           let isArray = false;
           const parserFn = this.parserConfig?.config.value?.parserModelName as (
             name: string
           ) => string;
           const modelName = `${parserFn(name) || name}`;
-          if(definition.enum) {
-            resolveTypeFn(definition as unknown as Schema, modelName, '', this.parserConfig?.config.value as Sw2NgxConfig)
-            return null
+          if (definition.enum) {
+            resolveTypeFn(
+              definition as unknown as Schema,
+              modelName,
+              '',
+              this.parserConfig?.config.value as Sw2NgxConfig
+            );
+            return null;
           }
           let modelProperties = definition?.properties
             ? Object.entries(definition.properties)
             : [];
-          if(definition.type ==="array"){
-            modelProperties = ((definition?.items) as Schema)?.properties
-            ? Object.entries(((definition?.items) as Schema)?.properties || {})
-            : [];
-            isArray = true
+          if (definition.type === 'array') {
+            modelProperties = (definition?.items as Schema)?.properties
+              ? Object.entries((definition?.items as Schema)?.properties || {})
+              : [];
+            isArray = true;
           }
           const parsedProperties = modelProperties.map(
             ([propName, propDef]) => {
@@ -92,11 +95,11 @@ export class OpenApiV3Parser implements IOpenApiParserPlugin {
               }, [])
             ),
             properties: parsedProperties,
-            isArray: isArray
+            isArray: isArray,
           };
           return resolvedModel;
-        }
-      ).filter((model): model is Sw2NgxModel=> !!model)
+        })
+        .filter((model): model is Sw2NgxModel => !!model);
       modelsDefs.enums = exportEnumRegistry();
     }
     return of(modelsDefs);
@@ -136,16 +139,16 @@ export class OpenApiV3Parser implements IOpenApiParserPlugin {
               const serviceMethodDef: OperationV3 = serviceDef[
                 servicePathMethod
               ] as OperationV3;
-              const response = (serviceMethodDef?.responses?.['200']?.[
-                'content'
-              ] as { [key: string]: Schema })?.['application/json'][
-                'schema'
-              ] as Schema;
+              const response = (
+                serviceMethodDef?.responses?.['200']?.['content'] as {
+                  [key: string]: Schema;
+                }
+              )?.['application/json']['schema'] as Schema;
               return serviceMethodDef
                 ? resolveMethodFn(
                     servicePath,
                     servicePathMethod as MethodType,
-                    (serviceMethodDef as unknown) as Operation,
+                    serviceMethodDef as unknown as Operation,
                     response,
                     this.parserConfig?.config.value as Sw2NgxConfig
                   )

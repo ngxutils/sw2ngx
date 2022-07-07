@@ -70,9 +70,8 @@ export class CliHelper {
     return args.reduce((prev: Sw2NgxConfig, cur, index) => {
       const mappedConfigurationParam =
         paramsParserMap[cur as keyof typeof paramsParserMap];
-      const mappedConfigurationParamValue = mappedConfigurationParam?.withoutValue
-        ? true
-        : args[index + 1];
+      const mappedConfigurationParamValue =
+        mappedConfigurationParam?.withoutValue ? true : args[index + 1];
       if (mappedConfigurationParam && mappedConfigurationParamValue) {
         return {
           ...prev,

@@ -1,6 +1,7 @@
 import { paramCase, pascalCase } from 'change-case';
 
 import { Description } from '../../../types/swagger';
+
 import { SimHash } from './simhash/simhash';
 
 let simHash = new SimHash();
@@ -36,9 +37,7 @@ export function mergeDuplicateEnums(
   insertEnum: Sw2NgxEnum
 ): string {
   const withParentName = `${pascalCase(
-    paramCase(insertEnum.modelName) +
-      '-' +
-      paramCase(insertEnum.name)
+    paramCase(insertEnum.modelName) + '-' + paramCase(insertEnum.name)
   )}`;
   const duplicate = enumsMap.has(insertEnum.name)
     ? [...enumsMap.keys()].filter(
@@ -83,7 +82,36 @@ export function mergeDuplicateEnums(
 export function resolveEnumFn(
   description: Description | undefined,
   enumValue: [unknown, ...unknown[]],
-  propType: 'array' | 'boolean' | 'integer' | 'null' | 'number' | 'object' | 'string' | [('array' | 'boolean' | 'integer' | 'null' | 'number' | 'object' | 'string'), ...('array' | 'boolean' | 'integer' | 'null' | 'number' | 'object' | 'string')[]] | 'file' | undefined,
+  propType:
+    | 'array'
+    | 'boolean'
+    | 'integer'
+    | 'null'
+    | 'number'
+    | 'object'
+    | 'string'
+    | [
+        (
+          | 'array'
+          | 'boolean'
+          | 'integer'
+          | 'null'
+          | 'number'
+          | 'object'
+          | 'string'
+        ),
+        ...(
+          | 'array'
+          | 'boolean'
+          | 'integer'
+          | 'null'
+          | 'number'
+          | 'object'
+          | 'string'
+        )[]
+      ]
+    | 'file'
+    | undefined,
   currentName: string,
   modelName: string
 ): Sw2NgxEnum {
@@ -91,7 +119,6 @@ export function resolveEnumFn(
   const hashName = getSimHash().hash(enumValue.join('|'));
 
   if (extractedEnum === null) {
-
     if (
       enumValue
         .join('')
@@ -100,11 +127,11 @@ export function resolveEnumFn(
     ) {
       return {
         name: `${pascalCase(currentName)}`,
-        value: enumValue.map((val, index)=> {
+        value: enumValue.map((val, index) => {
           return {
             key: String(val),
-            val: propType!=='string'?index: String(val)
-          }
+            val: propType !== 'string' ? index : String(val),
+          };
         }),
         modelName: modelName,
         hash: hashName.toString(16),

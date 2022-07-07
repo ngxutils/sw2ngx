@@ -59,7 +59,9 @@ export class SwaggerToAngularCodeGen {
           this.logger?.ok('[ OK ] Parsing openapi configuration successfully!');
           this.templatePrinter
             ?.print(resp)
-            .subscribe(() => this.logger?.ok('[ OK ] Generation successfully !'));
+            .subscribe(() =>
+              this.logger?.ok('[ OK ] Generation successfully !')
+            );
         },
         (err) =>
           this.logger?.err(

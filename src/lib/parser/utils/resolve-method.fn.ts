@@ -117,9 +117,11 @@ export function resolveMethodFn(
   };
   //TODO: decompose method for V3 parser
   const methodV3 = method as OperationV3;
-  const bodyRequest: Schema = (methodV3.requestBody?.['content'] as {
-    [key: string]: Schema;
-  })?.['application/json']['schema'] as Schema;
+  const bodyRequest: Schema = (
+    methodV3.requestBody?.['content'] as {
+      [key: string]: Schema;
+    }
+  )?.['application/json']['schema'] as Schema;
   if (bodyRequest) {
     //TODO: has properties  -  multipart/formdata
     const bodyParam: Sw2NgxMethodParam = {

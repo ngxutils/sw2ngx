@@ -6,5 +6,5 @@ declare type CliParam = {
   required: boolean;
   default?: string;
   defaultValueFunction?: () => string;
-  valueParser?: (value: unknown)=> unknown
+  valueParser?: (value: unknown) => unknown;
 };

@@ -112,9 +112,9 @@ export class TemplatePrinterService {
 
     return this.getTemplate('model').pipe(
       switchMap((template) => {
-        const templatedModels: Array<
-          [string, Sw2NgxModel]
-        > = models.map((model) => [template, model]);
+        const templatedModels: Array<[string, Sw2NgxModel]> = models.map(
+          (model) => [template, model]
+        );
         return fromArray(templatedModels);
       }),
       mergeMap(([template, model]: [string, Sw2NgxModel]) => {
@@ -145,7 +145,7 @@ export class TemplatePrinterService {
               path.resolve(
                 out,
                 'models',
-                paramCase(templateName)+ '.model.ts'
+                paramCase(templateName) + '.model.ts'
               ),
               rendered,
               (err) => {
@@ -198,14 +198,12 @@ export class TemplatePrinterService {
         .map((name) => `export { ${name} } from './${paramCase(name)}.enum';`)
         .join('\r\n');
       return this.getTemplate('enum').pipe(
-        switchMap(
-          (template): Observable<[string, Sw2NgxEnum]> => {
-            const enumsTemplated: [string, Sw2NgxEnum][] = enums
-              .filter((x) => !x.isPremitive)
-              .map((value) => [template, value]);
-            return fromArray(enumsTemplated);
-          }
-        ),
+        switchMap((template): Observable<[string, Sw2NgxEnum]> => {
+          const enumsTemplated: [string, Sw2NgxEnum][] = enums
+            .filter((x) => !x.isPremitive)
+            .map((value) => [template, value]);
+          return fromArray(enumsTemplated);
+        }),
         mergeMap(([template, value]: [string, Sw2NgxEnum]) =>
           this.renderEjsTemplate(
             template,
@@ -264,13 +262,9 @@ export class TemplatePrinterService {
       )
       .join('\r\n');
     return this.getTemplate('service').pipe(
-      switchMap(
-        (template): Observable<[string, Sw2NgxService]> => {
-          return fromArray(
-            activeServices.map((service) => [template, service])
-          );
-        }
-      ),
+      switchMap((template): Observable<[string, Sw2NgxService]> => {
+        return fromArray(activeServices.map((service) => [template, service]));
+      }),
       mergeMap(([template, service]: [string, Sw2NgxService]) =>
         this.renderEjsTemplate(
           template,
