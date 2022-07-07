@@ -1,7 +1,6 @@
 import { paramCase, pascalCase } from 'change-case';
 
 import { Description } from '../../../types/swagger';
-
 import { SimHash } from './simhash/simhash';
 
 let simHash = new SimHash();
@@ -84,6 +83,7 @@ export function mergeDuplicateEnums(
 export function resolveEnumFn(
   description: Description | undefined,
   enumValue: [unknown, ...unknown[]],
+  propType: 'array' | 'boolean' | 'integer' | 'null' | 'number' | 'object' | 'string' | [('array' | 'boolean' | 'integer' | 'null' | 'number' | 'object' | 'string'), ...('array' | 'boolean' | 'integer' | 'null' | 'number' | 'object' | 'string')[]] | 'file' | undefined,
   currentName: string,
   modelName: string
 ): Sw2NgxEnum {
@@ -103,7 +103,7 @@ export function resolveEnumFn(
         value: enumValue.map((val, index)=> {
           return {
             key: String(val),
-            val: index
+            val: propType!=='string'?index: String(val)
           }
         }),
         modelName: modelName,

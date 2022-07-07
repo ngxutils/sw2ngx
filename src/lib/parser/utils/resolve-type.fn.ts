@@ -25,6 +25,7 @@ export function resolveTypeFn(
     const resolvedEnum = resolveEnumFn(
       prop.description,
       prop.enum,
+      prop.type,
       name,
       parentName
     );
@@ -55,7 +56,16 @@ export function resolveTypeFn(
         result.type = 'number';
         break;
       case 'password':
+      case 'uuid':
+      case 'email':
+      case 'uri':
+      case 'hostname':
+      case 'ipv4':
+      case 'ipv6':
         result.type = 'string';
+        break;
+      case 'binary':
+        result.type = 'Blob';
         break;
       default:
         result.type = 'Record<string, unknown> | unknown';
