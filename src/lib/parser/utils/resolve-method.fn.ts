@@ -146,7 +146,15 @@ export function resolveMethodFn(
       (contentType) => contentType === 'application/x-www-form-urlencoded'
     ),
     description: method.summary,
-    params: params,
+    params: {
+      ...params,
+      all: params.all.sort((a,b)=>{
+        if(a.required && b.required){
+          return 0;
+        }
+        return a.required && !b.required?-1:1;
+      })
+    },
     resp: resolveResponseFn(methodResponse, camelCase(name), swConfig),
   };
 }
