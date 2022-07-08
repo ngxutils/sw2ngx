@@ -88,7 +88,11 @@ export class <%=`${fnPascalCase(service.name)}`%>ApiService <%_ if(genSrvInterfa
         <%if (param.type.type === 'any') {-%>
 <%-`form.append('${param.queryName}', ${param.name});\r\n`-%>
         <%} else {-%>
-<%-`form.append('${param.queryName}', JSON.stringify(${param.name}));\r\n`-%>
+          <%if (param.queryName!=='formModel') {-%>
+            <%-`form.append('${param.queryName}', JSON.stringify(${param.name}));\r\n`-%>
+          <%}else {-%>
+            <%-`Object.entries(${param.name}).forEach(([name, value])=>form.append(name, value))\r\n`-%>
+          <%}-%>
         <%}-%>
       <%}-%>
 <%-`return this.http.${method.type}<${method.resp[0]?.type}>(this.uri + \`${method.uri}\`, form, options);`-%>
