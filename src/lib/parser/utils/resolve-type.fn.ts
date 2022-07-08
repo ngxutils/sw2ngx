@@ -118,6 +118,23 @@ export function resolveTypeFn(
         typeImport: [],
       };
     } else if (prop.type === 'object') {
+      if(prop.properties){
+        const props = Object.entries(prop.properties).map(([propname, prop])=>{
+          return {
+            name: propname,
+            type: resolveTypeFn(prop, propname, '', swConfig)
+          }
+
+          })
+        return {
+          type: '{' +[props.map(x=>`${x.name}: ${x.type.type}`)].join(',') + '}',
+          typeImport: props.reduce((acc, cur)=>{
+            acc.push(...cur.type.typeImport);
+            return acc;
+          },[] as string[]),
+        }
+      }
+
       return {
         type: 'Record<string, unknown> | unknown',
         typeImport: [],
