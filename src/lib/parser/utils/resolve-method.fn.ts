@@ -117,13 +117,21 @@ export function resolveMethodFn(
   };
   //TODO: decompose method for V3 parser
   const methodV3 = method as OperationV3;
+
+  console.log(methodV3.requestBody);
   const bodyRequest: Schema = (
     methodV3.requestBody?.['content'] as {
       [key: string]: Schema;
     }
-  )?.['application/json']['schema'] as Schema;
+  )?.['application/json']?.['schema'] as Schema;
+
+  const formData : Schema = (
+    methodV3.requestBody?.['content'] as {
+      [key: string]: Schema;
+    }
+  )?.['multipart/form-data']?.['schema'] as Schema;
+
   if (bodyRequest) {
-    //TODO: has properties  -  multipart/formdata
     const bodyParam: Sw2NgxMethodParam = {
       name: 'methodBody',
       queryName: 'methodBody',
@@ -134,6 +142,18 @@ export function resolveMethodFn(
     };
     params.all.push(bodyParam);
     params.body.push(bodyParam);
+  }
+  if(formData) {
+    const formParam: Sw2NgxMethodParam = {
+      name: 'formData',
+      queryName: 'formModel',
+      description: formData.description,
+      required: true,
+      type: resolveTypeFn(formData, 'formData', name, swConfig),
+      in: 'formData',
+    };
+    params.all.push(formParam);
+    params.formData.push(formParam);
   }
   return {
     uri: path.replace(/{/gi, '${'),
