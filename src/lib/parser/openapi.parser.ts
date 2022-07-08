@@ -130,7 +130,8 @@ export class OpenApiV3Parser implements IOpenApiParserPlugin {
     modelsAndEnums: { enums: Sw2NgxEnum[]; models: Sw2NgxModel[] }
   ): Observable<Sw2NgxApiDefinition> {
     let services: Sw2NgxService[] = [];
-
+    const server = config?.servers?.pop()?.url
+    const uri = this.parserConfig?.config?.value?.baseHref || server || config.basePath
     if (config.paths) {
       const servicesList = Object.entries(config.paths)
         .map(([servicePath, serviceDef]) => {
@@ -168,9 +169,7 @@ export class OpenApiV3Parser implements IOpenApiParserPlugin {
             } else {
               acc[cur.tag] = {
                 name: cur.tag,
-                uri: `${
-                  this.parserConfig?.config?.value?.baseHref || config.basePath
-                }`,
+                uri: `${uri}`,
                 methods: [cur],
                 imports: [],
               };
@@ -180,9 +179,7 @@ export class OpenApiV3Parser implements IOpenApiParserPlugin {
           {
             __common: {
               name: '__common',
-              uri: `${
-                this.parserConfig?.config?.value?.baseHref || config.basePath
-              }`,
+              uri: `${uri}`,
               imports: [],
               methods: [],
             },
