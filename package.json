@@ -63,9 +63,7 @@
   },
   "files": [
     "bin",
-    "build/main",
-    "build/module",
-    "build/templates",
+    "build/**/*",
     "!**/*.spec.*",
     "!**/*.json",
     "CHANGELOG.md",

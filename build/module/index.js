@@ -1,0 +1,5 @@
+import 'reflect-metadata';
+import { SwaggerToAngularCodeGen } from './lib/sw2ngx';
+export * from './lib/sw2ngx';
+new SwaggerToAngularCodeGen();
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiaW5kZXguanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyIuLi8uLi9zcmMvaW5kZXgudHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IkFBQUEsT0FBTyxrQkFBa0IsQ0FBQztBQUMxQixPQUFPLEVBQUUsdUJBQXVCLEVBQUUsTUFBTSxjQUFjLENBQUM7QUFFdkQsY0FBYyxjQUFjLENBQUM7QUFFN0IsSUFBSSx1QkFBdUIsRUFBRSxDQUFDIn0=

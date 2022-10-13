@@ -1,0 +1,126 @@
+import { camelCase, pascalCase } from 'change-case';
+import { resolveResponseFn } from './resolve-response.fn';
+import { resolveTypeFn } from './resolve-type.fn';
+function clearName(name) {
+    const baseTypes = ['number', 'string', 'boolean', 'any', 'array'];
+    let result = name.replace(/\.|-/gi, '');
+    if (baseTypes.includes(result)) {
+        result = result + 'Param';
+    }
+    return result;
+}
+function isParameter(param) {
+    return param?.schema !== undefined;
+}
+function isJsonRef(param) {
+    return param.$ref !== undefined;
+}
+function resolveMethodParams(methodName, param, swConfig) {
+    const paramNameArr = param.name.split('.');
+    const parsedParamName = paramNameArr.length > 1
+        ? pascalCase(paramNameArr.pop() || '')
+        : paramNameArr.pop() || '';
+    const paramName = parsedParamName === '' ? 'parsingErrorUnknownParam' : parsedParamName;
+    let paramType;
+    if (isJsonRef(param)) {
+        const typeName = swConfig.parserModelName(param.$ref);
+        paramType = {
+            type: `${typeName}`,
+            typeImport: [`${typeName}`],
+        };
+    }
+    else if (isParameter(param)) {
+        paramType = resolveTypeFn(param.schema, paramName, methodName, swConfig);
+    }
+    else {
+        paramType = resolveTypeFn(param, paramName, methodName, swConfig);
+    }
+    return {
+        name: clearName(param.name),
+        queryName: paramName,
+        description: param?.descriprion
+            ? `${param?.descriprion}`
+            : '',
+        required: !!param?.required,
+        type: paramType,
+        in: param?.in,
+    };
+}
+export function resolveMethodFn(path, methodType, method, methodResponse, swConfig) {
+    const nameParser = swConfig.parserMethodName;
+    const name = camelCase(nameParser(path, methodType, method?.operationId ? method.operationId : ''));
+    const params = method.parameters
+        ?.map((param) => {
+        return resolveMethodParams(name, param, swConfig);
+    })
+        .filter((x) => !!x)
+        .reduce((acc, cur) => {
+        acc.all.push(cur);
+        acc[cur.in].push(cur);
+        return acc;
+    }, {
+        all: [],
+        query: [],
+        formData: [],
+        body: [],
+        path: [],
+        header: [],
+    }) || {
+        all: [],
+        query: [],
+        formData: [],
+        body: [],
+        path: [],
+        header: [],
+    };
+    //TODO: decompose method for V3 parser
+    const methodV3 = method;
+    console.log(methodV3.requestBody);
+    const bodyRequest = methodV3.requestBody?.['content']?.['application/json']?.['schema'];
+    const formData = methodV3.requestBody?.['content']?.['multipart/form-data']?.['schema'];
+    if (bodyRequest) {
+        const bodyParam = {
+            name: 'methodBody',
+            queryName: 'methodBody',
+            description: bodyRequest.description,
+            required: true,
+            type: resolveTypeFn(bodyRequest, 'methodBody', name, swConfig),
+            in: 'body',
+        };
+        params.all.push(bodyParam);
+        params.body.push(bodyParam);
+    }
+    if (formData) {
+        const formParam = {
+            name: 'formData',
+            queryName: 'formModel',
+            description: formData.description,
+            required: true,
+            type: resolveTypeFn(formData, 'formData', name, swConfig),
+            in: 'formData',
+        };
+        params.all.push(formParam);
+        params.formData.push(formParam);
+    }
+    return {
+        uri: path.replace(/{/gi, '${'),
+        type: methodType,
+        tag: Array.isArray(method.tags)
+            ? method.tags.pop() || '__common'
+            : '__common',
+        name: name,
+        isFormDataUrlencoded: !!method.consumes?.find((contentType) => contentType === 'application/x-www-form-urlencoded'),
+        description: method.summary,
+        params: {
+            ...params,
+            all: params.all.sort((a, b) => {
+                if (a.required && b.required) {
+                    return 0;
+                }
+                return a.required && !b.required ? -1 : 1;
+            })
+        },
+        resp: resolveResponseFn(methodResponse, camelCase(name), swConfig),
+    };
+}
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoicmVzb2x2ZS1tZXRob2QuZm4uanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyIuLi8uLi8uLi8uLi8uLi9zcmMvbGliL3BhcnNlci91dGlscy9yZXNvbHZlLW1ldGhvZC5mbi50cyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiQUFBQSxPQUFPLEVBQUUsU0FBUyxFQUFFLFVBQVUsRUFBRSxNQUFNLGFBQWEsQ0FBQztBQVlwRCxPQUFPLEVBQUUsaUJBQWlCLEVBQUUsTUFBTSx1QkFBdUIsQ0FBQztBQUMxRCxPQUFPLEVBQUUsYUFBYSxFQUFFLE1BQU0sbUJBQW1CLENBQUM7QUFHbEQsU0FBUyxTQUFTLENBQUMsSUFBWTtJQUM3QixNQUFNLFNBQVMsR0FBRyxDQUFDLFFBQVEsRUFBRSxRQUFRLEVBQUUsU0FBUyxFQUFFLEtBQUssRUFBRSxPQUFPLENBQUMsQ0FBQztJQUNsRSxJQUFJLE1BQU0sR0FBRyxJQUFJLENBQUMsT0FBTyxDQUFDLFFBQVEsRUFBRSxFQUFFLENBQUMsQ0FBQztJQUN4QyxJQUFJLFNBQVMsQ0FBQyxRQUFRLENBQUMsTUFBTSxDQUFDLEVBQUU7UUFDOUIsTUFBTSxHQUFHLE1BQU0sR0FBRyxPQUFPLENBQUM7S0FDM0I7SUFDRCxPQUFPLE1BQU0sQ0FBQztBQUNoQixDQUFDO0FBRUQsU0FBUyxXQUFXLENBQUMsS0FBZ0M7SUFDbkQsT0FBUSxLQUFtQixFQUFFLE1BQU0sS0FBSyxTQUFTLENBQUM7QUFDcEQsQ0FBQztBQUNELFNBQVMsU0FBUyxDQUFDLEtBQWdDO0lBQ2pELE9BQVEsS0FBdUIsQ0FBQyxJQUFJLEtBQUssU0FBUyxDQUFDO0FBQ3JELENBQUM7QUFFRCxTQUFTLG1CQUFtQixDQUMxQixVQUFrQixFQUNsQixLQUFnQyxFQUNoQyxRQUFzQjtJQUV0QixNQUFNLFlBQVksR0FBSyxLQUFtQixDQUFDLElBQWdCLENBQUMsS0FBSyxDQUFDLEdBQUcsQ0FBQyxDQUFDO0lBQ3ZFLE1BQU0sZUFBZSxHQUNuQixZQUFZLENBQUMsTUFBTSxH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
