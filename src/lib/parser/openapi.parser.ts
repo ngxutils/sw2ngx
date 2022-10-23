@@ -130,9 +130,6 @@ export class OpenApiV3Parser implements IOpenApiParserPlugin {
     modelsAndEnums: { enums: Sw2NgxEnum[]; models: Sw2NgxModel[] }
   ): Observable<Sw2NgxApiDefinition> {
     let services: Sw2NgxService[] = [];
-    console.log(JSON.stringify(modelsAndEnums.enums));
-    return of({...modelsAndEnums,
-    services: []});
     const server = config?.servers?.pop()?.url
     const uri = this.parserConfig?.config?.value?.baseHref || server || config.basePath
     if (config.paths) {
