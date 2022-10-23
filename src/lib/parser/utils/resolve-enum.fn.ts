@@ -80,6 +80,7 @@ export function mergeDuplicateEnums(
 }
 
 export function resolveEnumFn(
+  xEnum: string[],
   description: Description | undefined,
   enumValue: [unknown, ...unknown[]],
   propType:
@@ -117,6 +118,20 @@ export function resolveEnumFn(
 ): Sw2NgxEnum {
   const extractedEnum = extractEnumDescription(description ? description : '');
   const hashName = getSimHash().hash(enumValue.join('|'));
+  const mappedEnum = xEnum.map((val, index)=>{
+    const value: string | number = enumValue[index] as string | number;
+    return {key: val, val: value};
+  });
+
+  if (mappedEnum.length>0){
+    return {
+      name: `${pascalCase(currentName)}`,
+      modelName: modelName,
+      value: mappedEnum,
+      hash: hashName.toString(16),
+      isPremitive: false,
+    };
+  }
 
   if (extractedEnum === null) {
     if (

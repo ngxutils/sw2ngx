@@ -23,6 +23,7 @@ export function resolveTypeFn(
   }
   if (prop.enum) {
     const resolvedEnum = resolveEnumFn(
+      (prop["x-enumNames"]||[]) as string[],  // cast Names
       prop.description,
       prop.enum,
       prop.type,

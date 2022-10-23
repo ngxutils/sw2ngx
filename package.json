@@ -68,7 +68,7 @@
     "!**/*.json",
     "CHANGELOG.md",
     "LICENSE",
-    "sw2ngx/README.md",
+    "README.md",
     "config.scheme.json"
   ],
   "prettier": {
