@@ -222,7 +222,7 @@ export class OpenApiV3Parser implements IOpenApiParserPlugin {
     }
     return of({
       models: [...modelsAndEnums.models],
-      enums: [...modelsAndEnums.enums],
+      enums: exportEnumRegistry(),
       services: Object.values(services),
     });
   }

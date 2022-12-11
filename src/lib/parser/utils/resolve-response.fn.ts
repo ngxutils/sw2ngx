@@ -14,7 +14,6 @@ export function resolveResponseFn(
   methodName: string,
   swConfig: Sw2NgxConfig
 ): Sw2NgxResolvedType[] {
-  console.log(responseSchema);
 
   if (responseSchema) {
     let resolvedType: Sw2NgxResolvedType = {

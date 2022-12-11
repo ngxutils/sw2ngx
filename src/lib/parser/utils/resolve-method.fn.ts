@@ -118,7 +118,6 @@ export function resolveMethodFn(
   //TODO: decompose method for V3 parser
   const methodV3 = method as OperationV3;
 
-  console.log(methodV3.requestBody);
   const bodyRequest: Schema = (
     methodV3.requestBody?.['content'] as {
       [key: string]: Schema;

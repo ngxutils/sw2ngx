@@ -196,7 +196,7 @@ export class OpenApiV2Parser implements IOpenApiParserPlugin {
     }
     return of({
       models: [...modelsAndEnums.models],
-      enums: [...modelsAndEnums.enums],
+      enums: exportEnumRegistry(),
       services: Object.values(services),
     });
   }
