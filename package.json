@@ -1,6 +1,6 @@
 {
   "name": "sw2ngx",
-  "version": "6.7.0",
+  "version": "6.8.0",
   "description": "auto-generation of angular services by Swagger / OpenAPI declaration",
   "main": "build/main/index.js",
   "typings": "build/main/index.d.ts",
