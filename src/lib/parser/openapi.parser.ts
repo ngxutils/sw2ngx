@@ -144,7 +144,7 @@ export class OpenApiV3Parser implements IOpenApiParserPlugin {
                 serviceMethodDef?.responses?.['200']?.['content'] as {
                   [key: string]: Schema;
                 }
-              )?.['application/json']['schema'] as Schema;
+              )?.['application/json']?.['schema'] as Schema;
               return serviceMethodDef
                 ? resolveMethodFn(
                     servicePath,

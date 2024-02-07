@@ -319,7 +319,9 @@ export interface Schema {
         ...('array' | 'boolean' | 'integer' | 'null' | 'number' | 'object' | 'string')[]
     ];
     items?: Schema | [Schema, ...Schema[]];
-    allOf?: [Schema, ...Schema[]];
+    allOf?: Schema[];
+    oneOf?: Schema[];
+    anyOf?: Schema[];
     properties?: {
         [k: string]: Schema;
     };

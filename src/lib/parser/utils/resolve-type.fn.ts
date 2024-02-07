@@ -8,6 +8,10 @@ export function exportEnumRegistry(): Sw2NgxEnum[] {
   return [...enumRegistry.values()];
 }
 
+export function isSchemaMulti  (p: Schema | NonBodyParameter): p is Schema{
+  return !!(p && (p?.oneOf || p?.allOf || p?.anyOf));
+}
+
 export function resolveTypeFn(
   prop: Schema | NonBodyParameter,
   name: string,
@@ -141,8 +145,35 @@ export function resolveTypeFn(
         typeImport: [],
       };
     }
-  }
+  } else if(isSchemaMulti(prop)){
+    const items: Schema[] = [...(prop.allOf||[]),...(prop?.anyOf||[]), ...(prop?.oneOf||[])];
+    const unique = new Set<string>();
+    const resolve = items
+      .map((item)=> resolveTypeFn(item, name, parentName, swConfig))
+      .map((item)=>{
+        if(unique.has(item.type)){
+          return {
+            type: '',
+            typeImport: []
+          }
+        }else {
+          unique.add(item.type)
+          return item;
+        }
+      }).filter((x)=> x.type!=='')
+      .reduce((acc, item)=>{
+        if(acc.type!== ''){
+          acc.type = acc.type + `${prop.allOf?' & ': ' | '}`+ item.type;
+        }else{
+          acc.type = item.type;
+        }
 
+        acc.typeImport = [...acc.typeImport, ...item.typeImport];
+        return acc;
+
+      }, {type: '', typeImport: []})
+      return resolve;
+  }
   return {
     type: 'Record<string, unknown> | unknown',
     typeImport: [],

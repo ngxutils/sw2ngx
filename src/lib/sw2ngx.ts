@@ -64,11 +64,12 @@ export class SwaggerToAngularCodeGen {
             );
         },
         (err) =>
-          this.logger?.err(
-            `[ ERROR ]: Generation cancel with error (Stack Trace: ${JSON.stringify(
-              err
-            )} )`
+        {this.logger?.err(
+            `[ ERROR ]: Generation cancel with error (Stack Trace:
+              ${err}
+             )`
           )
+        }
       );
   }
   private parseInput(): Observable<Sw2NgxConfig | undefined> {
