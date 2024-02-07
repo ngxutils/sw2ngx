@@ -8,3 +8,5 @@ coverage
 *.log
 yarn.lock
 test.json
+/build/tsconfig.module.tsbuildinfo
+/build/tsconfig.tsbuildinfo
